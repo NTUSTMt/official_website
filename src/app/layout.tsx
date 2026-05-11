@@ -32,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable}`}>
-      <body className="antialiased flex flex-col min-h-screen">
+    <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
+      <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
         <Navbar />
         <div className="flex-1">
           {children}
