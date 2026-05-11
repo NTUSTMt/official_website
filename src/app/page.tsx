@@ -1,7 +1,6 @@
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import Features from "@/components/Features";
-import Rules from "@/components/Rules";
 import Quote from "@/components/Quote";
 
 export default function Home() {
@@ -10,7 +9,6 @@ export default function Home() {
       <Hero />
       <Navbar />
       <Features />
-      <Rules />
       <Quote />
     </main>
   );
