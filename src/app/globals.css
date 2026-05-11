@@ -25,18 +25,9 @@
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: oklch(15% 0.02 240);
-    --surface: oklch(20% 0.02 240);
-    --fg: oklch(90% 0.01 240);
-    --muted: oklch(65% 0.01 240);
-    --border: oklch(30% 0.02 240);
-    --accent: oklch(70% 0.15 35);
-  }
-}
 
 body {
   background: var(--background);
@@ -54,19 +45,28 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Glassmorphism utility */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.font-serif {
+  font-family: var(--font-serif);
 }
 
-.dark .glass {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
 }
+
 
 .hero-text-shadow {
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3), 0 4px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Hide scrollbar for nav horizontal scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

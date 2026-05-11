@@ -1,9 +1,11 @@
 import React from "react";
+import Navbar from "@/components/Navbar";
 
 export default function EventsPage() {
   return (
-    <main className="min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen pb-24">
+      <Navbar />
+      <div className="pt-24 px-6 max-w-4xl mx-auto">
         <div className="flex justify-between items-end mb-12">
           <h1 className="text-4xl md:text-6xl font-display italic">活動中心</h1>
           <span className="font-mono text-sm text-accent uppercase tracking-widest font-bold">Expeditions</span>

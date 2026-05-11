@@ -1,9 +1,11 @@
 import React from "react";
+import Navbar from "@/components/Navbar";
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen pb-24">
+      <Navbar />
+      <div className="pt-24 px-6 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-display italic mb-8">聯絡我們</h1>
         <div className="p-8 border border-border bg-surface">
           <div className="space-y-6">

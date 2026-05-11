@@ -1,9 +1,11 @@
 import React from "react";
+import Navbar from "@/components/Navbar";
 
 export default function EquipmentPage() {
   return (
-    <main className="min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen pb-24">
+      <Navbar />
+      <div className="pt-24 px-6 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-display italic mb-4">裝備租借中心</h1>
         <p className="text-muted font-serif mb-12">高品質裝備，為每一次安全攀登保駕護航。</p>
         

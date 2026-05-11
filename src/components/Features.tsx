@@ -8,8 +8,8 @@ const features = [
     tag: "STATUS: OPEN",
   },
   {
-    title: "我的足跡",
-    id: "USR_FOOT",
+    title: "成員專區",
+    id: "USR_MEMB",
     desc: "查看您的登山履歷、社團紀錄與數位會員證。",
   },
   {
@@ -21,11 +21,11 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-0 relative z-30 -mt-20">
+    <section className="py-24 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-0 relative z-30">
       {features.map((feature) => (
         <div 
           key={feature.id}
-          className="p-8 border border-border bg-surface hover:bg-background transition-all cursor-pointer group relative shadow-xl hover:shadow-2xl"
+          className="p-8 border border-border bg-surface hover:bg-background transition-all cursor-pointer group relative"
         >
           <div className="flex justify-between items-start mb-12">
             <span className="font-mono text-[10px] text-muted tracking-widest font-bold">{feature.id}</span>
@@ -35,13 +35,13 @@ export default function Features() {
               </span>
             )}
           </div>
-          <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors">
+          <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors text-foreground">
             {feature.title}
           </h3>
-          <p className="text-muted text-sm leading-relaxed mb-8">
+          <p className="text-muted text-sm leading-relaxed font-serif mb-8">
             {feature.desc}
           </p>
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all font-bold">
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all text-foreground font-bold">
             Access_Module <span>→</span>
           </div>
         </div>

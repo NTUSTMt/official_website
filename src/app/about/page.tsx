@@ -1,11 +1,13 @@
 import React from "react";
+import Navbar from "@/components/Navbar";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen pb-24">
+      <Navbar />
+      <div className="pt-24 px-6 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-display italic mb-8">關於我們</h1>
-        <div className="prose prose-invert max-w-none text-muted font-serif leading-relaxed">
+        <div className="prose max-w-none text-muted font-serif leading-relaxed">
           <p className="text-xl mb-6">
             台科大登山社成立於 1985 年，是一個致力於推廣高海拔探索與荒野保護的大學社團。
           </p>
