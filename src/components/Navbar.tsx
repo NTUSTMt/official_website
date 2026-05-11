@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "首頁", href: "/" },
@@ -13,7 +14,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
-  const [active, setActive] = useState("首頁");
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -41,9 +42,8 @@ export default function Navbar() {
               <Link
                 key={item.label}
                 href={item.href}
-                onClick={() => setActive(item.label)}
                 className={`hover:text-accent transition-colors ${
-                  active === item.label ? "text-accent font-bold" : "text-muted"
+                  pathname === item.href ? "text-accent font-bold" : "text-muted"
                 }`}
               >
                 {item.label}
@@ -60,15 +60,14 @@ export default function Navbar() {
             <Link
               key={item.label}
               href={item.href}
-              onClick={() => setActive(item.label)}
               className="flex flex-col items-center gap-1"
             >
               <div className={`text-[10px] font-mono font-bold transition-colors ${
-                active === item.label ? "text-accent" : "text-muted"
+                pathname === item.href ? "text-accent" : "text-muted"
               }`}>
                 {item.label}
               </div>
-              {active === item.label && (
+              {pathname === item.href && (
                 <div className="w-1 h-1 rounded-full bg-accent" />
               )}
             </Link>

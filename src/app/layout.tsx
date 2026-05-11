@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,6 +23,7 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   title: "台科大登山社 | NTUST Mountaineering Club",
   description: "台科大登山社官方網站 - 技術與荒野的交匯",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -30,8 +33,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable}`}>
-      <body className="antialiased">
-        {children}
+      <body className="antialiased flex flex-col min-h-screen">
+        <Navbar />
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );
