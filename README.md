@@ -56,4 +56,5 @@ npm run dev
 ```
 
 ---
-*註：若遇見 `Module not found: Can't resolve './mp1cyw0q-background.jpg'` 錯誤，請確保原始 HTML 原型已移至 `legacy/` 資料夾中以避免 Tailwind 掃描出錯。*
+*註 1：若遇見 `Module not found: Can't resolve './mp1cyw0q-background.jpg'` 錯誤，請確保原始 HTML 原型已移至 `legacy/` 資料夾中以避免 Tailwind 掃描出錯。*
+*註 2：PWA 的 Serwist 套件在 Turbopack 環境下可能會有警告，已設定為僅在 Production 環境啟用以維持開發效率。*
