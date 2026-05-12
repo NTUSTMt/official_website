@@ -16,8 +16,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key",
   }),
   // 使用 JWT 策略，這樣我們可以很方便地把 LINE User ID 夾在 Cookie 裡
   session: {
