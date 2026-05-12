@@ -4,8 +4,9 @@ import { eventsData, difficultyLevels } from "@/data/events";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
-  const event = eventsData.find((e) => e.id === params.id);
+export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const event = eventsData.find((e) => e.id === id);
 
   if (!event) {
     notFound();
