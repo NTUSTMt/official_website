@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --bg: oklch(98% 0.005 80);
-  --surface: oklch(100% 0 0);
-  --fg: oklch(20% 0.02 60);
-  --muted: oklch(55% 0.01 60);
-  --border: oklch(90% 0.01 80);
-  --accent: oklch(64% 0.15 35);
+  --bg: oklch(97% 0.01 85); /* Beige background */
+  --surface: oklch(99% 0.005 85);
+  --fg: oklch(25% 0.02 45); /* Darker brown-tinted foreground */
+  --muted: oklch(55% 0.02 45);
+  --border: oklch(88% 0.02 85);
+  --accent: oklch(62% 0.16 45); /* Orange-brown accent */
   --accent-foreground: oklch(100% 0 0);
 
   --background: var(--bg);

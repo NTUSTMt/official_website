@@ -21,27 +21,27 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-0 relative z-30">
+    <section className="py-24 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 relative z-30">
       {features.map((feature) => (
         <div 
           key={feature.id}
-          className="p-8 border border-border bg-surface hover:bg-background transition-all cursor-pointer group relative"
+          className="p-10 border border-border bg-surface hover:border-accent transition-all cursor-pointer group relative rounded-3xl shadow-sm hover:shadow-xl"
         >
           <div className="flex justify-between items-start mb-12">
             <span className="font-mono text-[10px] text-muted tracking-widest font-bold">{feature.id}</span>
             {feature.tag && (
-              <span className="text-[10px] font-mono text-accent border border-accent/20 px-2 py-0.5 font-bold bg-accent/5">
+              <span className="text-[10px] font-mono text-accent border border-accent/20 px-2 py-0.5 font-bold bg-accent/5 rounded-full">
                 {feature.tag}
               </span>
             )}
           </div>
-          <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors text-foreground">
+          <h3 className="text-3xl font-display italic mb-4 group-hover:text-accent transition-colors text-foreground">
             {feature.title}
           </h3>
-          <p className="text-muted text-sm leading-relaxed font-serif mb-8">
+          <p className="text-muted text-base leading-relaxed font-serif mb-8">
             {feature.desc}
           </p>
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all text-foreground font-bold">
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all text-accent font-bold">
             Access_Module <span>→</span>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display, Crimson_Pro } from "next/font/google";
+import TopographyBackground from "@/components/TopographyBackground";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -40,6 +41,7 @@ export default function RootLayout({
   return (
     <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${crimsonPro.variable}`} suppressHydrationWarning>
       <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
+        <TopographyBackground />
         <div className="flex-1">
           {children}
         </div>
