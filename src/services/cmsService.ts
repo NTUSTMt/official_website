@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
-import { mockCMSConfig } from "@/data/cms";
+import { mockCMSConfig, GlobalConfig } from "@/data/cms";
 
 export const cmsService = {
-  async getConfig() {
+  async getConfig(): Promise<GlobalConfig> {
     const { data, error } = await supabase
       .from("cms_config")
       .select("*")
@@ -15,6 +15,7 @@ export const cmsService = {
     }
     
     return {
+      siteName: data.site_name || mockCMSConfig.siteName,
       heroTagline: data.hero_tagline,
       heroSubtext: data.hero_subtext,
       stats: data.stats,
@@ -29,6 +30,7 @@ export const cmsService = {
       .from("cms_config")
       .upsert({
         id: "global_config",
+        site_name: config.siteName,
         hero_tagline: config.heroTagline,
         hero_subtext: config.heroSubtext,
         stats: config.stats,

@@ -1,12 +1,13 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
-import { eventsData, difficultyLevels } from "@/data/events";
+import { difficultyLevels } from "@/data/events";
+import { eventService } from "@/services/eventService";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const event = eventsData.find((e) => e.id === id);
+  const event = await eventService.getEventById(id);
 
   if (!event) {
     notFound();

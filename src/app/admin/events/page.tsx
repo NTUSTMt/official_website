@@ -1,31 +1,90 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { eventsData, EventItem } from "@/data/events";
-import { mockParticipants, Participant } from "@/data/participants";
+import { eventService, registrationService } from "@/services/eventService";
 
 type ViewState = "LIST" | "EDIT_EVENT" | "VIEW_PARTICIPANTS";
 
 export default function AdminEventsPage() {
   const [view, setView] = useState<ViewState>("LIST");
-  const [events, setEvents] = useState(eventsData);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [participants, setParticipants] = useState(mockParticipants);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const getParticipantsForEvent = (eventId: string) => {
-    return participants.filter(p => p.eventId === eventId);
-  };
+  // Load events from DB
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const data = await eventService.getAllEvents();
+        setEvents(data.length > 0 ? data : eventsData); // Fallback to mock if DB empty
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
 
-  const handleUpdateParticipantStatus = (pId: string, newStatus: Participant["status"]) => {
-    setParticipants(prev => prev.map(p => p.id === pId ? { ...p, status: newStatus } : p));
-  };
+  // Load participants when viewing an event
+  useEffect(() => {
+    if (view === "VIEW_PARTICIPANTS" && selectedEvent) {
+      registrationService.getRegistrations(selectedEvent.id).then(setParticipants);
+    }
+  }, [view, selectedEvent]);
 
-  const handleDeleteEvent = (id: string) => {
-    if (confirm("確定要刪除此活動嗎？相關報名資料可能也會受影響。")) {
-      setEvents(prev => prev.filter(e => e.id !== id));
+  const handleUpdateParticipantStatus = async (pId: string, newStatus: string) => {
+    try {
+      await registrationService.updateStatus(pId, newStatus);
+      setParticipants(prev => prev.map(p => p.id === pId ? { ...p, status: newStatus } : p));
+    } catch (err) {
+      alert("更新失敗");
     }
   };
+
+  const handleDeleteEvent = async (id: string) => {
+    if (confirm("確定要刪除此活動嗎？")) {
+      try {
+        await eventService.deleteEvent(id);
+        setEvents(prev => prev.filter(e => e.id !== id));
+      } catch (err) {
+        alert("刪除失敗");
+      }
+    }
+  };
+
+  const handleSaveEvent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const eventToSave: Partial<EventItem> = {
+      id: selectedEvent?.id || `event-${Date.now()}`,
+      title: formData.get("title") as string,
+      date: formData.get("date") as string,
+      status: formData.get("status") as any,
+      cost: formData.get("cost") as string,
+      summary: formData.get("summary") as string,
+      description: (formData.get("description") as string).split("\n"),
+      difficulty: selectedEvent?.difficulty || "初級", // Simplified for now
+      calendarDates: [formData.get("date") as string], // Simplified
+    };
+
+    try {
+      await eventService.upsertEvent(eventToSave);
+      alert("儲存成功！");
+      // Refresh list
+      const updated = await eventService.getAllEvents();
+      setEvents(updated);
+      setView("LIST");
+    } catch (err) {
+      alert("儲存失敗");
+    }
+  };
+
+  if (isLoading) {
+    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">LOADING_EVENTS...</div></AdminLayout>;
+  }
 
   return (
     <AdminLayout>
@@ -67,11 +126,10 @@ export default function AdminEventsPage() {
         {view === "LIST" && (
           <div className="grid grid-cols-1 gap-6">
             {events.map((event) => {
-              const pCount = getParticipantsForEvent(event.id).length;
               return (
                 <div key={event.id} className="bg-surface border border-border rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-accent/50 transition-all">
                   <div className="w-full md:w-32 h-24 rounded-2xl bg-background overflow-hidden relative flex-shrink-0">
-                    <div className="absolute inset-0 bg-accent/10 flex items-center justify-center font-mono text-[10px] text-accent font-bold uppercase tracking-tighter">No_Image</div>
+                    <img src={event.coverImage} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
@@ -86,7 +144,6 @@ export default function AdminEventsPage() {
                     <div className="flex items-center gap-4 text-xs font-serif text-muted">
                       <span>難度: {event.difficulty}</span>
                       <span>費用: {event.cost}</span>
-                      <span className="text-accent font-mono font-bold">{pCount} 筆報名</span>
                     </div>
                   </div>
                   <div className="flex gap-2 w-full md:w-auto">
@@ -117,22 +174,22 @@ export default function AdminEventsPage() {
 
         {/* View: Edit Event Form */}
         {view === "EDIT_EVENT" && (
-          <div className="bg-surface border border-border rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+          <form onSubmit={handleSaveEvent} className="bg-surface border border-border rounded-[2.5rem] p-8 md:p-12 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest border-l-2 border-accent pl-3">Basic_Details</h3>
                 <div>
                   <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">活動名稱</label>
-                  <input type="text" defaultValue={selectedEvent?.title} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" placeholder="e.g. 玉山主峰三日行" />
+                  <input name="title" type="text" defaultValue={selectedEvent?.title} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" placeholder="e.g. 玉山主峰三日行" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">活動日期</label>
-                    <input type="text" defaultValue={selectedEvent?.date} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors" placeholder="YYYY/MM/DD" />
+                    <input name="date" type="text" defaultValue={selectedEvent?.date} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors" placeholder="YYYY/MM/DD" required />
                   </div>
                   <div>
                     <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">狀態</label>
-                    <select defaultValue={selectedEvent?.status || "open"} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors">
+                    <select name="status" defaultValue={selectedEvent?.status || "open"} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors">
                       <option value="open">Open (報名中)</option>
                       <option value="closed">Closed (已截止)</option>
                       <option value="upcoming">Upcoming (籌備中)</option>
@@ -141,7 +198,7 @@ export default function AdminEventsPage() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">費用內容</label>
-                  <input type="text" defaultValue={selectedEvent?.cost} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" placeholder="e.g. NT$ 2,500" />
+                  <input name="cost" type="text" defaultValue={selectedEvent?.cost} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" placeholder="e.g. NT$ 2,500" />
                 </div>
               </div>
 
@@ -149,19 +206,19 @@ export default function AdminEventsPage() {
                 <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest border-l-2 border-accent pl-3">Content_&_Media</h3>
                 <div>
                   <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">簡短摘要</label>
-                  <input type="text" defaultValue={selectedEvent?.summary} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" />
+                  <input name="summary" type="text" defaultValue={selectedEvent?.summary} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">詳細說明 (Markdown 支援)</label>
-                  <textarea rows={6} defaultValue={selectedEvent?.description?.join("\n")} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors resize-none" />
+                  <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">詳細說明 (每行一段)</label>
+                  <textarea name="description" rows={6} defaultValue={selectedEvent?.description?.join("\n")} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors resize-none" />
                 </div>
               </div>
             </div>
             <div className="mt-12 pt-8 border-t border-border flex justify-end gap-4">
-              <button onClick={() => setView("LIST")} className="px-8 py-3 text-[10px] font-mono text-muted uppercase tracking-widest">Cancel</button>
-              <button onClick={() => { alert("Saved (Mock)"); setView("LIST"); }} className="px-10 py-3 bg-accent text-accent-foreground rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20">Save_Event</button>
+              <button type="button" onClick={() => setView("LIST")} className="px-8 py-3 text-[10px] font-mono text-muted uppercase tracking-widest">Cancel</button>
+              <button type="submit" className="px-10 py-3 bg-accent text-accent-foreground rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20">Save_to_Supabase</button>
             </div>
-          </div>
+          </form>
         )}
 
         {/* View: Participants Review */}
@@ -170,11 +227,8 @@ export default function AdminEventsPage() {
             <div className="bg-accent/5 border border-accent/20 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
                 <h3 className="text-lg font-serif mb-1">報名統計數據</h3>
-                <p className="text-xs font-mono text-muted uppercase">Total: {getParticipantsForEvent(selectedEvent.id).length} | Pending: {getParticipantsForEvent(selectedEvent.id).filter(p => p.status === "PENDING").length}</p>
+                <p className="text-xs font-mono text-muted uppercase">Total: {participants.length} | Pending: {participants.filter(p => p.status === "PENDING").length}</p>
               </div>
-              <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-mono uppercase tracking-widest font-bold">
-                Export to CSV
-              </button>
             </div>
 
             <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-sm">
@@ -184,20 +238,20 @@ export default function AdminEventsPage() {
                     <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Team_Member</th>
                     <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Status</th>
                     <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Payment</th>
-                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Actions</th>
+                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Signup_Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {getParticipantsForEvent(selectedEvent.id).map(p => (
+                  {participants.map(p => (
                     <tr key={p.id} className="hover:bg-background/50 transition-colors">
                       <td className="px-6 py-6">
-                        <div className="text-sm font-serif font-bold">{p.name}</div>
-                        <div className="text-[10px] font-mono text-muted/60">{p.studentId} • {p.phone}</div>
+                        <div className="text-sm font-serif font-bold">{p.real_name}</div>
+                        <div className="text-[10px] font-mono text-muted/60">{p.student_id} • {p.phone}</div>
                       </td>
                       <td className="px-6 py-6">
                         <select 
                           value={p.status} 
-                          onChange={(e) => handleUpdateParticipantStatus(p.id, e.target.value as any)}
+                          onChange={(e) => handleUpdateParticipantStatus(p.id, e.target.value)}
                           className={`text-[9px] font-mono px-2 py-1 rounded border uppercase font-bold outline-none ${
                             p.status === "ADMITTED" ? "border-emerald-500/30 text-emerald-600" :
                             p.status === "WAITLISTED" ? "border-amber-500/30 text-amber-600" :
@@ -212,18 +266,21 @@ export default function AdminEventsPage() {
                       </td>
                       <td className="px-6 py-6">
                         <span className={`text-[9px] font-mono px-2 py-1 rounded bg-surface border border-border tracking-widest ${
-                          p.paymentStatus === "PAID" ? "text-emerald-500" : p.paymentStatus === "VERIFYING" ? "text-amber-500" : "text-red-400"
+                          p.payment_status === "PAID" ? "text-emerald-500" : p.payment_status === "VERIFYING" ? "text-amber-500" : "text-red-400"
                         }`}>
-                          {p.paymentStatus}
+                          {p.payment_status}
                         </span>
                       </td>
-                      <td className="px-6 py-6">
-                        <button className="text-xs text-accent hover:underline font-serif">Details</button>
+                      <td className="px-6 py-6 font-mono text-[10px] text-muted">
+                        {new Date(p.signup_date).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {participants.length === 0 && (
+                <div className="p-20 text-center text-muted font-serif italic">目前尚無隊員報名</div>
+              )}
             </div>
           </div>
         )}
