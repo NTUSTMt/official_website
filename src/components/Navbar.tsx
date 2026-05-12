@@ -5,7 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationConfig, NavItem } from "@/config/navigation";
 
-export default function Navbar() {
+interface NavbarProps {
+  announcement?: {
+    enabled: boolean;
+    text: string;
+    link: string;
+  };
+}
+
+export default function Navbar({ announcement }: NavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
@@ -19,7 +27,15 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300 ${pathname === "/" ? "mt-[-59px]" : ""}`}>
+    <>
+      {announcement?.enabled && (
+        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-[60]">
+          <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
+            {announcement.text} →
+          </Link>
+        </div>
+      )}
+      <nav className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300 ${pathname === "/" ? "mt-[-59px]" : ""}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between py-3">
           {/* Logo or Brand could go here if needed, but keeping original layout */}
@@ -46,6 +62,7 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+    </>
   );
 }
 

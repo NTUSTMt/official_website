@@ -1,122 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { mockUsers, UserSummary } from "@/data/users";
+import { userService } from "@/services/userService";
 
-export default function UserAdminPage() {
-  const [users, setUsers] = useState(mockUsers);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null);
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.details.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.details.realName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const data = await userService.getAllUsers();
+        setUsers(data);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
 
-  const handleToggleVerify = (uId: string) => {
-    setUsers(prev => prev.map(u => u.id === uId ? { ...u, isVerified: !u.isVerified } : u));
-    if (selectedUser?.id === uId) {
-      setSelectedUser(prev => prev ? { ...prev, isVerified: !prev.isVerified } : null);
+  const handleToggleVerify = async (id: string, currentStatus: boolean) => {
+    try {
+      await userService.updateUserVerification(id, !currentStatus);
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, is_verified: !currentStatus } : u));
+    } catch (err) {
+      alert("更新失敗");
     }
   };
 
-  const UserDetailModal = ({ user }: { user: UserSummary }) => (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in">
-      <div className="bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[3rem] p-8 md:p-12 shadow-2xl relative">
-        <button 
-          onClick={() => setSelectedUser(null)}
-          className="absolute top-8 right-8 w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:bg-surface transition-colors"
-        >
-          ✕
-        </button>
-
-        <header className="flex flex-col md:flex-row items-center gap-8 mb-12 border-b border-border pb-10">
-          <img src={user.avatar} className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg" alt={user.name} />
-          <div className="text-center md:text-left flex-1">
-            <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
-              <h2 className="text-3xl font-display italic">{user.name}</h2>
-              <span className={`px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest border ${
-                user.isVerified ? "border-emerald-500/20 text-emerald-600 bg-emerald-50" : "border-amber-500/20 text-amber-600 bg-amber-50"
-              }`}>
-                {user.isVerified ? "VERIFIED_MEMBER" : "UNVERIFIED"}
-              </span>
-            </div>
-            <p className="text-sm font-serif text-muted mb-4">{user.bio}</p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-4">
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest">UID: {user.id}</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest">Joined: {user.joinDate}</div>
-            </div>
-          </div>
-          <button 
-            onClick={() => handleToggleVerify(user.id)}
-            className={`px-6 py-2.5 rounded-xl font-mono text-[10px] uppercase tracking-widest font-bold transition-all ${
-              user.isVerified ? "bg-red-50 text-red-500 border border-red-200" : "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-            }`}
-          >
-            {user.isVerified ? "Revoke Verification" : "Verify Member"}
-          </button>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="space-y-6">
-            <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest border-l-2 border-accent pl-3">Personal_Info</h3>
-            <div className="space-y-4">
-              <DetailItem label="真實姓名" value={user.details.realName} />
-              <DetailItem label="性別" value={user.details.gender} />
-              <DetailItem label="出生年月日" value={user.details.birthDate} />
-              <DetailItem label="學號/單位" value={user.details.studentId} />
-              <DetailItem label="Line ID" value={user.details.lineId} />
-            </div>
-          </div>
-          <div className="space-y-6">
-            <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest border-l-2 border-accent pl-3">Emergency_Contact</h3>
-            <div className="space-y-4">
-              <DetailItem label="聯絡人" value={user.details.emergencyContact.name} />
-              <DetailItem label="電話" value={user.details.emergencyContact.phone} />
-              <DetailItem label="關係" value={user.details.emergencyContact.relationship} />
-              <DetailItem label="地址" value={user.details.emergencyContact.address} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  const filteredUsers = users.filter(u => 
+    (u.real_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     u.student_id?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const DetailItem = ({ label, value }: { label: string, value: string }) => (
-    <div className="flex justify-between items-center border-b border-border/30 pb-2">
-      <span className="text-[10px] font-mono text-muted uppercase">{label}</span>
-      <span className="text-sm font-serif">{value}</span>
-    </div>
-  );
+  if (isLoading) {
+    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">LOADING_MEMBER_DIRECTORY...</div></AdminLayout>;
+  }
 
   return (
     <AdminLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-        <header className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-display italic mb-2">會員管理系統</h1>
-          <p className="text-sm font-serif text-muted">檢視社員詳細資料、審核會員身分並管理通訊錄。</p>
-        </header>
-
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30">🔍</span>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-display italic mb-2">社員身分管理</h1>
+            <p className="text-sm font-serif text-muted">檢視社員資料、審核入社身分與權限設定。</p>
+          </div>
+          <div className="relative w-full sm:w-64">
             <input 
               type="text" 
-              placeholder="搜尋姓名、學號或暱稱..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-surface border border-border px-12 py-3 rounded-2xl font-serif text-sm outline-none focus:border-accent transition-colors"
+              placeholder="Search members..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-surface border border-border px-4 py-2.5 rounded-xl text-xs font-serif outline-none focus:border-accent transition-all pl-10"
             />
-          </div>
-          <div className="flex gap-2">
-            <select className="bg-surface border border-border px-4 py-3 rounded-2xl font-mono text-[10px] uppercase tracking-widest outline-none">
-              <option>All Status</option>
-              <option>Verified</option>
-              <option>Unverified</option>
-            </select>
-            <button className="px-6 bg-surface border border-border rounded-2xl text-[10px] font-mono uppercase tracking-widest">Export All</button>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">🔍</span>
           </div>
         </div>
 
@@ -124,53 +64,101 @@ export default function UserAdminPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-background border-b border-border">
-                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Member</th>
+                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Member_Name</th>
                 <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Student_ID</th>
-                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Status</th>
-                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Join_Date</th>
-                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest text-right">Action</th>
+                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Verification</th>
+                <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-background/50 transition-colors group">
-                  <td className="px-6 py-6 flex items-center gap-4">
-                    <img src={user.avatar} className="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
-                    <div>
-                      <div className="text-sm font-serif font-bold text-foreground">{user.name}</div>
-                      <div className="text-[10px] font-mono text-muted/60">{user.details.realName}</div>
+                <tr key={user.id} className="hover:bg-background/50 transition-colors">
+                  <td className="px-6 py-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">
+                        {user.real_name?.[0] || "?"}
+                      </div>
+                      <div>
+                        <div className="text-sm font-serif font-bold">{user.real_name || "未設定"}</div>
+                        <div className="text-[10px] font-mono text-muted/60">{user.email}</div>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-6 font-mono text-xs text-muted">
-                    {user.details.studentId}
+                    {user.student_id || "N/A"}
                   </td>
                   <td className="px-6 py-6">
-                    <span className={`text-[9px] font-mono px-2 py-1 rounded border tracking-widest font-bold uppercase ${
-                      user.isVerified ? "border-emerald-500/20 text-emerald-600 bg-emerald-50" : "border-amber-500/20 text-amber-600 bg-amber-50"
+                    <span className={`text-[9px] font-mono px-2 py-1 rounded uppercase font-bold border ${
+                      user.is_verified ? "border-emerald-500/30 text-emerald-600 bg-emerald-50" : "border-amber-500/30 text-amber-600 bg-amber-50"
                     }`}>
-                      {user.isVerified ? "Verified" : "Pending"}
+                      {user.is_verified ? "Verified" : "Unverified"}
                     </span>
                   </td>
-                  <td className="px-6 py-6 font-mono text-[10px] text-muted">
-                    {user.joinDate}
-                  </td>
-                  <td className="px-6 py-6 text-right">
-                    <button 
-                      onClick={() => setSelectedUser(user)}
-                      className="px-4 py-2 bg-background border border-border rounded-xl text-[10px] font-mono uppercase tracking-widest hover:border-accent transition-all"
-                    >
-                      View Profile
-                    </button>
+                  <td className="px-6 py-6">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setSelectedUser(user)}
+                        className="px-4 py-2 bg-surface border border-border rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-background transition-all"
+                      >
+                        Details
+                      </button>
+                      <button 
+                        onClick={() => handleToggleVerify(user.id, user.is_verified)}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all ${
+                          user.is_verified ? "bg-red-50 text-red-600 border border-red-200" : "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                        }`}
+                      >
+                        {user.is_verified ? "Unverify" : "Verify"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {filteredUsers.length === 0 && (
+            <div className="p-20 text-center text-muted font-serif italic">找不到符合條件的社員</div>
+          )}
         </div>
-
-        {/* Modal Overlay */}
-        {selectedUser && <UserDetailModal user={selectedUser} />}
       </div>
+
+      {/* User Details Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-surface border border-border w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 md:p-10">
+              <div className="flex justify-between items-start mb-8">
+                <h2 className="text-2xl font-display italic">社員詳細資料</h2>
+                <button onClick={() => setSelectedUser(null)} className="text-muted hover:text-foreground">✕</button>
+              </div>
+              
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Personal_Info</h3>
+                  <div className="grid grid-cols-2 gap-y-4 text-sm">
+                    <div className="text-muted font-mono text-[10px] uppercase">Real Name</div>
+                    <div className="font-serif">{selectedUser.real_name || "N/A"}</div>
+                    <div className="text-muted font-mono text-[10px] uppercase">Student ID</div>
+                    <div className="font-mono">{selectedUser.student_id || "N/A"}</div>
+                    <div className="text-muted font-mono text-[10px] uppercase">Phone</div>
+                    <div className="font-mono">{selectedUser.phone || "N/A"}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Emergency_Contact</h3>
+                  <div className="bg-background/50 p-4 rounded-2xl">
+                    <p className="text-xs text-muted italic">此區塊將顯示從 user_profiles.full_details 解析出的緊急聯絡資訊。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background p-6 flex justify-end border-t border-border">
+              <button onClick={() => setSelectedUser(null)} className="px-8 py-2.5 bg-surface border border-border text-foreground rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
