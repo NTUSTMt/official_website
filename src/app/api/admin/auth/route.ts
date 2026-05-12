@@ -9,7 +9,7 @@ export async function POST(request: Request) {
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     // Set a simple auth cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set("admin_session", "authenticated", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
