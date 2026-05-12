@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { userService } from "@/services/userService";
+import { Search, UserCheck, UserX, Info, X } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -56,7 +57,9 @@ export default function AdminUsersPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-surface border border-border px-4 py-2.5 rounded-xl text-xs font-serif outline-none focus:border-accent transition-all pl-10"
             />
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">🔍</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+              <Search className="w-3.5 h-3.5" />
+            </span>
           </div>
         </div>
 
@@ -129,7 +132,9 @@ export default function AdminUsersPage() {
             <div className="p-8 md:p-10">
               <div className="flex justify-between items-start mb-8">
                 <h2 className="text-2xl font-display italic">社員詳細資料</h2>
-                <button onClick={() => setSelectedUser(null)} className="text-muted hover:text-foreground">✕</button>
+                <button onClick={() => setSelectedUser(null)} className="text-muted hover:text-foreground">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
               
               <div className="space-y-8">

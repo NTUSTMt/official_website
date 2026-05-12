@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { equipmentData, EquipmentItem, EquipmentCategory } from "@/data/equipment";
 import { equipmentService, rentalService } from "@/services/equipmentService";
+import { Trash2, Pencil, Plus, Search, Package, CheckCircle, XCircle } from "lucide-react";
 
 type Tab = "INVENTORY" | "RENTALS";
 
@@ -14,6 +15,8 @@ export default function AdminEquipmentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Load data from DB
   useEffect(() => {
@@ -31,9 +34,32 @@ export default function AdminEquipmentPage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (editingItem) {
+      setPreviewImage(editingItem.image || null);
+    } else {
+      setPreviewImage(null);
+    }
+  }, [editingItem, isModalOpen]);
+
   const handleSaveItem = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setUploading(true);
     const formData = new FormData(e.currentTarget);
+    const file = (formData.get("image") as File);
+    
+    let imageUrl = editingItem?.image || "";
+    
+    if (file && file.size > 0) {
+      try {
+        imageUrl = await equipmentService.uploadImage(file);
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("圖片上傳失敗");
+        setUploading(false);
+        return;
+      }
+    }
     
     const item: Partial<EquipmentItem> = {
       id: editingItem?.id || `eq-${Date.now()}`,
@@ -42,8 +68,9 @@ export default function AdminEquipmentPage() {
       quantity: Number(formData.get("quantity")),
       availableQty: Number(formData.get("availableQty")),
       details: formData.get("details") as string,
-      isRentable: formData.get("isRentable") === "true",
+      isRentable: true, // Default to true
       isMemberOnly: formData.get("isMemberOnly") === "true",
+      image: imageUrl,
       pricing: {
         base2Days: Number(formData.get("basePrice")),
         perExtraDay: Number(formData.get("extraPrice")),
@@ -57,7 +84,10 @@ export default function AdminEquipmentPage() {
       setInventory(updated);
       setIsModalOpen(false);
     } catch (err) {
+      console.error("Save error:", err);
       alert("儲存失敗");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -99,9 +129,10 @@ export default function AdminEquipmentPage() {
             {activeTab === "INVENTORY" && (
               <button 
                 onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
-                className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity"
+                className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
-                + Add Equipment
+                <Plus className="w-3 h-3" />
+                Add Equipment
               </button>
             )}
           </div>
@@ -127,29 +158,73 @@ export default function AdminEquipmentPage() {
         </div>
 
         {activeTab === "INVENTORY" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {inventory.map((item) => (
-              <div key={item.id} className="bg-surface border border-border rounded-3xl p-6 hover:border-accent/30 transition-all group">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-[10px] font-mono text-muted uppercase tracking-widest">{item.category}</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditingItem(item); setIsModalOpen(true); }} className="text-muted hover:text-accent transition-colors">✎</button>
-                    <button onClick={() => handleDeleteItem(item.id)} className="text-muted hover:text-red-500 transition-colors">🗑️</button>
-                  </div>
-                </div>
-                <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
-                <p className="text-xs font-serif text-muted mb-6 line-clamp-2 min-h-[2.5rem]">{item.details || "無詳細說明"}</p>
-                
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
-                  <div>
-                    <div className="text-[10px] font-mono text-muted uppercase mb-1">Stock</div>
-                    <div className="text-lg font-mono">{item.availableQty} / {item.quantity}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-mono text-muted uppercase mb-1">Status</div>
-                    <div className={`text-[10px] font-mono font-bold uppercase ${item.availableQty > 0 ? "text-emerald-500" : "text-red-400"}`}>
-                      {item.availableQty > 0 ? "In Stock" : "Out of Stock"}
+              <div 
+                key={item.id}
+                className="group bg-surface border border-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500"
+              >
+                {/* 1. Image Area */}
+                <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
+                  
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  ) : (
+                    <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
+                      {item.category === "炊事系統" && "🍳"}
+                      {item.category === "營帳系統" && "⛺"}
+                      {item.category === "睡眠系統" && "🛌"}
+                      {item.category === "行進裝備" && "🎒"}
+                      {item.category === "技術裝備" && "⛏️"}
                     </div>
+                  )}
+                  
+                  {item.isMemberOnly && (
+                    <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
+                      🔒 社員限定
+                    </div>
+                  )}
+                </div>
+
+                {/* Content Container */}
+                <div className="p-8 flex flex-1 flex-col">
+                  {/* 2. System & Remaining Qty */}
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="font-mono text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
+                    <div className="font-mono text-xs text-muted uppercase tracking-widest">
+                      <span className="text-foreground font-bold">{item.availableQty}</span> / {item.quantity}
+                    </div>
+                  </div>
+
+                  {/* 3. Name */}
+                  <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
+
+                  {/* 4. Note (Details) */}
+                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
+                    {item.details || "專業登山裝備，提供完善防護與便利性。"}
+                  </p>
+
+                  <div className="mt-auto">
+                    {/* 5. Pricing (Base & Extra) */}
+                    <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
+                      <div className="font-mono">
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
+                        <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
+                      </div>
+                      <div className="w-px h-6 bg-border/50"></div>
+                      <div className="font-mono text-right">
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
+                        <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                      className="w-full py-4 bg-background border border-border text-muted hover:text-accent hover:border-accent rounded-full font-mono text-xs uppercase tracking-[0.2em] transition-all"
+                    >
+                      Edit Equipment
+                    </button>
                   </div>
                 </div>
               </div>
@@ -209,48 +284,137 @@ export default function AdminEquipmentPage() {
       {/* Modal for Add/Edit Equipment */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-surface border border-border w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="bg-surface border border-border w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <form onSubmit={handleSaveItem}>
-              <div className="p-8 md:p-10">
-                <h2 className="text-2xl font-display italic mb-8">{editingItem ? "編輯裝備資訊" : "新增裝備"}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">裝備名稱</label>
-                    <input name="name" type="text" defaultValue={editingItem?.name} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent" required />
+              <div className="p-8 md:p-12">
+                <div className="flex justify-between items-center mb-10">
+                  <h2 className="text-3xl font-display italic">{editingItem ? "編輯裝備資訊" : "新增裝備"}</h2>
+                  {editingItem && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        handleDeleteItem(editingItem.id);
+                        setIsModalOpen(false);
+                      }}
+                      className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                      title="刪除裝備"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  {/* Left Column: Image Upload */}
+                  <div className="lg:col-span-4 space-y-6">
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">裝備圖片 Photo</label>
+                    <div className="aspect-square bg-background border-2 border-dashed border-border rounded-3xl overflow-hidden relative group cursor-pointer hover:border-accent transition-colors">
+                      {previewImage ? (
+                        <img src={previewImage} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-muted/40">
+                          <Plus className="w-8 h-8 mb-2" />
+                          <span className="text-[10px] font-mono uppercase">Upload Image</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        name="image" 
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = URL.createObjectURL(file);
+                            setPreviewImage(url);
+                          }
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                      />
+                      {previewImage && (
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-mono uppercase tracking-widest">
+                          Change Image
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-mono text-muted/40 text-center uppercase tracking-widest">建議尺寸: 800 x 800px</p>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">類別</label>
-                    <select name="category" defaultValue={editingItem?.category || "炊事系統"} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent">
-                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">總量</label>
-                      <input name="quantity" type="number" defaultValue={editingItem?.quantity || 1} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent" required />
+
+                  {/* Right Column: Details */}
+                  <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">裝備名稱 Name</label>
+                      <input name="name" type="text" defaultValue={editingItem?.name} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-serif text-lg outline-none focus:border-accent" required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">可用數量</label>
-                      <input name="availableQty" type="number" defaultValue={editingItem?.availableQty || 1} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent" required />
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">類別 Category</label>
+                      <select name="category" defaultValue={editingItem?.category || "炊事系統"} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-serif text-sm outline-none focus:border-accent">
+                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">詳細說明/規格</label>
-                    <textarea name="details" defaultValue={editingItem?.details} rows={3} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent resize-none" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">基本租金 (2天)</label>
-                    <input name="basePrice" type="number" defaultValue={editingItem?.pricing?.base2Days || 0} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">每日加價</label>
-                    <input name="extraPrice" type="number" defaultValue={editingItem?.pricing?.perExtraDay || 0} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">總庫存 Total</label>
+                        <input name="quantity" type="number" defaultValue={editingItem?.quantity || 1} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-mono text-sm outline-none focus:border-accent" required />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">可用庫存 Avail</label>
+                        <input name="availableQty" type="number" defaultValue={editingItem?.availableQty || 1} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-mono text-sm outline-none focus:border-accent" required />
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">詳細說明/規格 Details</label>
+                      <textarea name="details" defaultValue={editingItem?.details} rows={4} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-serif text-sm outline-none focus:border-accent resize-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">基本租金 (2天) Base</label>
+                      <div className="relative">
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-muted font-mono text-sm">$</span>
+                        <input name="basePrice" type="number" defaultValue={editingItem?.pricing?.base2Days || 0} className="w-full bg-background border border-border pl-12 pr-6 py-4 rounded-2xl font-mono text-sm outline-none focus:border-accent" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">每日加價 Extra</label>
+                      <div className="relative">
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-muted font-mono text-sm">$</span>
+                        <input name="extraPrice" type="number" defaultValue={editingItem?.pricing?.perExtraDay || 0} className="w-full bg-background border border-border pl-12 pr-6 py-4 rounded-2xl font-mono text-sm outline-none focus:border-accent" />
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className="relative flex items-center">
+                          <input type="checkbox" name="isMemberOnly" value="true" defaultChecked={editingItem?.isMemberOnly} className="peer sr-only" />
+                          <div className="w-10 h-6 bg-border rounded-full peer peer-checked:bg-accent transition-colors"></div>
+                          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-4 transition-transform shadow-sm"></div>
+                        </div>
+                        <span className="text-[10px] font-mono text-muted uppercase tracking-widest group-hover:text-accent transition-colors">限社員租借 Member Only</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="bg-background p-6 flex justify-end gap-3 border-t border-border">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-[10px] font-mono text-muted uppercase tracking-widest font-bold">Cancel</button>
-                <button type="submit" className="px-8 py-2.5 bg-accent text-white rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20">Save_Item</button>
+              <div className="bg-background p-8 flex justify-end gap-4 border-t border-border">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)} 
+                  disabled={uploading}
+                  className="px-8 py-3 text-[10px] font-mono text-muted uppercase tracking-widest font-bold hover:text-foreground transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={uploading}
+                  className="px-12 py-3 bg-accent text-white rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20 hover:brightness-110 transition-all flex items-center gap-3 disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    "Save_Equipment"
+                  )}
+                </button>
               </div>
             </form>
           </div>

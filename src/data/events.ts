@@ -8,6 +8,7 @@ export interface EventItem {
   status: "open" | "closed" | "upcoming";
   coverImage: string;
   summary: string;
+  registrationDeadline?: string;
   description: string[];
   itinerary?: { time: string; activity: string }[];
   requirements?: string[];
@@ -93,6 +94,7 @@ export const eventsData: EventItem[] = [
     ],
     requirements: ["具備3000公尺以上高山經驗", "良好心肺耐力", "需參加行前訓練"],
     signupUrl: "https://forms.gle/placeholder",
+    registrationDeadline: "2026/06/01",
     tags: ["百岳", "單攻", "最高峰"]
   },
   {
@@ -111,6 +113,7 @@ export const eventsData: EventItem[] = [
       "這是一個輕鬆且愉快的迎新登山活動。"
     ],
     signupUrl: "https://forms.gle/placeholder",
+    registrationDeadline: "2026/04/10",
     tags: ["迎新", "百岳", "新手推薦"]
   },
   {
@@ -128,6 +131,7 @@ export const eventsData: EventItem[] = [
       "我們將在小奇萊與成功山屋宿營。",
       "需具備基本攀爬技巧與重裝體能。"
     ],
+    registrationDeadline: "2026/06/30",
     tags: ["百岳", "宿營", "險峻"]
   }
 ];

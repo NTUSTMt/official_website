@@ -1,31 +1,42 @@
-import { supabase } from "@/lib/supabase";
-import { EventItem } from "@/data/events";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { EventItem, eventsData } from "@/data/events";
 
 export const eventService = {
   async getAllEvents() {
+    if (!isSupabaseConfigured) return eventsData;
+    
     const { data, error } = await supabase
       .from("events")
       .select("*")
       .order("created_at", { ascending: false });
-
+    
     if (error) {
-      console.error("Error fetching events:", error);
-      return [];
+      console.error("Error fetching events from Supabase:", error);
+      return eventsData;
     }
-
-    return data.map(this.mapDbToEvent);
+    
+    return data.length > 0 ? data.map(this.mapDbToEvent) : eventsData;
   },
 
   async getEventById(id: string) {
+    if (!isSupabaseConfigured) {
+      return eventsData.find(e => e.id === id) || null;
+    }
+
     const { data, error } = await supabase
       .from("events")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      console.error(`Error fetching event ${id}:`, error);
-      return null;
+      console.error(`Error fetching event ${id} from Supabase:`, error);
+      // Fallback to mock data if DB fetch fails
+      return eventsData.find(e => e.id === id) || null;
+    }
+
+    if (!data) {
+      return eventsData.find(e => e.id === id) || null;
     }
 
     return this.mapDbToEvent(data);
@@ -42,6 +53,7 @@ export const eventService = {
       status: event.status,
       cover_image: event.coverImage,
       summary: event.summary,
+      registration_deadline: event.registrationDeadline,
       description: event.description,
       itinerary: event.itinerary,
       requirements: event.requirements,
@@ -76,6 +88,7 @@ export const eventService = {
       status: db.status,
       coverImage: db.cover_image,
       summary: db.summary,
+      registrationDeadline: db.registration_deadline || "",
       description: db.description || [],
       itinerary: db.itinerary || [],
       requirements: db.requirements || [],

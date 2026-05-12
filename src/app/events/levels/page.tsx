@@ -1,8 +1,29 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { difficultyLevels } from "@/data/events";
+import { historyService } from "@/services/cmsService";
 
 export default function DifficultyLevelsPage() {
+  const [levels, setLevels] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const dbLevels = await historyService.getActivityLevels();
+        setLevels(dbLevels);
+      } catch (error) {
+        console.error("Error fetching levels:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) return null;
+
   return (
     <main className="min-h-screen">
       <Navbar />
@@ -19,7 +40,7 @@ export default function DifficultyLevelsPage() {
         </section>
 
         <div className="space-y-12">
-          {difficultyLevels.map((level) => (
+          {levels.map((level) => (
             <div 
               key={level.level}
               className="group relative bg-surface border border-border p-10 md:p-16 rounded-[3rem] shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden"

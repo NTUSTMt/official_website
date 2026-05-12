@@ -51,14 +51,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         {/* Main Content */}
         <div className="lg:col-span-8 space-y-12">
           <div className="bg-surface p-12 md:p-16 border border-border rounded-[3rem] shadow-xl">
-            <div className="prose prose-stone max-w-none">
+            <div className="max-w-none">
               <h2 className="text-3xl font-display italic mb-8 border-b border-border pb-6">活動詳情 Description</h2>
-              <div className="space-y-6">
-                {event.description.map((para, i) => (
-                  <p key={i} className="text-xl font-serif text-muted leading-relaxed">
-                    {para}
-                  </p>
-                ))}
+              <div className="space-y-4">
+                {Array.isArray(event.description) ? (
+                  event.description.map((para, i) => (
+                    <p key={i} className="text-base md:text-lg font-serif text-muted leading-relaxed">
+                      {para}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-base md:text-lg font-serif text-muted leading-relaxed">{event.description}</p>
+                )}
               </div>
             </div>
 
@@ -104,13 +108,24 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         {/* Sidebar / CTA */}
         <div className="lg:col-span-4 space-y-8">
           <div className="bg-surface p-10 border border-border rounded-[3rem] shadow-lg sticky top-32">
-            <div className="mb-8 text-center">
-              <div className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 font-bold">Status</div>
-              <div className={`text-2xl font-display italic ${
-                event.status === "open" ? "text-emerald-600" : "text-muted/40"
-              }`}>
-                {event.status === "open" ? "開放報名中" : event.status === "closed" ? "報名已截止" : "即將開放"}
+            <div className="mb-8 text-center space-y-4">
+              <div>
+                <div className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 font-bold">Status</div>
+                <div className={`text-2xl font-display italic ${
+                  event.status === "open" ? "text-emerald-600" : "text-muted/40"
+                }`}>
+                  {event.status === "open" ? "開放報名中" : event.status === "closed" ? "報名已截止" : "即將開放"}
+                </div>
               </div>
+
+              {event.registrationDeadline && (
+                <div className="pt-4 border-t border-border/50">
+                  <div className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 font-bold">Registration Deadline</div>
+                  <div className="text-xl font-mono text-accent">
+                    {event.registrationDeadline}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">

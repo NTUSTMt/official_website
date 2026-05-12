@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Globe, Tent, Package, Users, LogOut, LayoutDashboard, FileText } from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -28,10 +29,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const navItems = [
-    { label: "全站內容 CMS", href: "/admin", icon: "🌐" },
-    { label: "活動與報名", href: "/admin/events", icon: "🏕️" },
-    { label: "裝備與訂單", href: "/admin/equipment", icon: "🎒" },
-    { label: "會員管理", href: "/admin/users", icon: "👥" },
+    { label: "全站內容 CMS", href: "/admin", icon: Globe },
+    { label: "活動與報名", href: "/admin/events", icon: Tent },
+    { label: "裝備與訂單", href: "/admin/equipment", icon: Package },
+    { label: "會員管理", href: "/admin/users", icon: Users },
+    { label: "規章制度", href: "/admin/rules", icon: FileText },
   ];
 
   if (isAuthenticated === null) return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-xs text-muted">LOADING...</div>;
@@ -68,7 +70,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       : "text-muted hover:bg-background hover:text-foreground"
                   }`}
                 >
-                  <span>{item.icon}</span>
+                  <item.icon className={`w-4 h-4 ${isActive ? "text-accent-foreground" : "text-muted"}`} />
                   {item.label}
                 </Link>
               );
@@ -79,8 +81,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-6 border-t border-border">
           <button 
             onClick={handleLogout}
-            className="w-full py-3 px-4 rounded-xl text-xs font-mono tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors border border-transparent hover:border-red-200"
+            className="w-full py-3 px-4 rounded-xl text-xs font-mono tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-200 flex items-center justify-center gap-2"
           >
+            <LogOut className="w-3 h-3" />
             LOGOUT
           </button>
         </div>
@@ -125,7 +128,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               pathname === item.href ? "text-accent" : "text-muted"
             }`}
           >
-            <span className="text-xl">{item.icon}</span>
+            <item.icon className={`w-5 h-5 ${pathname === item.href ? "text-accent" : "text-muted"}`} />
             <span className="text-[8px] font-mono uppercase tracking-widest">{item.label.split(" ")[0]}</span>
           </Link>
         ))}

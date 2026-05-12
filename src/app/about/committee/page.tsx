@@ -1,15 +1,28 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
+import { historyService } from "@/services/cmsService";
 
 export default function CommitteePage() {
-  const roles = [
-    { title: "社長 (President)", responsibility: "綜理全社事務，對外代表本社，主持各項會議。" },
-    { title: "副社長 (Vice President)", responsibility: "襄助社長處理社務，於社長因故不能執行職務時代理之。" },
-    { title: "行政長 (Secretary)", responsibility: "負責社團公文、會議紀錄、通訊錄管理及資料歸檔。" },
-    { title: "財務長 (Treasurer)", responsibility: "負責經費收支、預決算編制及財務報告。" },
-    { title: "裝備長 (Quartermaster)", responsibility: "負責社產裝備之採購、租借管理、維護及盤點。" },
-    { title: "技術長 (Technical Director)", responsibility: "負責登山技術之培訓、嚮導訓練、活動安全之審核。" },
-  ];
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const dbRoles = await historyService.getCommitteeRoles();
+        setData(dbRoles);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) return null;
 
   return (
     <main className="min-h-screen bg-white">
@@ -23,19 +36,53 @@ export default function CommitteePage() {
           <div className="h-1 w-24 bg-accent mb-12"></div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {roles.map((role, i) => (
-            <div key={i} className="p-10 border border-border bg-surface hover:bg-white transition-colors rounded-3xl shadow-sm border-l-8 border-l-accent">
-              <h3 className="text-xl font-mono font-bold text-accent mb-4 uppercase tracking-wider">{role.title}</h3>
-              <p className="font-serif text-muted text-lg leading-relaxed">
-                {role.responsibility}
-              </p>
-            </div>
-          ))}
-        </section>
+        {/* Individual Roles */}
+        <div className="mb-24">
+          <h2 className="text-sm font-mono text-accent font-bold uppercase tracking-[0.3em] mb-12 border-l-4 border-accent pl-4">幹部分工 (Roles)</h2>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {data?.roles?.map((role: any, i: number) => (
+              <div key={i} className="p-8 border border-border bg-surface hover:bg-white transition-all duration-300 rounded-3xl shadow-sm hover:shadow-md group">
+                <h3 className="text-xl font-display italic text-foreground mb-4 group-hover:text-accent transition-colors">{role.title}</h3>
+                <p className="font-serif text-muted leading-relaxed">
+                  {role.description}
+                </p>
+              </div>
+            ))}
+          </section>
+        </div>
+
+        {/* Common Responsibilities */}
+        <div className="mb-24">
+          <h2 className="text-sm font-mono text-accent font-bold uppercase tracking-[0.3em] mb-12 border-l-4 border-accent pl-4">幹部共同職責 (Shared Duties)</h2>
+          <div className="bg-surface border border-border p-8 md:p-12 rounded-[2rem] shadow-sm">
+            <ul className="space-y-6">
+              {data?.commonResponsibilities?.map((item: string, i: number) => (
+                <li key={i} className="flex gap-4 items-start group">
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full mt-2 flex-shrink-0 group-hover:scale-150 transition-transform"></span>
+                  <p className="font-serif text-lg text-muted leading-relaxed">{item}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Mountain Duties */}
+        <div className="mb-24">
+          <h2 className="text-sm font-mono text-emerald-600 font-bold uppercase tracking-[0.3em] mb-12 border-l-4 border-emerald-600 pl-4">上山後的工作 (Mountain Duties)</h2>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {data?.mountainDuties?.map((duty: any, i: number) => (
+              <div key={i} className="p-8 border border-border bg-background hover:bg-emerald-50/30 transition-all duration-300 rounded-3xl shadow-sm hover:shadow-md border-t-4 border-t-emerald-600/20">
+                <h3 className="text-lg font-display italic text-emerald-700 mb-4">{duty.title}</h3>
+                <p className="font-serif text-muted text-sm leading-relaxed">
+                  {duty.description}
+                </p>
+              </div>
+            ))}
+          </section>
+        </div>
 
         <p className="mt-24 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
-          NTUST Mountaineering Club · Organization
+          NTUST Mountaineering Club · Organization & Responsibilities
         </p>
       </div>
     </main>

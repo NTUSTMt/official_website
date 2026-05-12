@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationConfig, NavItem } from "@/config/navigation";
@@ -26,17 +26,30 @@ export default function Navbar({ announcement }: NavbarProps) {
     );
   };
 
+  const navRef = useRef<HTMLElement>(null);
+  const [navHeight, setNavHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    if (navRef.current) {
+      const updateHeight = () => {
+        if (navRef.current) {
+          setNavHeight(navRef.current.offsetHeight);
+        }
+      };
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+      return () => window.removeEventListener('resize', updateHeight);
+    }
+  }, [announcement]);
+
   return (
     <>
-      {announcement?.enabled && (
-        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-[60]">
-          <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
-            {announcement.text} →
-          </Link>
-        </div>
-      )}
-      <nav className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300 ${pathname === "/" ? "mt-[-59px]" : ""}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <nav 
+        ref={navRef}
+        style={{ marginTop: pathname === "/" ? `-${navHeight}px` : undefined }}
+        className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300`}
+      >
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between py-3">
           {/* Logo or Brand could go here if needed, but keeping original layout */}
           
@@ -61,7 +74,14 @@ export default function Navbar({ announcement }: NavbarProps) {
           </div>
         </div>
       </div>
-    </nav>
+      </nav>
+      {announcement?.enabled && (
+        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20">
+          <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
+            {announcement.text} →
+          </Link>
+        </div>
+      )}
     </>
   );
 }
@@ -87,7 +107,7 @@ function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
 
       {/* Dropdown Menu */}
       {item.subItems && (
-        <div className="absolute top-full left-0 w-full min-w-[200px] pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+        <div className="absolute top-full left-0 w-full min-w-[200px] pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[70]">
           <div className="bg-surface border border-border shadow-2xl py-3 flex flex-col rounded-2xl overflow-hidden">
             {item.subItems.map((sub) => (
               <Link

@@ -1,37 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import RulesLayout from "@/components/RulesLayout";
-import { rulesData, RuleCategory } from "@/data/rules";
-import { ruleService } from "@/services/ruleService";
+import { rulesData } from "@/data/rules";
 
-export default function MembershipRulesPage() {
-  const [data, setData] = useState<RuleCategory>(rulesData.membership);
-  const [isLoading, setIsLoading] = useState(true);
+export default function JoiningRulesPage() {
+  const data = rulesData.joining;
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const result = await ruleService.getRuleCategory("membership");
-        setData(result);
-      } catch (err) {
-        console.error("Failed to load membership rules:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <RulesLayout>
-        <div className="flex items-center justify-center h-64 font-mono text-xs animate-pulse">
-          LOADING_RULES...
-        </div>
-      </RulesLayout>
-    );
-  }
+  if (!data) return null;
 
   return (
     <RulesLayout>
@@ -70,7 +46,7 @@ export default function MembershipRulesPage() {
 
         <footer className="mt-20 pt-12 border-t border-border">
           <p className="text-xs font-mono text-muted/40 uppercase tracking-[0.2em]">
-            Last Updated: {new Date().toLocaleDateString('zh-TW')}
+            Last Updated: 2024.05.12
           </p>
         </footer>
       </div>

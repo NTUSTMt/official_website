@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
+import { ShieldCheck, Lock, ChevronRight } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -56,8 +57,9 @@ export default function AdminLoginPage() {
               type="submit"
               className="w-full bg-accent text-accent-foreground py-3 rounded-xl font-mono text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
+              <Lock className="w-3.5 h-3.5" />
               <span>Authenticate</span>
-              <span>→</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </form>
 

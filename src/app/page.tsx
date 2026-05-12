@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
-      <Hero tagline={config.heroTagline} subtext={config.heroSubtext} stats={config.stats} />
+      <Hero />
       <Navbar announcement={config.announcement} />
       <Features />
       <Quote />

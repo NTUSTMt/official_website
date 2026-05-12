@@ -79,44 +79,59 @@ export default function EquipmentBrowsePage() {
                 key={item.id}
                 className="group bg-surface border border-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500"
               >
-                {/* Image Placeholder */}
-                <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center p-12">
-                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  {/* Category Based Icon Placeholder */}
-                  <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
-                    {item.category === "炊事系統" && "🍳"}
-                    {item.category === "營帳系統" && "⛺"}
-                    {item.category === "睡眠系統" && "🛌"}
-                    {item.category === "行進裝備" && "🎒"}
-                    {item.category === "技術裝備" && "⛏️"}
-                  </div>
+                {/* 1. Image Area */}
+                <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
                   
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  ) : (
+                    <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
+                      {item.category === "炊事系統" && "🍳"}
+                      {item.category === "營帳系統" && "⛺"}
+                      {item.category === "睡眠系統" && "🛌"}
+                      {item.category === "行進裝備" && "🎒"}
+                      {item.category === "技術裝備" && "⛏️"}
+                    </div>
+                  )}
+
                   {item.isMemberOnly && (
-                    <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold">
+                    <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
                       🔒 社員限定
                     </div>
                   )}
-                  
-                  <div className="absolute top-6 right-6 font-mono text-[10px] text-muted/40 uppercase tracking-widest">
-                    Qty: {item.availableQty}
-                  </div>
                 </div>
 
-                {/* Content */}
+                {/* Content Container */}
                 <div className="p-8 flex flex-1 flex-col">
-                  <div className="font-mono text-[10px] text-accent uppercase tracking-widest mb-2 font-bold">{item.category}</div>
+                  {/* 2. System & Remaining Qty */}
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="font-mono text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
+                    <div className="font-mono text-xs text-muted uppercase tracking-widest">
+                      剩餘: <span className="text-foreground font-bold">{item.availableQty}</span>
+                    </div>
+                  </div>
+
+                  {/* 3. Name */}
                   <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
-                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2">
+
+                  {/* 4. Note (Details) */}
+                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
                     {item.details || "專業登山裝備，提供完善防護與便利性。"}
                   </p>
 
                   <div className="mt-auto">
-                    <div className="flex justify-between items-end mb-6">
+                    {/* 5. Pricing (Base & Extra) */}
+                    <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
                       <div className="font-mono">
-                        <div className="text-[10px] text-muted/40 uppercase tracking-widest">Starting from</div>
-                        <div className="text-lg font-bold">${item.pricing?.base2Days || 0}</div>
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
+                        <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
                       </div>
-                      <div className="text-[10px] font-mono text-muted/40 uppercase tracking-widest">2 Days Base</div>
+                      <div className="w-px h-6 bg-border/50"></div>
+                      <div className="font-mono text-right">
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
+                        <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
+                      </div>
                     </div>
 
                     {qty > 0 ? (
