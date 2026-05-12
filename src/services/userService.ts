@@ -66,16 +66,36 @@ export const userService = {
   },
 
   async getCurrentUser() {
-    // In a real app, this would get the ID from session/auth
-    // For now, we'll try to get the first profile or a saved ID
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .select("*")
-      .limit(1)
-      .single();
+    try {
+      const response = await fetch('/api/auth/session');
+      const session = await response.json();
+      
+      if (!session || !session.user || !session.user.email) {
+        return null;
+      }
 
-    if (error) return null;
-    return data as UserProfile;
+      // 根據 email 或 lineUserId 從 public.users 取出詳細資料
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", session.user.email)
+        .single();
+
+      if (error) return null;
+      
+      // 將 public.users 的資料對應到 UserProfile 介面 (補上預設值避免報錯)
+      return {
+        id: data.id,
+        real_name: data.name || "",
+        email: data.email || "",
+        avatar_url: data.image || "",
+        membership_status: "unpaid", // 預設值，後續可從資料庫擴充
+        balance: 0,
+      } as UserProfile;
+    } catch (err) {
+      console.error("Failed to fetch current user session", err);
+      return null;
+    }
   },
 
   async updateProfile(id: string, updates: Partial<UserProfile>) {
