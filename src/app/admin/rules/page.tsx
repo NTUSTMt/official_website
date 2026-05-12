@@ -8,6 +8,17 @@ import { RuleCategory, RuleSection } from "@/data/rules";
 
 type RuleTab = "membership" | "joining" | "equipment" | "room" | "constitution";
 
+const TabButton = ({ id, label, activeTab, setActiveTab }: { id: RuleTab, label: string, activeTab: RuleTab, setActiveTab: (tab: RuleTab) => void }) => (
+  <button
+    onClick={() => setActiveTab(id)}
+    className={`px-6 py-4 text-xs font-mono tracking-widest uppercase border-b-2 transition-all whitespace-nowrap ${
+      activeTab === id ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
+    }`}
+  >
+    {label}
+  </button>
+);
+
 export default function AdminRulesPage() {
   const [activeTab, setActiveTab] = useState<RuleTab>("membership");
   const [data, setData] = useState<RuleCategory | null>(null);
