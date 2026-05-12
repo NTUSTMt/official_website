@@ -80,17 +80,6 @@ export default function AdminRulesPage() {
     setData({ ...data, sections: newSections });
   };
 
-  const TabButton = ({ id, label }: { id: RuleTab, label: string }) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      className={`px-6 py-4 text-xs font-mono tracking-widest uppercase border-b-2 transition-all whitespace-nowrap ${
-        activeTab === id ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
-      }`}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <AdminLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
@@ -114,11 +103,11 @@ export default function AdminRulesPage() {
         </div>
 
         <div className="flex border-b border-border mb-10 overflow-x-auto no-scrollbar">
-          <TabButton id="membership" label="我想成為社員！" />
-          <TabButton id="joining" label="我想參與社團活動！" />
-          <TabButton id="equipment" label="租借規則與費用" />
-          <TabButton id="room" label="社辦使用規範" />
-          <TabButton id="constitution" label="組織章程" />
+          <TabButton id="membership" label="我想成為社員！" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="joining" label="我想參與社團活動！" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="equipment" label="租借規則與費用" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="room" label="社辦使用規範" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="constitution" label="組織章程" activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
 
         {isLoading ? (

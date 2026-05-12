@@ -185,7 +185,7 @@ export default function AdminDashboardPage() {
     </div>
   );
 
-  const TabButton = ({ id, label }: { id: Tab, label: string }) => (
+  const TabButton = ({ id, label, activeTab, setActiveTab }: { id: Tab, label: string, activeTab: Tab, setActiveTab: (id: Tab) => void }) => (
     <button
       onClick={() => setActiveTab(id)}
       className={`px-8 py-4 text-xs font-mono tracking-widest uppercase border-b-2 transition-all ${
@@ -244,11 +244,11 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex border-b border-border mb-10 overflow-x-auto">
-          <TabButton id="GENERAL" label="General_Settings" />
-          <TabButton id="ABOUT" label="About_Us_CMS" />
-          <TabButton id="LEADERSHIP" label="Leadership_History" />
-          <TabButton id="ROLES" label="Roles_&_Duties" />
-          <TabButton id="LEVELS" label="Activity_Levels" />
+          <TabButton id="GENERAL" label="General_Settings" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="ABOUT" label="About_Us_CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="LEADERSHIP" label="Leadership_History" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="ROLES" label="Roles_&_Duties" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="LEVELS" label="Activity_Levels" activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
 
         {activeTab === "GENERAL" && (
