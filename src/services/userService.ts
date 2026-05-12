@@ -19,21 +19,32 @@ export interface UserProfile {
   created_at: string;
 }
 
+// 輔助函數：將資料庫的 users 資料轉為前端的 UserProfile 格式
+const mapDatabaseToProfile = (data: any): UserProfile => {
+  return {
+    ...data,
+    real_name: data.name || data.real_name,
+    avatar_url: data.image || data.avatar_url,
+    membership_status: data.membership_status || 'unpaid',
+    balance: data.balance || 0,
+  };
+};
+
 export const userService = {
   async getProfile(id: string) {
     const { data, error } = await supabase
-      .from("user_profiles")
+      .from("users")
       .select("*")
       .eq("id", id)
       .single();
 
     if (error) return null;
-    return data as UserProfile;
+    return mapDatabaseToProfile(data);
   },
 
   async getAllUsers() {
     const { data, error } = await supabase
-      .from("user_profiles")
+      .from("users")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -41,13 +52,12 @@ export const userService = {
       console.error("Error fetching all users:", error);
       return [];
     }
-    return data;
+    return data.map(mapDatabaseToProfile);
   },
 
   async updateUserVerification(id: string, isVerified: boolean) {
-    // This is for backward compatibility or future use
     const { error } = await supabase
-      .from("user_profiles")
+      .from("users")
       .update({ membership_status: isVerified ? 'active' : 'unpaid' })
       .eq("id", id);
 
@@ -56,13 +66,13 @@ export const userService = {
 
   async getPublicProfile(id: string) {
     const { data, error } = await supabase
-      .from("user_profiles")
+      .from("users")
       .select("*")
       .eq("id", id)
       .single();
 
     if (error) return null;
-    return data;
+    return mapDatabaseToProfile(data);
   },
 
   async getCurrentUser() {
@@ -70,28 +80,39 @@ export const userService = {
       const response = await fetch('/api/auth/session');
       const session = await response.json();
       
-      if (!session || !session.user || !session.user.email) {
+      if (!session || !session.user) {
         return null;
       }
 
-      // 根據 email 或 lineUserId 從 public.users 取出詳細資料
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", session.user.email)
+      const lineUserId = session.user.lineUserId;
+      if (!lineUserId) return null;
+
+      // 1. 透過 accounts 資料表找到對應的 userId
+      const { data: accountData, error: accountError } = await supabase
+        .from("accounts")
+        .select("userId")
+        .eq("provider", "line")
+        .eq("providerAccountId", lineUserId)
         .single();
 
-      if (error) return null;
+      if (accountError || !accountData) {
+        console.error("Account not found:", accountError);
+        return null;
+      }
+
+      // 2. 透過 userId 取得 users 的資料
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", accountData.userId)
+        .single();
+
+      if (userError || !userData) {
+        console.error("User not found:", userError);
+        return null;
+      }
       
-      // 將 public.users 的資料對應到 UserProfile 介面 (補上預設值避免報錯)
-      return {
-        id: data.id,
-        real_name: data.name || "",
-        email: data.email || "",
-        avatar_url: data.image || "",
-        membership_status: "unpaid", // 預設值，後續可從資料庫擴充
-        balance: 0,
-      } as UserProfile;
+      return mapDatabaseToProfile(userData);
     } catch (err) {
       console.error("Failed to fetch current user session", err);
       return null;
@@ -99,14 +120,23 @@ export const userService = {
   },
 
   async updateProfile(id: string, updates: Partial<UserProfile>) {
+    // 將前端欄位對應回資料庫的 users 欄位
+    const dbUpdates: any = { ...updates };
+    if (updates.real_name !== undefined) dbUpdates.name = updates.real_name;
+    if (updates.avatar_url !== undefined) dbUpdates.image = updates.avatar_url;
+    
+    // 移除不應該直接更新到 users 的前端虛擬欄位 (避免 Supabase 報錯)
+    delete dbUpdates.real_name;
+    delete dbUpdates.avatar_url;
+
     const { data, error } = await supabase
-      .from("user_profiles")
-      .update(updates)
+      .from("users")
+      .update(dbUpdates)
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw error;
-    return data as UserProfile;
+    return mapDatabaseToProfile(data);
   }
 };

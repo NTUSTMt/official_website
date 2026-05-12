@@ -1,0 +1,11 @@
+-- 新增社團所需的額外欄位到 NextAuth 的 users 資料表中
+ALTER TABLE public.users
+ADD COLUMN IF NOT EXISTS student_id text,
+ADD COLUMN IF NOT EXISTS department text,
+ADD COLUMN IF NOT EXISTS phone text,
+ADD COLUMN IF NOT EXISTS membership_status text DEFAULT 'unpaid',
+ADD COLUMN IF NOT EXISTS emergency_contact_name text,
+ADD COLUMN IF NOT EXISTS emergency_contact_phone text,
+ADD COLUMN IF NOT EXISTS skills text[],
+ADD COLUMN IF NOT EXISTS balance integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS created_at timestamp with time zone DEFAULT now();
