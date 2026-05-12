@@ -6,6 +6,33 @@ import { userService, UserProfile } from "@/services/userService";
 import { Save, Edit2, X, Check, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
+interface FieldProps {
+  label: string;
+  value: string;
+  name: keyof UserProfile;
+  placeholder?: string;
+  isEditing: boolean;
+  formData: Partial<UserProfile>;
+  setFormData: React.Dispatch<React.SetStateAction<Partial<UserProfile>>>;
+}
+
+const Field = ({ label, value, name, placeholder, isEditing, formData, setFormData }: FieldProps) => (
+  <div className="py-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+    <label className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] md:w-48 group-hover:text-accent transition-colors">{label}</label>
+    {isEditing ? (
+      <input 
+        type="text"
+        placeholder={placeholder}
+        value={formData[name] as string || ""}
+        onChange={(e) => setFormData({...formData, [name]: e.target.value})}
+        className="flex-1 max-w-md bg-surface border border-border px-6 py-3 rounded-2xl font-serif text-sm text-foreground outline-none focus:border-accent transition-all shadow-inner"
+      />
+    ) : (
+      <div className="flex-1 font-serif text-lg text-foreground/80">{value || <span className="text-muted/30 italic">未填寫</span>}</div>
+    )}
+  </div>
+);
+
 export default function ProfileDetailsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -37,23 +64,6 @@ export default function ProfileDetailsPage() {
       alert("儲存失敗");
     }
   };
-
-  const Field = ({ label, value, name, placeholder }: { label: string, value: string, name: keyof UserProfile, placeholder?: string }) => (
-    <div className="py-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4 group">
-      <label className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] md:w-48 group-hover:text-accent transition-colors">{label}</label>
-      {isEditing ? (
-        <input 
-          type="text"
-          placeholder={placeholder}
-          value={formData[name] as string || ""}
-          onChange={(e) => setFormData({...formData, [name]: e.target.value})}
-          className="flex-1 max-w-md bg-surface border border-border px-6 py-3 rounded-2xl font-serif text-sm text-foreground outline-none focus:border-accent transition-all shadow-inner"
-        />
-      ) : (
-        <div className="flex-1 font-serif text-lg text-foreground/80">{value || <span className="text-muted/30 italic">未填寫</span>}</div>
-      )}
-    </div>
-  );
 
   if (isLoading) {
     return (
@@ -122,9 +132,9 @@ export default function ProfileDetailsPage() {
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
             <div className="bg-surface/30 rounded-[2.5rem] p-4 md:p-10 border border-border/50">
-              <Field label="真實姓名" value={user.real_name || ""} name="real_name" placeholder="請輸入證件姓名" />
-              <Field label="學號 / 單位" value={user.student_id || ""} name="student_id" placeholder="110XXXXX" />
-              <Field label="系所" value={user.department || ""} name="department" placeholder="例如：資工系" />
+              <Field label="真實姓名" value={user.real_name || ""} name="real_name" placeholder="請輸入證件姓名" isEditing={isEditing} formData={formData} setFormData={setFormData} />
+              <Field label="學號 / 單位" value={user.student_id || ""} name="student_id" placeholder="110XXXXX" isEditing={isEditing} formData={formData} setFormData={setFormData} />
+              <Field label="系所" value={user.department || ""} name="department" placeholder="例如：資工系" isEditing={isEditing} formData={formData} setFormData={setFormData} />
             </div>
           </section>
 
@@ -136,8 +146,8 @@ export default function ProfileDetailsPage() {
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
             <div className="bg-surface/30 rounded-[2.5rem] p-4 md:p-10 border border-border/50">
-              <Field label="聯絡電話" value={user.phone || ""} name="phone" placeholder="09XX-XXX-XXX" />
-              <Field label="聯絡信箱" value={user.email || ""} name="email" placeholder="example@mail.com" />
+              <Field label="聯絡電話" value={user.phone || ""} name="phone" placeholder="09XX-XXX-XXX" isEditing={isEditing} formData={formData} setFormData={setFormData} />
+              <Field label="聯絡信箱" value={user.email || ""} name="email" placeholder="example@mail.com" isEditing={isEditing} formData={formData} setFormData={setFormData} />
             </div>
           </section>
 
@@ -149,8 +159,8 @@ export default function ProfileDetailsPage() {
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
             <div className="bg-surface/30 rounded-[2.5rem] p-4 md:p-10 border border-border/50">
-              <Field label="聯絡人姓名" value={user.emergency_contact_name || ""} name="emergency_contact_name" />
-              <Field label="聯絡人電話" value={user.emergency_contact_phone || ""} name="emergency_contact_phone" />
+              <Field label="聯絡人姓名" value={user.emergency_contact_name || ""} name="emergency_contact_name" isEditing={isEditing} formData={formData} setFormData={setFormData} />
+              <Field label="聯絡人電話" value={user.emergency_contact_phone || ""} name="emergency_contact_phone" isEditing={isEditing} formData={formData} setFormData={setFormData} />
             </div>
           </section>
         </div>
