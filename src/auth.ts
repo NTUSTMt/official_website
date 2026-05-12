@@ -7,6 +7,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     LineProvider({
       clientId: process.env.LINE_CLIENT_ID,
       clientSecret: process.env.LINE_CLIENT_SECRET,
+      checks: ["pkce", "none"], // 解決 InvalidCheck: state value could not be parsed 錯誤
       authorization: {
         params: {
           scope: "profile openid", // 如果您的 LINE Channel 有申請 Email，可以加上 email
