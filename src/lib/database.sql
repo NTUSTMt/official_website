@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS user_peaks (
   elevation INTEGER,
   climb_date DATE,
   note TEXT,
-  is_manual BOOLEAN DEFAULT true,
+  is_official BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

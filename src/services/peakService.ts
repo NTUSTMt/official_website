@@ -7,7 +7,7 @@ export interface UserPeak {
   elevation?: number;
   climb_date: string;
   note?: string;
-  is_manual: boolean;
+  is_official: boolean;
   created_at: string;
 }
 
