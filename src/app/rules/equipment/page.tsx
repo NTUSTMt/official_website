@@ -1,12 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import RulesLayout from "@/components/RulesLayout";
-import { rulesData } from "@/data/rules";
-import { rentalRules } from "@/data/equipment";
+import { rulesData, RuleCategory } from "@/data/rules";
+import { ruleService } from "@/services/ruleService";
 
 export default function EquipmentRulesPage() {
-  const data = rulesData.equipment;
+  const [data, setData] = useState<RuleCategory>(rulesData.equipment);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const result = await ruleService.getRuleCategory("equipment");
+        setData(result);
+      } catch (err) {
+        console.error("Failed to load equipment rules:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <RulesLayout>
+        <div className="flex items-center justify-center h-64 font-mono text-xs animate-pulse">
+          LOADING_EQUIPMENT_RULES...
+        </div>
+      </RulesLayout>
+    );
+  }
 
   return (
     <RulesLayout>
@@ -15,7 +40,7 @@ export default function EquipmentRulesPage() {
           <div className="flex items-center gap-4 mb-4">
             <span className="font-mono text-xs text-accent uppercase tracking-widest font-bold">Policy & Pricing</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display italic mb-6">租借規則與費用</h1>
+          <h1 className="text-4xl md:text-5xl font-display italic mb-6">{data.title}</h1>
           <p className="text-lg font-serif text-muted leading-relaxed">
             {data.description}
           </p>
@@ -23,7 +48,6 @@ export default function EquipmentRulesPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
-          {/* Rules Section */}
           <div className="lg:col-span-7 space-y-12">
             {data.sections.map((section, idx) => (
               <section key={idx} className="group">
@@ -48,7 +72,6 @@ export default function EquipmentRulesPage() {
             ))}
           </div>
 
-          {/* Pricing Matrix Section */}
           <div className="lg:col-span-5">
             <div className="sticky top-32 space-y-8">
               <div className="p-10 bg-accent text-white rounded-[3rem] shadow-2xl shadow-accent/20">

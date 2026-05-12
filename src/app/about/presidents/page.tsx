@@ -55,8 +55,8 @@ export default function PresidentsPage() {
                 </div>
 
                 {/* Members List - Horizontal Scroll on Mobile, Grid on Desktop */}
-                <div className="flex-1 w-full overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0">
-                  <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-w-max md:min-w-0 pb-6 md:pb-0">
+                <div className="flex-1 w-screen -mx-6 md:w-full md:mx-0 overflow-x-auto no-scrollbar">
+                  <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-6 md:px-0 min-w-max md:min-w-0 pb-6 md:pb-0">
                     {yearGroup.members.map((member, idx) => (
                       <div key={idx} className="w-[280px] md:w-full bg-surface border border-border p-6 group hover:border-accent transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md">
                         {/* Avatar Placeholder */}

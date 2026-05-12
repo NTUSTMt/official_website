@@ -2,74 +2,109 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import AdminLayout from "@/components/AdminLayout";
-import { ShieldCheck, Lock, ChevronRight } from "lucide-react";
+import { Lock, User, Mountain } from "lucide-react";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic: password is "admin123"
-    if (password === "admin123") {
-      localStorage.setItem("admin_auth", "true");
-      router.push("/admin");
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 3000);
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (res.ok) {
+        router.push("/admin");
+        router.refresh();
+      } else {
+        const data = await res.json();
+        setError(data.message || "登入失敗，請檢查帳密");
+      }
+    } catch (err) {
+      setError("連線錯誤，請稍後再試");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <AdminLayout>
-      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Background elements */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[100px] pointer-events-none"></div>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decoration */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none select-none flex items-center justify-center">
+        <Mountain className="w-[800px] h-[800px] rotate-12" />
+      </div>
 
-        <div className="w-full max-w-md bg-surface border border-border rounded-3xl p-8 relative z-10 shadow-2xl">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-display italic mb-2">Admin Panel</h1>
-            <p className="text-xs font-mono text-muted uppercase tracking-[0.2em]">NTUST Mountaineering Club</p>
+      <div className="w-full max-w-[400px] bg-surface border border-border p-10 rounded-[2.5rem] shadow-2xl relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-display italic text-foreground mb-2">Basecamp Login</h1>
+          <p className="text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Management_Portal_v2.0</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Username</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full bg-background border border-border px-12 py-3.5 rounded-xl text-sm outline-none focus:border-accent transition-all font-mono"
+                placeholder="ID_CREDENTIAL"
+                required
+              />
+            </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">
-                Access Code
-              </label>
-              <input
-                type="password"
+          <div className="space-y-2">
+            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
+              <input 
+                type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password..."
-                className={`w-full bg-background border ${error ? "border-red-500 focus:border-red-500" : "border-border focus:border-accent"} px-4 py-3 rounded-xl font-mono text-sm outline-none transition-colors`}
+                className="w-full bg-background border border-border px-12 py-3.5 rounded-xl text-sm outline-none focus:border-accent transition-all font-mono"
+                placeholder="••••••••"
+                required
               />
-              {error && (
-                <p className="text-red-500 text-[10px] font-mono mt-2 ml-1 animate-in fade-in">
-                  INCORRECT_ACCESS_CODE
-                </p>
-              )}
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-accent text-accent-foreground py-3 rounded-xl font-mono text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Authenticate</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </form>
-
-          <div className="mt-8 text-center border-t border-border pt-6">
-            <p className="text-[10px] font-mono text-muted/60">
-              Mock Environment. Password: admin123
-            </p>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-[10px] font-mono uppercase text-center animate-pulse">
+              [Error]: {error}
+            </div>
+          )}
+
+          <button 
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-foreground text-background py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.3em] hover:bg-accent hover:text-white transition-all duration-300 shadow-xl shadow-foreground/10"
+          >
+            {isLoading ? "AUTHENTICATING..." : "Enter_Basecamp"}
+          </button>
+        </form>
+
+        <div className="mt-12 pt-8 border-t border-border/50 text-center">
+          <p className="text-[9px] font-mono text-muted uppercase tracking-widest">
+            Restricted Access © {new Date().getFullYear()} NTUSTMC
+          </p>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

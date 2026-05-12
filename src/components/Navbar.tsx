@@ -50,9 +50,7 @@ export default function Navbar({ announcement }: NavbarProps) {
         className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between py-3">
-          {/* Logo or Brand could go here if needed, but keeping original layout */}
-          
+        <div className="flex items-center justify-between md:py-3">
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 w-full font-mono">
             {navigationConfig.map((item) => (
@@ -61,22 +59,49 @@ export default function Navbar({ announcement }: NavbarProps) {
           </div>
 
           {/* Mobile Navigation Placeholder / Toggle */}
-          <div className="md:hidden flex items-center justify-between w-full font-mono overflow-x-auto no-scrollbar">
+          <div className="md:hidden flex flex-col w-full">
+            <div className="flex items-center w-screen -mx-4 overflow-x-auto no-scrollbar border-b border-border/50 py-2">
+              <div className="flex items-center px-4 font-mono">
+                {navigationConfig.map((item) => (
+                  <NavItemMobile 
+                    key={item.href} 
+                    item={item} 
+                    active={pathname.startsWith(item.href) && (item.href !== "/" || pathname === "/")}
+                    expanded={expandedItems.includes(item.href)}
+                    onToggle={(e) => {
+                      setExpandedItems(prev => prev.includes(item.href) ? [] : [item.href]);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Secondary Row for Sub-items */}
             {navigationConfig.map((item) => (
-              <NavItemMobile 
-                key={item.href} 
-                item={item} 
-                active={pathname.startsWith(item.href) && (item.href !== "/" || pathname === "/")}
-                expanded={expandedItems.includes(item.href)}
-                onToggle={(e) => toggleExpand(e, item.href)}
-              />
+              item.subItems && expandedItems.includes(item.href) && (
+                <div key={`sub-${item.href}`} className="w-screen -mx-4 bg-background/50 border-b border-border/30 overflow-x-auto no-scrollbar animate-in slide-in-from-top-1 duration-200">
+                  <div className="flex items-center px-6 py-2 gap-6 min-w-max">
+                    {item.subItems.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={`text-[11px] font-mono whitespace-nowrap transition-colors ${
+                          pathname === sub.href ? "text-accent font-bold" : "text-muted hover:text-accent"
+                        }`}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )
             ))}
           </div>
         </div>
       </div>
       </nav>
       {announcement?.enabled && (
-        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20">
+        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20 shadow-sm">
           <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
             {announcement.text} →
           </Link>
@@ -136,44 +161,33 @@ function NavItemMobile({
   expanded: boolean,
   onToggle: (e: React.MouseEvent) => void
 }) {
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+
+  const content = (
+    <div className={`flex items-center gap-1 cursor-pointer transition-all px-3 py-2 border-b-2 whitespace-nowrap text-center ${
+      active 
+        ? "border-accent text-accent font-bold" 
+        : "border-transparent text-muted hover:text-foreground"
+    }`}>
+      <span className="text-[12px] font-bold tracking-[0.05em]">{item.label}</span>
+      {hasSubItems && (
+        <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      )}
+    </div>
+  );
+
   return (
     <div className="relative flex-shrink-0">
-      <div className="flex items-center">
-        <Link 
-          href={item.href}
-          className={`cursor-pointer transition-all px-3 py-1 border-b-2 whitespace-nowrap text-center ${
-            active 
-              ? "border-accent text-accent font-bold" 
-              : "border-transparent text-muted hover:text-foreground"
-          }`}
-        >
-          <span className="text-[12px] font-bold tracking-[0.05em]">{item.label}</span>
-        </Link>
-        {item.subItems && (
-          <button 
-            onClick={onToggle}
-            className="p-1 text-muted hover:text-accent transition-colors border-b-2 border-transparent"
-          >
-            <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Mobile Submenu Dropdown */}
-      {item.subItems && expanded && (
-        <div className="absolute top-full left-0 min-w-[160px] bg-surface border border-border shadow-xl py-2 z-[60] rounded-xl overflow-hidden mt-1">
-          {item.subItems.map((sub) => (
-            <Link
-              key={sub.href}
-              href={sub.href}
-              className="block px-4 py-2 text-[11px] text-muted hover:text-accent hover:bg-background border-l-4 border-transparent hover:border-accent"
-            >
-              {sub.label}
-            </Link>
-          ))}
+      {hasSubItems ? (
+        <div onClick={onToggle}>
+          {content}
         </div>
+      ) : (
+        <Link href={item.href}>
+          {content}
+        </Link>
       )}
     </div>
   );

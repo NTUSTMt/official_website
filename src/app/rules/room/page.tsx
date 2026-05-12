@@ -1,11 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import RulesLayout from "@/components/RulesLayout";
-import { rulesData } from "@/data/rules";
+import { rulesData, RuleCategory } from "@/data/rules";
+import { ruleService } from "@/services/ruleService";
 
 export default function RoomRulesPage() {
-  const data = rulesData.room;
+  const [data, setData] = useState<RuleCategory>(rulesData.room);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const result = await ruleService.getRuleCategory("room");
+        setData(result);
+      } catch (err) {
+        console.error("Failed to load room rules:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <RulesLayout>
+        <div className="flex items-center justify-center h-64 font-mono text-xs animate-pulse">
+          LOADING_ROOM_RULES...
+        </div>
+      </RulesLayout>
+    );
+  }
 
   return (
     <RulesLayout>
@@ -44,7 +70,7 @@ export default function RoomRulesPage() {
 
         <footer className="mt-20 pt-12 border-t border-border">
           <p className="text-xs font-mono text-muted/40 uppercase tracking-[0.2em]">
-            Last Updated: 2024.05.12
+            Last Updated: {new Date().toLocaleDateString('zh-TW')}
           </p>
         </footer>
       </div>

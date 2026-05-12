@@ -51,6 +51,7 @@ export const navigationConfig: NavItem[] = [
     subItems: [
       { label: "個人簡介", href: "/profile" },
       { label: "詳細資料", href: "/profile/details" },
+      { label: "山岳足跡", href: "/profile/peaks" },
       { label: "出團紀錄", href: "/profile/events" },
       { label: "租借紀錄", href: "/profile/equipment" },
     ]

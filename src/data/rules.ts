@@ -162,5 +162,18 @@ export const rulesData: Record<string, RuleCategory> = {
         ]
       }
     ]
+  },
+  constitution: {
+    id: "constitution",
+    title: "組織章程",
+    description: "台科大登山社的最高指導原則與運作架構。",
+    sections: [
+      {
+        title: "Google 文件連結",
+        content: [
+          "https://docs.google.com/document/d/e/2PACX-1vT5K7_O-MhX9Wq_V5G5X9Y5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z/pub"
+        ]
+      }
+    ]
   }
 };

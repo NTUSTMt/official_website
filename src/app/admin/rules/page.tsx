@@ -166,64 +166,102 @@ export default function AdminRulesPage() {
                   <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-emerald-500 pl-3">Content_Sections</h3>
                   <p className="text-[10px] text-muted font-mono mt-1">MANAGE_PARAGRAPHS_AND_LISTS</p>
                 </div>
-                <button 
-                  onClick={addSection}
-                  className="px-4 py-2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center gap-2"
-                >
-                  <Plus className="w-3 h-3" />
-                  Add Section
-                </button>
+                {activeTab !== "constitution" && (
+                  <button 
+                    onClick={addSection}
+                    className="px-4 py-2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Section
+                  </button>
+                )}
               </div>
 
               <div className="space-y-6">
-                {data.sections.map((section, idx) => (
-                  <div key={idx} className="bg-surface border border-border rounded-3xl p-8 shadow-sm group hover:border-accent/30 transition-all relative">
-                    {/* Controls */}
-                    <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => moveSection(idx, "up")} className="p-1.5 text-muted hover:text-foreground transition-colors"><ChevronUp className="w-4 h-4" /></button>
-                      <button onClick={() => moveSection(idx, "down")} className="p-1.5 text-muted hover:text-foreground transition-colors"><ChevronDown className="w-4 h-4" /></button>
-                      <div className="w-px h-4 bg-border mx-1"></div>
-                      <button 
-                        onClick={() => removeSection(idx)} 
-                        className="p-1.5 text-red-400 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
+                {activeTab === "constitution" ? (
+                  /* Simplified Editor for Constitution (Google Doc Link) */
+                  <div className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       <div className="md:col-span-1">
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-3">Section Title</label>
-                        <input 
-                          type="text" 
-                          value={section.title} 
-                          onChange={(e) => handleUpdateSection(idx, "title", e.target.value)}
-                          className="w-full bg-background border border-border px-4 py-2.5 rounded-xl font-serif font-bold text-sm outline-none focus:border-emerald-500"
-                        />
+                        <div className="flex items-center gap-3 mb-2">
+                          <FileText className="w-4 h-4 text-accent" />
+                          <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest">Document_Link</h3>
+                        </div>
+                        <p className="text-xs text-muted font-serif italic">請貼上 Google 文件的「發佈到網路」連結。</p>
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-3">
-                          List Items (One per line)
-                        </label>
-                        <textarea 
-                          value={section.content.join("\n")} 
-                          onChange={(e) => handleUpdateSection(idx, "content", e.target.value)}
-                          className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-emerald-500 leading-relaxed"
-                          rows={4}
-                          placeholder="每一行輸入一項說明..."
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-3">Google Doc URL</label>
+                        <input 
+                          type="text" 
+                          value={data.sections[0]?.content[0] || ""} 
+                          onChange={(e) => {
+                            const newSections = [{ title: "Google 文件連結", content: [e.target.value] }];
+                            setData({ ...data, sections: newSections });
+                          }}
+                          placeholder="https://docs.google.com/document/d/..."
+                          className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent"
                         />
+                        <div className="mt-4 p-4 bg-accent/5 rounded-xl border border-accent/10 flex gap-3">
+                          <AlertCircle className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-muted leading-relaxed font-serif">
+                            提示：若要嵌入顯示，建議使用 <strong>發佈到網路</strong> 的連結。
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  /* Standard Section Editor */
+                  data.sections.map((section, idx) => (
+                    <div key={idx} className="bg-surface border border-border rounded-3xl p-8 shadow-sm group hover:border-accent/30 transition-all relative">
+                      {/* Controls */}
+                      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => moveSection(idx, "up")} className="p-1.5 text-muted hover:text-foreground transition-colors"><ChevronUp className="w-4 h-4" /></button>
+                        <button onClick={() => moveSection(idx, "down")} className="p-1.5 text-muted hover:text-foreground transition-colors"><ChevronDown className="w-4 h-4" /></button>
+                        <div className="w-px h-4 bg-border mx-1"></div>
+                        <button 
+                          onClick={() => removeSection(idx)} 
+                          className="p-1.5 text-red-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="md:col-span-1">
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-3">Section Title</label>
+                          <input 
+                            type="text" 
+                            value={section.title} 
+                            onChange={(e) => handleUpdateSection(idx, "title", e.target.value)}
+                            className="w-full bg-background border border-border px-4 py-2.5 rounded-xl font-serif font-bold text-sm outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-3">
+                            List Items (One per line)
+                          </label>
+                          <textarea 
+                            value={section.content.join("\n")} 
+                            onChange={(e) => handleUpdateSection(idx, "content", e.target.value)}
+                            className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-emerald-500 leading-relaxed"
+                            rows={4}
+                            placeholder="每一行輸入一項說明..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
                 
-                {data.sections.length === 0 && (
+                {activeTab !== "constitution" && data.sections.length === 0 && (
                   <div className="py-20 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center text-muted/30">
                     <FileText className="w-12 h-12 mb-4 opacity-10" />
                     <p className="font-mono text-xs uppercase tracking-widest">No_Sections_Found</p>
                   </div>
                 )}
               </div>
+
             </div>
           </div>
         )}

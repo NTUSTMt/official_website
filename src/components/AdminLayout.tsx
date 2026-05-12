@@ -14,17 +14,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  // Mock Authentication Check
   useEffect(() => {
-    const isAuth = localStorage.getItem("admin_auth") === "true";
-    setIsAuthenticated(isAuth);
-    if (!isAuth && pathname !== "/admin/login") {
-      router.push("/admin/login");
-    }
+    // Check for auth cookie (simple check)
+    const checkAuth = async () => {
+      const isAuth = document.cookie.includes("admin_session=authenticated");
+      setIsAuthenticated(isAuth);
+      
+      if (!isAuth && !pathname.startsWith("/admin/login")) {
+        router.push("/admin/login");
+      }
+    };
+    
+    checkAuth();
   }, [pathname, router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_auth");
+  const handleLogout = async () => {
+    // Clear cookie and redirect
+    document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     router.push("/admin/login");
   };
 
@@ -32,13 +38,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: "全站內容 CMS", href: "/admin", icon: Globe },
     { label: "活動與報名", href: "/admin/events", icon: Tent },
     { label: "裝備與訂單", href: "/admin/equipment", icon: Package },
-    { label: "會員管理", href: "/admin/users", icon: Users },
+    { label: "會員管理中心", href: "/admin/users", icon: Users },
     { label: "規章制度", href: "/admin/rules", icon: FileText },
   ];
 
-  if (isAuthenticated === null) return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-xs text-muted">LOADING...</div>;
+  if (isAuthenticated === null && !pathname.startsWith("/admin/login")) {
+    return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-xs text-muted">AUTHENTICATING...</div>;
+  }
 
-  if (!isAuthenticated && pathname === "/admin/login") {
+  if (pathname.startsWith("/admin/login")) {
     return <>{children}</>;
   }
 
@@ -96,14 +104,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <h1 className="text-xl font-serif">
               {navItems.find(i => i.href === pathname)?.label || "Dashboard"}
             </h1>
-            <span className="px-2 py-1 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-md text-[9px] font-mono uppercase tracking-widest font-bold">
-              Mock Mode
-            </span>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-serif text-foreground">幹部管理員</div>
-              <div className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest">Active Session</div>
+              <div className="text-xs font-serif text-foreground">管理員</div>
+              <div className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest">Authenticated Session</div>
             </div>
             <div className="w-10 h-10 rounded-full bg-surface border-2 border-accent flex items-center justify-center font-mono text-xs font-bold text-accent">
               AD
@@ -129,7 +134,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             }`}
           >
             <item.icon className={`w-5 h-5 ${pathname === item.href ? "text-accent" : "text-muted"}`} />
-            <span className="text-[8px] font-mono uppercase tracking-widest">{item.label.split(" ")[0]}</span>
+            <span className="text-[8px] font-mono uppercase tracking-widest">{item.label.substring(0, 4)}</span>
           </Link>
         ))}
       </div>

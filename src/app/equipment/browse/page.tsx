@@ -168,28 +168,28 @@ export default function EquipmentBrowsePage() {
 
         {/* Sticky Checkout Bar */}
         {cartTotalItems > 0 && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl z-50">
-            <div className="bg-surface/80 backdrop-blur-xl border border-accent/30 p-6 rounded-[2.5rem] shadow-2xl flex items-center justify-between">
-              <div className="flex items-center gap-6 px-4">
-                <div className="relative">
-                  <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-lg">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-50">
+            <div className="bg-surface/80 backdrop-blur-xl border border-accent/30 p-3 md:p-6 rounded-[2.5rem] shadow-2xl flex items-center justify-between gap-2 md:gap-6">
+              <div className="flex items-center gap-3 md:gap-6 px-2 md:px-4 min-w-0">
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-lg text-lg md:text-xl">
                     🛒
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold border-2 border-surface">
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 md:w-6 md:h-6 bg-red-500 text-white text-[9px] md:text-[10px] flex items-center justify-center rounded-full font-bold border-2 border-surface">
                     {cartTotalItems}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">My Rental Cart</div>
-                  <div className="text-sm font-serif italic text-muted">已選擇 {state.items.length} 類裝備</div>
+                <div className="min-w-0">
+                  <div className="text-[9px] md:text-[10px] font-mono text-muted uppercase tracking-widest font-bold whitespace-nowrap overflow-hidden text-ellipsis">My Rental Cart</div>
+                  <div className="text-xs md:text-sm font-serif italic text-muted whitespace-nowrap overflow-hidden text-ellipsis">已選擇 {state.items.length} 類裝備</div>
                 </div>
               </div>
               
               <Link 
                 href="/equipment/cart"
-                className="px-10 py-4 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg"
+                className="flex-shrink-0 px-6 md:px-10 py-3 md:py-4 bg-accent text-white rounded-full font-mono text-[10px] md:text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg whitespace-nowrap"
               >
-                前往預約 →
+                前往預約 <span className="hidden sm:inline">→</span>
               </Link>
             </div>
           </div>

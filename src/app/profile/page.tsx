@@ -1,14 +1,60 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ProfileLayout from "@/components/ProfileLayout";
-import { mockUserProfile, mockExpeditions, mockRentals } from "@/data/profile";
+import { userService, UserProfile } from "@/services/userService";
+import { peakService } from "@/services/peakService";
 import Link from "next/link";
+import { Shield, Award, Calendar, Package, ChevronRight, User } from "lucide-react";
 
 export default function ProfilePage() {
-  const user = mockUserProfile;
-  const recentExpeditions = mockExpeditions.slice(0, 2);
-  const activeRentals = mockRentals.filter(r => r.status === "RENTING");
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [recentPeaks, setRecentPeaks] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const profile = await userService.getCurrentUser();
+        if (profile) {
+          setUser(profile);
+          const peaks = await peakService.getUserPeaks(profile.id);
+          setRecentPeaks(peaks.slice(0, 3));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <ProfileLayout>
+        <div className="p-20 text-center font-mono animate-pulse text-xs tracking-widest text-muted">
+          SYNCHRONIZING_PERSONAL_DATA...
+        </div>
+      </ProfileLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ProfileLayout>
+        <div className="p-20 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="text-center font-serif text-muted italic mb-8">
+            無法載入個人資料，請嘗試登入。
+          </div>
+          <Link 
+            href="/login" 
+            className="px-10 py-4 bg-accent text-white rounded-2xl font-mono text-[10px] uppercase tracking-[0.2em] font-bold hover:brightness-110 transition-all shadow-xl shadow-accent/20"
+          >
+            Go_to_Login
+          </Link>
+        </div>
+      </ProfileLayout>
+    );
+  }
 
   return (
     <ProfileLayout>
@@ -16,79 +62,101 @@ export default function ProfilePage() {
         <header className="flex flex-col md:flex-row items-center gap-10 mb-16">
           <div className="relative group">
             <div className="absolute inset-0 bg-accent rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <img 
-              src={user.avatar} 
-              alt={user.name}
-              className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-xl relative z-10"
-            />
+            <div className="w-40 h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt={user.real_name} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-16 h-16 text-accent" />
+              )}
+            </div>
+            <div className="absolute -bottom-2 right-4 z-20 px-3 py-1 bg-white border border-border rounded-full text-[9px] font-mono font-bold uppercase tracking-widest shadow-sm">
+              {user.membership_status}
+            </div>
           </div>
           <div className="text-center md:text-left">
-            <div className="font-mono text-xs text-accent mb-3 font-bold tracking-[0.3em] uppercase">
-              Club_Member {user.memberId}
+            <div className="font-mono text-[10px] text-accent mb-3 font-bold tracking-[0.3em] uppercase">
+              Club_Member {user.student_id || "ID_PENDING"}
             </div>
-            <h1 className="text-4xl md:text-5xl font-display italic mb-6">{user.name}</h1>
-            <p className="text-lg font-serif text-muted leading-relaxed max-w-xl">
-              {user.bio}
-            </p>
+            <h1 className="text-4xl md:text-5xl font-display italic mb-6">{user.real_name || user.nickname || "神秘社員"}</h1>
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
+              {user.skills?.map((skill, i) => (
+                <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Quick Stats/Links */}
+          {/* Recent Peaks */}
           <div className="p-10 bg-background border border-border rounded-[2.5rem] flex flex-col justify-between">
             <div>
-              <h3 className="text-xl font-display italic mb-6">近期出團</h3>
-              <div className="space-y-4">
-                {recentExpeditions.map(exp => (
-                  <div key={exp.id} className="flex items-center justify-between group cursor-default">
-                    <div>
-                      <div className="text-sm font-serif">{exp.title}</div>
-                      <div className="text-[10px] font-mono text-muted/60 uppercase">{exp.date}</div>
-                    </div>
-                    <span className={`text-[9px] font-mono px-2 py-1 rounded-full border ${
-                      exp.status === "ADMITTED" ? "border-emerald-500/30 text-emerald-600" : "border-amber-500/30 text-amber-600"
-                    }`}>
-                      {exp.status}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex items-center gap-3 mb-6">
+                <Award className="w-5 h-5 text-accent" />
+                <h3 className="text-xl font-display italic">近期足跡</h3>
               </div>
-            </div>
-            <Link href="/profile/events" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline">
-              查看全部紀錄 →
-            </Link>
-          </div>
-
-          <div className="p-10 bg-background border border-border rounded-[2.5rem] flex flex-col justify-between">
-            <div>
-              <h3 className="text-xl font-display italic mb-6">當前租借</h3>
-              <div className="space-y-4">
-                {activeRentals.length > 0 ? (
-                  activeRentals.map(rent => (
-                    <div key={rent.id}>
-                      <div className="text-sm font-serif">{rent.itemName}</div>
-                      <div className="text-[10px] font-mono text-muted/60 uppercase">還款日: {rent.endDate}</div>
+              <div className="space-y-6">
+                {recentPeaks.length > 0 ? (
+                  recentPeaks.map((peak, i) => (
+                    <div key={i} className="flex items-center justify-between group">
+                      <div>
+                        <div className="text-sm font-serif font-bold">{peak.peak_name}</div>
+                        <div className="text-[10px] font-mono text-muted/60 uppercase">{peak.climb_date}</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted/20 group-hover:text-accent transition-colors" />
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm font-serif text-muted italic">目前無進行中的租借。</p>
+                  <p className="text-sm font-serif text-muted italic">目前無山岳紀錄。</p>
                 )}
               </div>
             </div>
-            <Link href="/profile/equipment" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline">
-              查看租借歷史 →
+            <Link href="/profile/footprints" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline flex items-center gap-2">
+              查看全部紀錄 <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {/* Account Status */}
+          <div className="p-10 bg-background border border-border rounded-[2.5rem] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Shield className="w-5 h-5 text-accent" />
+                <h3 className="text-xl font-display italic">帳戶狀態</h3>
+              </div>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-serif text-muted">目前餘額</span>
+                  <span className={`font-mono text-sm font-bold ${user.balance < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                    ${user.balance}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-serif text-muted">社員身分</span>
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 bg-accent/5 rounded border border-accent/10">
+                    {user.membership_status}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Link href="/profile/details" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline flex items-center gap-2">
+              修改個人資料 <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
         </div>
 
         <section className="mt-16 p-10 bg-accent/5 border border-accent/20 rounded-[2.5rem]">
-          <h3 className="text-xl font-display italic mb-6">備賽小秘訣</h3>
-          <p className="text-sm font-serif text-muted leading-relaxed">
-            您目前的詳細資料填寫率為 85%。完成「詳細資料」中的保險相關資訊，可以讓您在下次報名百岳行程時，系統自動為您填寫入園申請與保險表單。
-          </p>
-          <Link href="/profile/details" className="inline-block mt-6 px-8 py-3 bg-accent text-white rounded-full font-mono text-[10px] uppercase tracking-widest hover:brightness-110 transition-all">
-            立即完善資料
-          </Link>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex-1">
+              <h3 className="text-xl font-display italic mb-4">完善緊急聯絡資訊</h3>
+              <p className="text-sm font-serif text-muted leading-relaxed">
+                填寫緊急聯絡人資訊是出隊的必要條件。完善後，系統在報名社團活動時會自動為您帶入資料，節省您的寶貴時間。
+              </p>
+            </div>
+            <Link href="/profile/details" className="px-8 py-3 bg-accent text-white rounded-full font-mono text-[10px] uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-accent/20 whitespace-nowrap">
+              前往填寫
+            </Link>
+          </div>
         </section>
       </div>
     </ProfileLayout>
