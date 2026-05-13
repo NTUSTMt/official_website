@@ -6,9 +6,12 @@
   - **排序功能**：後台新增「上下移動」功能，精確控制公告顯示順序。
 - **聯絡管道優化**：
   - **Email 介面簡化**：移除 Email 卡片的「前往連結」按鈕，使介面更專注於文字說明。
-  - **CMS 服務層重構**：統一 `cmsService` 介面，解決 `saveSemesterCalendars` 等 TypeScript 型別錯誤，確保行事曆與聯絡資訊管理穩定運作。
-
-### 聯絡管道管理與導覽強化 (Contact Management & Navigation)
+  - **後台架構與 TypeScript 修復**：
+    *   **服務層重構**：統一將 `getSemesterCalendars` 與 `saveSemesterCalendars` 歸納至 `cmsService`，修正了全站（包含 `admin/events` 與 `events/calendar`）因服務引用路徑錯誤導致的 TypeScript 編譯問題。
+    *   **資料遷移**：確保資料庫欄位同步至 `announcements`（JSONB），並實作自動降級機制以兼容舊資料。
+- **首頁 UI 優化**：
+    *   **透明導覽列**：實作了 Glassmorphism 效果，並讓導覽列在首頁初始位置時與 Hero 圖片重疊。
+    *   **視覺進入點**：首頁進入時導覽列對齊螢幕底部，且公告預設隱藏於螢幕下方，創造更乾淨的視覺開場。
 - **新增「聯絡我們管理」分頁**：後台新增專屬分頁，支援 LINE、Instagram、Facebook 及 Email 的動態管理。
   - **全方位管理**：可自定義各平台的連結、QR Code 上傳及功能說明，確保社團對外聯繫資訊即時更新。
 - **導覽列同步**：在主導覽列（Navbar）正式加入「聯絡我們」標籤，提升導覽的直覺性。

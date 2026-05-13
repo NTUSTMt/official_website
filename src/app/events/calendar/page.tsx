@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { historyService } from "@/services/cmsService";
+import { cmsService } from "@/services/cmsService";
 
 export default function CalendarPage() {
   const [calendars, setCalendars] = useState<any[]>([]);
@@ -11,7 +11,7 @@ export default function CalendarPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const dbCalendars = await historyService.getSemesterCalendars();
+        const dbCalendars = await cmsService.getSemesterCalendars();
         setCalendars(dbCalendars);
       } catch (error) {
         console.error("Error fetching calendars:", error);
