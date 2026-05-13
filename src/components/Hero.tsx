@@ -11,9 +11,6 @@ export default function Hero() {
         }}
       />
       
-      {/* Overlay to ensure text legibility */}
-      <div className="absolute inset-0 bg-black/10 z-10" />
-      
       <div className="relative z-20 text-center px-4 hero-text-shadow max-w-4xl">
         <h1 className="flex flex-col items-center">
           <span className="text-5xl md:text-8xl font-display leading-[1.1] tracking-tighter mb-4 italic text-white uppercase drop-shadow-2xl">
