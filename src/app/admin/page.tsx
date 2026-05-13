@@ -6,13 +6,14 @@ import { mockCMSConfig } from "@/data/cms";
 import { historyData, introductionContent } from "@/data/history";
 import { committeeData } from "@/data/committee";
 import { historyService, cmsService } from "@/services/cmsService";
+import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAction, saveCmsConfigAction } from "./cms-actions";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X } from "lucide-react";
 
-type Tab = "GENERAL" | "ABOUT" | "LEADERSHIP" | "ROLES" | "LEVELS";
+type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS";
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("GENERAL");
+  const [activeTab, setActiveTab] = useState<Tab>("HOMEPAGE");
   const [config, setConfig] = useState(mockCMSConfig);
   const [history, setHistory] = useState(historyData);
   const [intro, setIntro] = useState(introductionContent);
@@ -90,36 +91,24 @@ export default function AdminDashboardPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      if (activeTab === "GENERAL") {
-        await cmsService.updateConfig(config);
-      } else if (activeTab === "ABOUT") {
-        await historyService.saveMilestones(history);
-        
-        // Save About Intro
+      if (activeTab === "GENERAL" || activeTab === "HOMEPAGE") {
+        await updateGlobalConfigAction(config);
+      } else if (activeTab === "ABOUT_CMS") {
+        // 儲存關於山社的所有內容
+        await saveHistoryMilestonesAction(history);
         if (isSupabaseConfigured) {
-          const { error: introError } = await supabase
-            .from("cms_config")
-            .upsert({
-              id: "about_intro",
-              content: intro,
-              updated_at: new Date().toISOString()
-            });
-          if (introError) throw introError;
+          await saveCmsConfigAction("about_intro", intro);
+          await saveCmsConfigAction("committee_roles", rolesData);
         }
       } else if (activeTab === "LEADERSHIP") {
-        // Save Committee Data
+        // 儲存歷任幹部
         if (isSupabaseConfigured) {
-          await historyService.saveCommittees(committees);
-        }
-      } else if (activeTab === "ROLES") {
-        // Save Committee Roles
-        if (isSupabaseConfigured) {
-          await historyService.saveCommitteeRoles(rolesData);
+          await saveCommitteesAction(committees);
         }
       } else if (activeTab === "LEVELS") {
         // Save Activity Levels
         if (isSupabaseConfigured) {
-          await historyService.saveActivityLevels(levels);
+          await saveCmsConfigAction("activity_levels", levels);
         }
       }
       alert("儲存成功！資料已同步至 Supabase。");
@@ -244,12 +233,87 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex border-b border-border mb-10 overflow-x-auto">
-            <TabButton id="GENERAL" label="一般參數設定" activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton id="ABOUT" label="關於我們 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="HOMEPAGE" label="首頁內容 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="ABOUT_CMS" label="關於山社 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEADERSHIP" label="歷任幹部管理" activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton id="ROLES" label="職責說明 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEVELS" label="活動分級 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="GENERAL" label="一般參數設定" activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
+
+          {activeTab === "HOMEPAGE" && (
+            <div className="space-y-12">
+              {/* Hero Section Management */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="首頁標題 (Hero Section)" subtitle="網站第一眼見到的內容" />
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">大標題 (Site Name / Hero Title)</label>
+                    <input 
+                      type="text" 
+                      value={config.siteName} 
+                      onChange={(e) => handleChange("", "siteName", e.target.value)}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-display italic text-lg outline-none focus:border-accent transition-colors"
+                      placeholder="輸入大標題..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">副標題 (Hero Subtitle)</label>
+                    <textarea 
+                      value={config.heroSubtext} 
+                      onChange={(e) => handleChange("", "heroSubtext", e.target.value)}
+                      rows={2}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
+                      placeholder="輸入副標題..."
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Introduction Management */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="首頁簡介 (Introduction)" subtitle="首頁核心介紹區塊" />
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">簡介內文 (Support newline)</label>
+                    <textarea 
+                      value={config.introduction} 
+                      onChange={(e) => handleChange("", "introduction", e.target.value)}
+                      rows={10}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors leading-relaxed"
+                      placeholder="輸入首頁簡介內容..."
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Slogan Management */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="首頁標語 (Slogan)" subtitle="首頁哲學/引用句" />
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">標語內容</label>
+                    <input 
+                      type="text" 
+                      value={config.slogan} 
+                      onChange={(e) => handleChange("", "slogan", e.target.value)}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
+                      placeholder="輸入標語..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">標語標籤 (Slogan Label)</label>
+                    <input 
+                      type="text" 
+                      value={config.sloganLabel} 
+                      onChange={(e) => handleChange("", "sloganLabel", e.target.value)}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-xs outline-none focus:border-accent transition-colors"
+                      placeholder="例如: Wilderness_Philosophy"
+                    />
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
 
           {activeTab === "GENERAL" && (
             <div className="space-y-12">
@@ -327,49 +391,14 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {activeTab === "ABOUT" && (
+          {activeTab === "ABOUT_CMS" && (
             <div className="space-y-12">
-              {/* Introduction Management */}
-              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <SectionHeader title="關於我們簡介" subtitle="網站簡介內容" />
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Quote (引用金句)</label>
-                    <input 
-                      type="text" 
-                      value={intro.quote} 
-                      onChange={(e) => setIntro(prev => ({ ...prev, quote: e.target.value }))}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Introduction Paragraphs (介紹內文，每行一個段落)</label>
-                    <textarea 
-                      value={intro.paragraphs.join("\n\n")} 
-                      onChange={(e) => setIntro(prev => ({ ...prev, paragraphs: e.target.value.split("\n\n").filter(p => p.trim() !== "") }))}
-                      rows={8}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors leading-relaxed"
-                      placeholder="輸入社團介紹內文..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Core Values (核心價值，每行一個)</label>
-                    <textarea 
-                      value={intro.coreValues.join("\n")} 
-                      onChange={(e) => setIntro(prev => ({ ...prev, coreValues: e.target.value.split("\n").filter(v => v.trim() !== "") }))}
-                      rows={4}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* History Management */}
+              {/* 1. 社團簡史與傳承 (History Management) */}
               <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
                 <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
                   <div>
-                    <h2 className="text-xl font-display italic text-foreground mb-1">歷史時光軸</h2>
-                    <p className="text-xs font-mono text-muted uppercase tracking-widest">歷史大事記管理</p>
+                    <h2 className="text-xl font-display italic text-foreground mb-1">社團簡史與傳承</h2>
+                    <p className="text-xs font-mono text-muted uppercase tracking-widest">歷史大事記與里程碑管理</p>
                   </div>
                   <button 
                     onClick={() => setHistory(prev => [...prev, { year: "New", title: "New Milestone", content: "" }])}
@@ -393,7 +422,7 @@ export default function AdminDashboardPage() {
                                 setHistory(newHistory);
                               }}
                               className="sm:col-span-1 bg-surface border border-border px-3 py-2 rounded-lg text-xs font-mono" 
-                              placeholder="Year" 
+                              placeholder="年份" 
                             />
                             <input 
                               type="text" 
@@ -404,7 +433,7 @@ export default function AdminDashboardPage() {
                                 setHistory(newHistory);
                               }}
                               className="sm:col-span-3 bg-surface border border-border px-3 py-2 rounded-lg text-sm font-serif font-bold" 
-                              placeholder="Title" 
+                              placeholder="標題" 
                             />
                           </div>
                           <textarea 
@@ -416,7 +445,7 @@ export default function AdminDashboardPage() {
                             }}
                             rows={2} 
                             className="w-full bg-surface border border-border px-3 py-2 rounded-lg text-xs font-serif text-muted" 
-                            placeholder="Content Description" 
+                            placeholder="內容描述" 
                           />
                         </div>
                         <button 
@@ -430,202 +459,53 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
               </section>
-            </div>
-          )}
 
-          {activeTab === "LEADERSHIP" && (
-            <div className="space-y-12">
-              {/* Committee Management */}
+              {/* 2. 社團特色與簡介 (Introduction Management) */}
               <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
+                <SectionHeader title="社團特色與簡介" subtitle="關於山社的詳細介紹內容" />
+                <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-display italic text-foreground mb-1">歷任幹部管理</h2>
-                    <p className="text-xs font-mono text-muted uppercase tracking-widest">歷任幹部資料庫管理</p>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">金句引用 (Quote)</label>
+                    <input 
+                      type="text" 
+                      value={intro.quote} 
+                      onChange={(e) => setIntro(prev => ({ ...prev, quote: e.target.value }))}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
+                      placeholder="輸入引言..."
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => {
-                        if (confirm("這將會從程式碼中載入原始的歷屆幹部資料（46 年份），這會覆蓋您目前在畫面上的編輯內容，確定嗎？")) {
-                          setCommittees(committeeData);
-                        }
-                      }}
-                      className="px-4 py-2 bg-muted/10 text-muted border border-border rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-muted/20 transition-all"
-                    >
-                      匯入靜態資料
-                    </button>
-                    <button 
-                      onClick={() => setCommittees(prev => [{ year: "114", members: [] }, ...prev])}
-                      className="px-4 py-2 bg-accent/10 text-accent border border-accent/20 rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-accent/20 transition-all"
-                    >
-                      + 新增學年度
-                    </button>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">介紹內文 (多段落請空一行)</label>
+                    <textarea 
+                      value={intro.paragraphs.join("\n\n")} 
+                      onChange={(e) => setIntro(prev => ({ ...prev, paragraphs: e.target.value.split("\n\n").filter(p => p.trim() !== "") }))}
+                      rows={8}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors leading-relaxed"
+                      placeholder="輸入社團介紹內文..."
+                    />
                   </div>
-                </div>
-                
-                <div className="space-y-12">
-                  {committees.map((yearGroup, yIdx) => (
-                    <div key={yIdx} className="p-8 bg-background border border-border rounded-2xl relative group/year">
-                      <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center gap-4">
-                          <input 
-                            type="text" 
-                            value={yearGroup.year} 
-                            onChange={(e) => {
-                              const newCommittees = [...committees];
-                              newCommittees[yIdx].year = e.target.value;
-                              setCommittees(newCommittees);
-                            }}
-                            className="bg-surface border border-border px-4 py-2 rounded-xl text-xl font-display italic w-32"
-                            placeholder="Year"
-                          />
-                          <span className="text-sm font-serif text-muted">學年度</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => {
-                              const newCommittees = [...committees];
-                              newCommittees[yIdx].members.push({ name: "", role: "社長", dept: "", intro: "", avatar: "" });
-                              setCommittees(newCommittees);
-                            }}
-                            className="px-3 py-1.5 bg-accent/5 text-accent border border-accent/10 rounded-lg text-[9px] font-mono uppercase tracking-tighter hover:bg-accent/10"
-                          >
-                            + 新增成員
-                          </button>
-                          <button 
-                            onClick={() => setCommittees(prev => prev.filter((_, i) => i !== yIdx))}
-                            className="p-1.5 text-red-400 hover:text-red-600 border border-transparent hover:border-red-100 rounded-lg transition-all"
-                          >
-                            <AlertTriangle className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {yearGroup.members.map((member, mIdx) => (
-                          <div key={mIdx} className="p-5 bg-surface border border-border rounded-xl relative group/member hover:border-accent/30 transition-all">
-                            <button 
-                              onClick={() => {
-                                const newCommittees = [...committees];
-                                newCommittees[yIdx].members = newCommittees[yIdx].members.filter((_, i) => i !== mIdx);
-                                setCommittees(newCommittees);
-                              }}
-                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center opacity-0 group-member/member:opacity-100 hover:bg-red-500 hover:text-white transition-all text-[10px] border border-red-100"
-                            >
-                              ×
-                            </button>
-                            
-                            <div className="flex gap-4 items-start">
-                              {/* Avatar Upload/Preview */}
-                              <div className="w-16 h-16 bg-background border border-border rounded-full overflow-hidden flex-shrink-0 relative group/avatar">
-                                {member.avatar ? (
-                                  <img src={member.avatar} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-muted/20">
-                                    <ImageIcon className="w-6 h-6" />
-                                  </div>
-                                )}
-                                <label className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                  <Upload className="w-4 h-4 text-white" />
-                                  <input 
-                                    type="file" 
-                                    className="sr-only" 
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) handleFileUpload(yIdx, mIdx, file);
-                                    }}
-                                  />
-                                </label>
-                                {member.avatar && (
-                                  <button 
-                                    onClick={() => {
-                                      const newCommittees = [...committees];
-                                      newCommittees[yIdx].members[mIdx].avatar = "";
-                                      setCommittees(newCommittees);
-                                    }}
-                                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
-
-                              <div className="flex-1 space-y-4">
-                                <div className="flex gap-2">
-                                  <input 
-                                    type="text" 
-                                    value={member.role} 
-                                    onChange={(e) => {
-                                      const newCommittees = [...committees];
-                                      newCommittees[yIdx].members[mIdx].role = e.target.value;
-                                      setCommittees(newCommittees);
-                                    }}
-                                    className="w-1/3 bg-background border border-border px-2 py-1.5 rounded-lg text-[10px] font-mono text-accent uppercase font-bold"
-                                    placeholder="Role"
-                                  />
-                                  <input 
-                                    type="text" 
-                                    value={member.name} 
-                                    onChange={(e) => {
-                                      const newCommittees = [...committees];
-                                      newCommittees[yIdx].members[mIdx].name = e.target.value;
-                                      setCommittees(newCommittees);
-                                    }}
-                                    className="flex-1 bg-background border border-border px-2 py-1.5 rounded-lg text-sm font-display italic"
-                                    placeholder="Name"
-                                  />
-                                </div>
-                                <input 
-                                  type="text" 
-                                  value={member.dept} 
-                                  onChange={(e) => {
-                                    const newCommittees = [...committees];
-                                    newCommittees[yIdx].members[mIdx].dept = e.target.value;
-                                    setCommittees(newCommittees);
-                                  }}
-                                  className="w-full bg-background border border-border px-2 py-1.5 rounded-lg text-[10px] font-mono text-muted uppercase"
-                                  placeholder="Department (e.g. 四營建三)"
-                                />
-                              </div>
-                            </div>
-                            
-                            <textarea 
-                              value={member.intro} 
-                              onChange={(e) => {
-                                const newCommittees = [...committees];
-                                newCommittees[yIdx].members[mIdx].intro = e.target.value;
-                                setCommittees(newCommittees);
-                              }}
-                              className="w-full bg-background border border-border px-2 py-1.5 rounded-lg text-xs font-serif text-muted italic mt-4"
-                              placeholder="Introduction Quote"
-                              rows={2}
-                            />
-                          </div>
-                        ))}
-                        {yearGroup.members.length === 0 && (
-                          <div className="col-span-full py-8 border-2 border-dashed border-border rounded-xl flex items-center justify-center text-muted/30 text-xs font-mono uppercase">
-                            尚無成員資料
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">核心價值 (每行一個)</label>
+                    <textarea 
+                      value={intro.coreValues.join("\n")} 
+                      onChange={(e) => setIntro(prev => ({ ...prev, coreValues: e.target.value.split("\n").filter(v => v.trim() !== "") }))}
+                      rows={4}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
+                      placeholder="輸入核心價值..."
+                    />
+                  </div>
                 </div>
               </section>
-            </div>
-          )}
 
-          {activeTab === "ROLES" && (
-            <div className="space-y-12">
-              {/* Roles & Responsibilities Management */}
+              {/* 3. 關於幹部與職責 (Roles & Committee Management) */}
               <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <SectionHeader title="幹部職責說明管理" subtitle="職責與任務說明管理" />
+                <SectionHeader title="關於幹部與職責" subtitle="幹部分工說明與歷任名單管理" />
                 
                 <div className="space-y-12">
                   {/* Individual Roles */}
                   <div>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">幹部分工 (Individual Roles)</h3>
+                      <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">各職位說明</h3>
                       <button 
                         onClick={() => setRolesData(prev => ({ ...prev, roles: [...prev.roles, { title: "", description: "" }] }))}
                         className="text-[10px] font-mono text-accent hover:underline"
@@ -646,7 +526,7 @@ export default function AdminDashboardPage() {
                                 setRolesData(prev => ({ ...prev, roles: newRoles }));
                               }}
                               className="bg-surface border border-border px-3 py-1 rounded text-xs font-bold text-accent"
-                              placeholder="Role Title"
+                              placeholder="職位名稱"
                             />
                             <button onClick={() => setRolesData(prev => ({ ...prev, roles: prev.roles.filter((_, i) => i !== idx) }))} className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                               <X className="w-3 h-3" />
@@ -660,7 +540,7 @@ export default function AdminDashboardPage() {
                               setRolesData(prev => ({ ...prev, roles: newRoles }));
                             }}
                             className="w-full bg-surface border border-border px-3 py-2 rounded text-xs font-serif text-muted"
-                            placeholder="Role Description"
+                            placeholder="職責描述"
                             rows={2}
                           />
                         </div>
@@ -670,7 +550,7 @@ export default function AdminDashboardPage() {
 
                   {/* Common Responsibilities */}
                   <div>
-                    <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3 mb-6">幹部共同職責 (Shared Duties)</h3>
+                    <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3 mb-6">幹部共同職責</h3>
                     <textarea 
                       value={rolesData.commonResponsibilities.join("\n")} 
                       onChange={(e) => setRolesData(prev => ({ ...prev, commonResponsibilities: e.target.value.split("\n").filter(l => l.trim() !== "") }))}
@@ -683,7 +563,7 @@ export default function AdminDashboardPage() {
                   {/* Mountain Duties */}
                   <div>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">上山後的工作 (Mountain Duties)</h3>
+                      <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">上山後的工作</h3>
                       <button 
                         onClick={() => setRolesData(prev => ({ ...prev, mountainDuties: [...prev.mountainDuties, { title: "", description: "" }] }))}
                         className="text-[10px] font-mono text-accent hover:underline"
@@ -704,7 +584,7 @@ export default function AdminDashboardPage() {
                                 setRolesData(prev => ({ ...prev, mountainDuties: newDuties }));
                               }}
                               className="bg-surface border border-border px-3 py-1 rounded text-xs font-bold text-emerald-600"
-                              placeholder="Duty Title"
+                              placeholder="任務名稱"
                             />
                             <button onClick={() => setRolesData(prev => ({ ...prev, mountainDuties: prev.mountainDuties.filter((_, i) => i !== idx) }))} className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                               <X className="w-3 h-3" />
@@ -718,7 +598,7 @@ export default function AdminDashboardPage() {
                               setRolesData(prev => ({ ...prev, mountainDuties: newDuties }));
                             }}
                             className="w-full bg-surface border border-border px-3 py-2 rounded text-xs font-serif text-muted"
-                            placeholder="Duty Description"
+                            placeholder="任務描述"
                             rows={2}
                           />
                         </div>
@@ -727,6 +607,211 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               </section>
+            </div>
+          )}
+
+          {activeTab === "LEADERSHIP" && (
+            <div className="space-y-20">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h2 className="text-2xl font-display italic text-foreground">歷任幹部名單管理</h2>
+                  <p className="text-[10px] font-mono text-muted uppercase tracking-widest mt-1">Historical Leadership Management</p>
+                </div>
+                <button 
+                  onClick={() => setCommittees(prev => [{ year: "114", members: [] }, ...prev])}
+                  className="px-6 py-3 bg-accent text-white rounded-full text-xs font-mono uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-accent/20"
+                >
+                  + 新增學年度
+                </button>
+              </div>
+
+              <div className="space-y-16">
+                {[...committees].sort((a, b) => b.year.localeCompare(a.year, undefined, { numeric: true })).map((yearGroup, yIdx) => {
+                  // Find the original index in the source state to update correctly
+                  const originalYIdx = committees.findIndex(c => c.year === yearGroup.year);
+                  
+                  return (
+                    <div key={yearGroup.year} className="relative group/year">
+                      <div className="flex flex-col md:flex-row gap-8 items-start">
+                        {/* Year Display & Input - Scaled Down */}
+                        <div className="md:sticky md:top-32 flex-shrink-0 flex flex-col items-center group/year-input">
+                          <div className="flex items-baseline gap-2">
+                            <input 
+                              type="text" 
+                              value={yearGroup.year} 
+                              onChange={(e) => {
+                                const newCommittees = [...committees];
+                                newCommittees[originalYIdx].year = e.target.value;
+                                setCommittees(newCommittees);
+                              }}
+                              className="bg-transparent border border-transparent hover:border-border/50 rounded-xl px-2 py-1 text-3xl md:text-5xl font-display italic text-foreground w-20 outline-none focus:ring-0 leading-none text-right transition-all"
+                              placeholder="114"
+                            />
+                            <span className="text-[9px] font-mono text-muted uppercase tracking-[0.2em] [writing-mode:vertical-rl] h-fit border-l border-border pl-1.5 py-1">學年度</span>
+                          </div>
+                          
+                          {/* Delete Year Button - Moved below */}
+                          <button 
+                            onClick={() => setCommittees(prev => prev.filter((_, i) => i !== originalYIdx))}
+                            className="mt-4 p-2 text-red-400 hover:text-red-600 opacity-0 group-hover/year:opacity-100 transition-all flex items-center gap-1.5 text-[8px] font-mono uppercase tracking-tighter border border-transparent hover:border-red-100 rounded-lg"
+                          >
+                            <AlertTriangle className="w-3 h-3" /> 刪除年度
+                          </button>
+                        </div>
+
+                        {/* Members Grid - Horizontal Scroll */}
+                        <div className="flex-1 w-full overflow-x-auto no-scrollbar">
+                          <div className="flex gap-6 pb-6">
+                            {yearGroup.members.map((member, mIdx) => (
+                              <div key={mIdx} className="w-[240px] md:w-[280px] flex-shrink-0 bg-surface/50 border border-border p-6 group/member hover:border-accent hover:bg-white transition-all duration-500 rounded-[2rem] shadow-sm hover:shadow-lg relative flex flex-col items-center">
+                                {/* Member Management Bar */}
+                                <div className="absolute top-4 left-4 right-4 flex justify-between items-center opacity-0 group-hover/member:opacity-100 transition-all z-20">
+                                  <div className="flex gap-1">
+                                    <button 
+                                      onClick={() => {
+                                        if (mIdx === 0) return;
+                                        const newCommittees = [...committees];
+                                        const members = [...newCommittees[originalYIdx].members];
+                                        [members[mIdx-1], members[mIdx]] = [members[mIdx], members[mIdx-1]];
+                                        newCommittees[originalYIdx].members = members;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      disabled={mIdx === 0}
+                                      className="w-6 h-6 bg-white border border-border rounded-full flex items-center justify-center text-muted hover:text-accent hover:border-accent disabled:opacity-30 text-[10px] font-mono"
+                                    >
+                                      &lt;
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        if (mIdx === yearGroup.members.length - 1) return;
+                                        const newCommittees = [...committees];
+                                        const members = [...newCommittees[originalYIdx].members];
+                                        [members[mIdx], members[mIdx+1]] = [members[mIdx+1], members[mIdx]];
+                                        newCommittees[originalYIdx].members = members;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      disabled={mIdx === yearGroup.members.length - 1}
+                                      className="w-6 h-6 bg-white border border-border rounded-full flex items-center justify-center text-muted hover:text-accent hover:border-accent disabled:opacity-30 text-[10px] font-mono"
+                                    >
+                                      &gt;
+                                    </button>
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      const newCommittees = [...committees];
+                                      newCommittees[originalYIdx].members = newCommittees[originalYIdx].members.filter((_, i) => i !== mIdx);
+                                      setCommittees(newCommittees);
+                                    }}
+                                    className="w-6 h-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all text-xs border border-red-100"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+
+                                {/* Avatar Section - Scaled Down */}
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-background border border-border rounded-full overflow-hidden flex-shrink-0 relative group/avatar mb-6 shadow-inner mt-4">
+                                  {member.avatar ? (
+                                    <img src={member.avatar} alt="Preview" className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-500" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-muted/20">
+                                      <ImageIcon className="w-8 h-8" />
+                                    </div>
+                                  )}
+                                  <label className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10">
+                                    <Upload className="w-4 h-4 text-white" />
+                                    <input 
+                                      type="file" 
+                                      className="hidden" 
+                                      accept="image/*"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleFileUpload(originalYIdx, mIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+
+                                {/* Info Section */}
+                                <div className="w-full space-y-3 text-center px-2">
+                                  <div className="space-y-1">
+                                    {/* Role Input */}
+                                    <input 
+                                      type="text" 
+                                      value={member.role} 
+                                      onChange={(e) => {
+                                        const newCommittees = [...committees];
+                                        newCommittees[originalYIdx].members[mIdx].role = e.target.value;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      className="w-full bg-transparent border border-transparent hover:border-border/50 rounded-lg p-1 text-[9px] font-mono text-accent uppercase tracking-[0.2em] font-bold text-center focus:ring-0 transition-all"
+                                      placeholder="職稱"
+                                    />
+                                    {/* Name Input */}
+                                    <input 
+                                      type="text" 
+                                      value={member.name} 
+                                      onChange={(e) => {
+                                        const newCommittees = [...committees];
+                                        newCommittees[originalYIdx].members[mIdx].name = e.target.value;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      className="w-full bg-transparent border border-transparent hover:border-border/50 rounded-lg p-1 text-xl md:text-2xl font-display italic tracking-tight text-center focus:ring-0 transition-all"
+                                      placeholder="姓名"
+                                    />
+                                    {/* Dept Input */}
+                                    <input 
+                                      type="text" 
+                                      value={member.dept} 
+                                      onChange={(e) => {
+                                        const newCommittees = [...committees];
+                                        newCommittees[originalYIdx].members[mIdx].dept = e.target.value;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      className="w-full bg-transparent border border-transparent hover:border-border/50 rounded-lg p-1 text-[9px] font-mono text-muted uppercase tracking-wider text-center focus:ring-0 transition-all"
+                                      placeholder="科系"
+                                    />
+                                  </div>
+
+                                  {/* Intro / Quote Input */}
+                                  <div className="pt-4 border-t border-border/50">
+                                    <textarea 
+                                      value={member.intro} 
+                                      onChange={(e) => {
+                                        const newCommittees = [...committees];
+                                        newCommittees[originalYIdx].members[mIdx].intro = e.target.value;
+                                        setCommittees(newCommittees);
+                                      }}
+                                      className="w-full bg-transparent border border-transparent hover:border-border/50 rounded-lg p-2 text-xs font-serif text-muted italic leading-relaxed text-center focus:ring-0 resize-none transition-all"
+                                      placeholder="個人金句..."
+                                      rows={2}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {/* Add Member Button Card - Scaled Down */}
+                            <button 
+                              onClick={() => {
+                                const newCommittees = [...committees];
+                                newCommittees[originalYIdx].members.push({ name: "", role: "社長", dept: "", intro: "", avatar: "" });
+                                setCommittees(newCommittees);
+                              }}
+                              className="w-[200px] flex-shrink-0 border-2 border-dashed border-border rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 text-muted hover:border-accent hover:text-accent transition-all hover:bg-accent/5 group/add-member"
+                            >
+                              <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center group-hover/add-member:scale-110 transition-transform">
+                                <span className="text-xl">+</span>
+                              </div>
+                              <span className="text-[10px] font-mono uppercase tracking-widest">新增成員</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

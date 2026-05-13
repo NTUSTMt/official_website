@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationConfig, NavItem } from "@/config/navigation";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 interface NavbarProps {
   announcement?: {
@@ -13,10 +14,30 @@ interface NavbarProps {
   };
 }
 
-export default function Navbar({ announcement }: NavbarProps) {
+export default function Navbar({ announcement: initialAnnouncement }: NavbarProps) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [announcement, setAnnouncement] = useState(initialAnnouncement);
+
+  useEffect(() => {
+    async function fetchAnnouncement() {
+      if (!isSupabaseConfigured) return;
+      
+      const { data } = await supabase
+        .from("cms_config")
+        .select("announcement")
+        .eq("id", "global_config")
+        .single();
+      
+      if (data?.announcement) {
+        setAnnouncement(data.announcement);
+      }
+    }
+    
+    if (!initialAnnouncement) {
+      fetchAnnouncement();
+    }
+  }, [initialAnnouncement]);
 
   const toggleExpand = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -97,16 +118,17 @@ export default function Navbar({ announcement }: NavbarProps) {
               )
             ))}
           </div>
+          </div>
         </div>
-      </div>
+        
+        {announcement?.enabled && announcement.text && (
+          <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20 shadow-sm border-t border-white/10">
+            <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
+              {announcement.text} →
+            </Link>
+          </div>
+        )}
       </nav>
-      {announcement?.enabled && (
-        <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20 shadow-sm">
-          <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
-            {announcement.text} →
-          </Link>
-        </div>
-      )}
     </>
   );
 }

@@ -28,6 +28,9 @@ export const cmsService = {
       announcement: data.announcement || { enabled: false, text: "", link: "" },
       fees: { ...mockCMSConfig.fees, ...data.fees },
       officeHours: data.office_hours || mockCMSConfig.officeHours,
+      introduction: data.introduction || mockCMSConfig.introduction,
+      slogan: data.slogan || mockCMSConfig.slogan,
+      sloganLabel: data.slogan_label || mockCMSConfig.sloganLabel,
     };
   },
 
@@ -47,6 +50,9 @@ export const cmsService = {
         announcement: config.announcement,
         fees: config.fees,
         office_hours: config.officeHours,
+        introduction: config.introduction,
+        slogan: config.slogan,
+        slogan_label: config.sloganLabel,
         updated_at: new Date().toISOString(),
       });
 

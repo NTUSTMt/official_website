@@ -30,8 +30,6 @@ export default function IntroductionPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
-      
       <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
         <section className={`mb-20 transition-opacity duration-700 ${isLoading ? "opacity-50" : "opacity-100"}`}>
           <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
@@ -66,7 +64,7 @@ export default function IntroductionPage() {
         </section>
 
         <p className="mt-16 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
-          NTUST Mountaineering Club · Spirit and Tradition
+          2026 © 國立臺灣科技大學登山社 · 傳承與現代化
         </p>
       </div>
     </main>

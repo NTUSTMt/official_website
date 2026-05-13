@@ -1,6 +1,13 @@
 import React from "react";
 
-export default function Quote() {
+interface QuoteProps {
+  text: string;
+  label?: string;
+}
+
+export default function Quote({ text, label }: QuoteProps) {
+  if (!text) return null;
+  
   return (
     <section className="py-16 md:py-24 px-6 max-w-7xl mx-auto">
       <div className="bg-surface relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] py-16 px-8 md:py-32 md:px-12 text-center border border-border shadow-sm group">
@@ -10,9 +17,13 @@ export default function Quote() {
         />
         <div className="relative z-10 max-w-4xl mx-auto">
           <h3 className="text-3xl md:text-6xl font-display italic leading-tight mb-8 text-foreground text-balance">
-            “ 登山不是為了征服山，實是為了在山的懷抱中，學會謙卑與誠實。 ”
+            “ {text} ”
           </h3>
-          <div className="font-mono text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] text-accent uppercase font-bold">Wilderness_Philosophy</div>
+          {label && (
+            <div className="font-mono text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] text-accent uppercase font-bold">
+              {label}
+            </div>
+          )}
         </div>
       </div>
     </section>
