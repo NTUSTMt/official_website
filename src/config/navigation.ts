@@ -56,4 +56,5 @@ export const navigationConfig: NavItem[] = [
       { label: "租借紀錄", href: "/profile/equipment" },
     ]
   },
+  { label: "聯絡我們", href: "/contact" },
 ];

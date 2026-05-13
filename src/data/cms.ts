@@ -1,3 +1,10 @@
+export interface Announcement {
+  id: string;
+  enabled: boolean;
+  text: string;
+  link: string;
+}
+
 export interface GlobalConfig {
   siteName: string;
   heroTagline: string;
@@ -7,11 +14,7 @@ export interface GlobalConfig {
     members: string;
     years: string;
   };
-  announcement: {
-    enabled: boolean;
-    text: string;
-    link: string;
-  };
+  announcements: Announcement[];
   fees: {
     membershipFee: number;
     accountNumber: string;
@@ -33,11 +36,14 @@ export const mockCMSConfig: GlobalConfig = {
     members: "1200+",
     years: "45+",
   },
-  announcement: {
-    enabled: true,
-    text: "🔥 113學年度下學期新血招募說明會將於 2/25 舉辦，點此報名！",
-    link: "/events/recruitment-113",
-  },
+  announcements: [
+    {
+      id: "recruit-113",
+      enabled: true,
+      text: "🔥 113學年度下學期新血招募說明會將於 2/25 舉辦，點此報名！",
+      link: "/events/recruitment-113",
+    }
+  ],
   fees: {
     membershipFee: 1500,
     bankCode: "700",

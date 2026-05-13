@@ -9,8 +9,13 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Hero title={config.siteName} subtitle={config.heroSubtext} />
-      <Navbar announcement={config.announcement} />
+      <div className="relative h-screen">
+        <Hero title={config.siteName} subtitle={config.heroSubtext} />
+      </div>
+      <Navbar 
+        announcements={config.announcements} 
+        className="-mt-[var(--nav-links-height,64px)]"
+      />
       <Introduction content={config.introduction} />
       <Quote text={config.slogan} label={config.sloganLabel} />
     </main>

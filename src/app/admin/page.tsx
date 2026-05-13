@@ -8,9 +8,9 @@ import { committeeData } from "@/data/committee";
 import { historyService, cmsService } from "@/services/cmsService";
 import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAction, saveCmsConfigAction } from "./cms-actions";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X } from "lucide-react";
+import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X, Mail, Link as LinkIcon, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
-type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS";
+type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS" | "CONTACT";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("HOMEPAGE");
@@ -34,6 +34,19 @@ export default function AdminDashboardPage() {
     example: string;
     color: string;
   }[]>([]);
+  const [contactInfo, setContactInfo] = useState<{
+    line: { link: string, qrcode: string, description: string },
+    instagram: { link: string, qrcode: string, description: string },
+    facebook: { link: string, qrcode: string, description: string },
+    email: { link: string, qrcode: string, description: string },
+    basecamp: { location: string, hours: string, mapsLink: string }
+  }>({
+    line: { link: "", qrcode: "", description: "" },
+    instagram: { link: "", qrcode: "", description: "" },
+    facebook: { link: "", qrcode: "", description: "" },
+    email: { link: "", qrcode: "", description: "" },
+    basecamp: { location: "", hours: "", mapsLink: "" }
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,6 +85,10 @@ export default function AdminDashboardPage() {
         const dbLevels = await historyService.getActivityLevels();
         if (dbLevels) setLevels(dbLevels);
 
+        // Fetch Contact Info
+        const dbContact = await cmsService.getContactInfo();
+        if (dbContact) setContactInfo(dbContact);
+
         if (dbHistory && dbHistory.length > 0) {
           setHistory(dbHistory.map(h => ({
             year: h.year,
@@ -109,6 +126,11 @@ export default function AdminDashboardPage() {
         // Save Activity Levels
         if (isSupabaseConfigured) {
           await saveCmsConfigAction("activity_levels", levels);
+        }
+      } else if (activeTab === "CONTACT") {
+        // Save Contact Info
+        if (isSupabaseConfigured) {
+          await cmsService.saveContactInfo(contactInfo);
         }
       }
       alert("儲存成功！資料已同步至 Supabase。");
@@ -237,8 +259,166 @@ export default function AdminDashboardPage() {
             <TabButton id="ABOUT_CMS" label="關於山社 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEADERSHIP" label="歷任幹部管理" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEVELS" label="活動分級 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton id="GENERAL" label="一般參數設定" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="CONTACT" label="聯絡我們管理" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="GENERAL" label="公告管理" activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
+
+          {/* Contact Management Tab Content */}
+          {activeTab === "CONTACT" && (
+            <div className="space-y-12">
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="社群與聯絡管道管理" subtitle="管理 LINE、Instagram、Facebook 與 Email 資訊" />
+                
+                <div className="flex flex-col gap-6">
+                  {(['line', 'instagram', 'facebook', 'email'] as const).map((platform) => (
+                    <div key={platform} className="p-8 bg-background border border-border rounded-[2rem] group hover:border-accent transition-all relative">
+                      <div className="flex flex-col md:flex-row gap-8 items-start">
+                        {/* Title and Info */}
+                        <div className="w-full md:w-48 flex-shrink-0">
+                          <div className="flex items-center gap-3 mb-4">
+                            <h3 className="text-lg font-display italic text-foreground capitalize">{platform}</h3>
+                          </div>
+                          
+                          {/* QR Code Upload (Smaller in admin horizontal) */}
+                          <div className="w-32 h-32 bg-surface border border-dashed border-border rounded-2xl overflow-hidden relative group/qr">
+                            {contactInfo[platform].qrcode ? (
+                              <img src={contactInfo[platform].qrcode} alt="QR Code" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-[10px] font-mono text-muted/40 uppercase tracking-widest text-center p-2">
+                                <ImageIcon className="w-5 h-5 mb-1 opacity-20" />
+                                上傳 QR
+                              </div>
+                            )}
+                            <label className="absolute inset-0 bg-black/40 opacity-0 group-hover/qr:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10">
+                              <Upload className="w-4 h-4 text-white" />
+                              <input 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file && isSupabaseConfigured) {
+                                    try {
+                                      const fileExt = file.name.split('.').pop();
+                                      const fileName = `contact_${platform}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                                      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+                                      if (uploadError) throw uploadError;
+                                      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+                                      const newContact = { ...contactInfo };
+                                      newContact[platform].qrcode = publicUrl;
+                                      setContactInfo(newContact);
+                                      alert("QR Code 上傳成功！");
+                                    } catch (err) {
+                                      console.error("Upload failed:", err);
+                                      alert("上傳失敗");
+                                    }
+                                  }
+                                }}
+                              />
+                            </label>
+                            {contactInfo[platform].qrcode && (
+                              <button 
+                                onClick={() => {
+                                  const newContact = { ...contactInfo };
+                                  newContact[platform].qrcode = "";
+                                  setContactInfo(newContact);
+                                }}
+                                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/qr:opacity-100 transition-opacity z-20"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Inputs Section */}
+                        <div className="flex-1 w-full space-y-6">
+                          <div>
+                            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">連結網址 (Link URL)</label>
+                            <input 
+                              type="text" 
+                              value={contactInfo[platform].link} 
+                              onChange={(e) => {
+                                const newContact = { ...contactInfo };
+                                newContact[platform].link = e.target.value;
+                                setContactInfo(newContact);
+                              }}
+                              className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                              placeholder={platform === 'email' ? 'mailto:example@mail.com' : 'https://...'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">功能說明 (Description)</label>
+                            <textarea 
+                              value={contactInfo[platform].description} 
+                              onChange={(e) => {
+                                const newContact = { ...contactInfo };
+                                newContact[platform].description = e.target.value;
+                                setContactInfo(newContact);
+                              }}
+                              className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif leading-relaxed outline-none focus:border-accent transition-colors"
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Basecamp Management */}
+                <div className="mt-12 pt-12 border-t border-border">
+                  <SectionHeader title="社辦位置管理 (Basecamp)" subtitle="管理社辦地址、開放時間與 Google Maps 連結" />
+                  <div className="p-8 bg-background border border-border rounded-[2rem] space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社辦地址 (Location)</label>
+                        <input 
+                          type="text" 
+                          value={contactInfo.basecamp?.location || ""} 
+                          onChange={(e) => {
+                            const newContact = { ...contactInfo };
+                            newContact.basecamp.location = e.target.value;
+                            setContactInfo(newContact);
+                          }}
+                          className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                          placeholder="例如：國立臺灣科技大學 學生活動中心 B1 登山社"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Google Maps 連結</label>
+                        <input 
+                          type="text" 
+                          value={contactInfo.basecamp?.mapsLink || ""} 
+                          onChange={(e) => {
+                            const newContact = { ...contactInfo };
+                            newContact.basecamp.mapsLink = e.target.value;
+                            setContactInfo(newContact);
+                          }}
+                          className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                          placeholder="https://maps.app.goo.gl/..."
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">開放時間 (Office Hours)</label>
+                      <input 
+                        type="text" 
+                        value={contactInfo.basecamp?.hours || ""} 
+                        onChange={(e) => {
+                          const newContact = { ...contactInfo };
+                          newContact.basecamp.hours = e.target.value;
+                          setContactInfo(newContact);
+                        }}
+                        className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                        placeholder="例如：每週一至五 12:20 - 13:20 (學期期間)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
 
           {activeTab === "HOMEPAGE" && (
             <div className="space-y-12">
@@ -322,70 +502,118 @@ export default function AdminDashboardPage() {
               <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
                 <div className="flex justify-between items-start mb-6 border-b border-border/50 pb-4">
                   <div>
-                    <h2 className="text-xl font-display italic text-foreground mb-1">置頂公告 (Announcement Bar)</h2>
-                    <p className="text-xs font-mono text-muted uppercase tracking-widest">全站跑馬燈公告</p>
+                    <h2 className="text-xl font-display italic text-foreground mb-1">置頂公告管理 (Announcement Bar)</h2>
+                    <p className="text-xs font-mono text-muted uppercase tracking-widest">全站跑馬燈公告（可顯示多條）</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={config.announcement.enabled} onChange={(e) => handleChange("announcement", "enabled", e.target.checked)} />
-                    <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
+                  <button 
+                    onClick={() => {
+                      const newAnnouncements = [...(config.announcements || [])];
+                      newAnnouncements.push({ id: Math.random().toString(36).substring(7), enabled: true, text: "", link: "" });
+                      setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                    }}
+                    className="px-4 py-2 bg-accent/10 text-accent border border-accent/20 rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-accent/20 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-3 h-3" /> 新增公告
+                  </button>
                 </div>
                 
-                <div className={`space-y-6 transition-opacity duration-300 ${!config.announcement.enabled && "opacity-50 pointer-events-none"}`}>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">公告內容 (Announcement Text)</label>
-                    <input 
-                      type="text" 
-                      value={config.announcement.text} 
-                      onChange={(e) => handleChange("announcement", "text", e.target.value)}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">超連結網址 (Action Link URL)</label>
-                    <input 
-                      type="text" 
-                      value={config.announcement.link} 
-                      onChange={(e) => handleChange("announcement", "link", e.target.value)}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Global Parameters */}
-              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <SectionHeader title="全站參數設定 (Global Parameters)" subtitle="費用與運作配置" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">財務參數配置</h3>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">入社費 (NTD)</label>
-                      <input type="number" value={config.fees.membershipFee} onChange={(e) => handleChange("fees", "membershipFee", Number(e.target.value))} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">銀行代碼</label>
-                        <input type="text" value={config.fees.bankCode} onChange={(e) => handleChange("fees", "bankCode", e.target.value)} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors" />
+                <div className="space-y-6">
+                  {config.announcements?.map((ann, idx) => (
+                    <div key={ann.id || idx} className="p-6 bg-background border border-border rounded-2xl relative group">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-mono text-muted uppercase tracking-widest">公告 #{idx + 1}</span>
+                          <div className="flex items-center gap-1 bg-background/50 rounded-lg border border-border/50 p-0.5">
+                            <button 
+                              disabled={idx === 0}
+                              onClick={() => {
+                                const newAnnouncements = [...config.announcements];
+                                [newAnnouncements[idx], newAnnouncements[idx-1]] = [newAnnouncements[idx-1], newAnnouncements[idx]];
+                                setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                              }}
+                              className="p-1 text-muted hover:text-accent hover:bg-white rounded-md transition-all disabled:opacity-20"
+                              title="上移"
+                            >
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              disabled={idx === config.announcements.length - 1}
+                              onClick={() => {
+                                const newAnnouncements = [...config.announcements];
+                                [newAnnouncements[idx], newAnnouncements[idx+1]] = [newAnnouncements[idx+1], newAnnouncements[idx]];
+                                setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                              }}
+                              className="p-1 text-muted hover:text-accent hover:bg-white rounded-md transition-all disabled:opacity-20"
+                              title="下移"
+                            >
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="sr-only peer" 
+                              checked={ann.enabled} 
+                              onChange={(e) => {
+                                const newAnnouncements = [...config.announcements];
+                                newAnnouncements[idx].enabled = e.target.checked;
+                                setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                              }}
+                            />
+                            <div className="w-9 h-5 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                          </label>
+                          <button 
+                            onClick={() => {
+                              const newAnnouncements = config.announcements.filter((_, i) => i !== idx);
+                              setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                            }}
+                            className="p-1.5 text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">銀行名稱</label>
-                        <input type="text" value={config.fees.bankName} onChange={(e) => handleChange("fees", "bankName", e.target.value)} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">公告內容</label>
+                          <input 
+                            type="text" 
+                            value={ann.text} 
+                            onChange={(e) => {
+                              const newAnnouncements = [...config.announcements];
+                              newAnnouncements[idx].text = e.target.value;
+                              setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                            }}
+                            className="w-full bg-surface border border-border px-4 py-2.5 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors"
+                            placeholder="輸入公告文字..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">連結網址</label>
+                          <input 
+                            type="text" 
+                            value={ann.link} 
+                            onChange={(e) => {
+                              const newAnnouncements = [...config.announcements];
+                              newAnnouncements[idx].link = e.target.value;
+                              setConfig(prev => ({ ...prev, announcements: newAnnouncements }));
+                            }}
+                            className="w-full bg-surface border border-border px-4 py-2.5 rounded-xl font-mono text-xs outline-none focus:border-accent transition-colors"
+                            placeholder="https://..."
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">匯款帳號</label>
-                      <input type="text" value={config.fees.accountNumber} onChange={(e) => handleChange("fees", "accountNumber", e.target.value)} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-mono text-sm outline-none focus:border-accent transition-colors" />
-                    </div>
-                  </div>
+                  ))}
 
-                  <div className="space-y-6">
-                    <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3">社辦營運配置</h3>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社辦開放時間</label>
-                      <input type="text" value={config.officeHours} onChange={(e) => handleChange("", "officeHours", e.target.value)} className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm outline-none focus:border-accent transition-colors" />
+                  {(!config.announcements || config.announcements.length === 0) && (
+                    <div className="text-center py-12 bg-background border border-dashed border-border rounded-2xl">
+                      <p className="text-xs font-mono text-muted uppercase tracking-widest">目前沒有公告</p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </section>
             </div>

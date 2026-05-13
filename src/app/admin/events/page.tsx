@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { eventsData, EventItem, difficultyLevels } from "@/data/events";
 import { eventService, registrationService } from "@/services/eventService";
-import { historyService } from "@/services/cmsService";
+import { historyService, cmsService } from "@/services/cmsService";
 import { userService } from "@/services/userService";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText } from "lucide-react";
@@ -31,7 +31,7 @@ export default function AdminEventsPage() {
       try {
         const [eventList, calendarList] = await Promise.all([
           eventService.getAllEvents(),
-          historyService.getSemesterCalendars()
+          cmsService.getSemesterCalendars()
         ]);
         setEvents(eventList.length > 0 ? eventList : eventsData);
         setCalendars(calendarList);
@@ -103,7 +103,7 @@ export default function AdminEventsPage() {
   const handleSaveCalendar = async () => {
     setIsSaving(true);
     try {
-      await historyService.saveSemesterCalendars(calendars);
+      await cmsService.saveSemesterCalendars(calendars);
       alert("儲存成功！");
     } catch (err) {
       alert("儲存失敗");

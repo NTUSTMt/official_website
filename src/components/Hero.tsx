@@ -7,7 +7,7 @@ interface HeroProps {
 
 export default function Hero({ title, subtitle }: HeroProps) {
   return (
-    <header className="relative h-screen w-full overflow-hidden flex items-center justify-center bg-white">
+    <header className="relative h-full w-full overflow-hidden flex items-center justify-center bg-white">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"

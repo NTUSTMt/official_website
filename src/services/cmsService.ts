@@ -16,7 +16,7 @@ export const cmsService = {
       console.error("Error fetching CMS config:", error);
       return {
         ...mockCMSConfig,
-        announcement: { enabled: false, text: "", link: "" }
+        announcements: mockCMSConfig.announcements
       };
     }
     
@@ -25,7 +25,7 @@ export const cmsService = {
       heroTagline: data.hero_tagline || mockCMSConfig.heroTagline,
       heroSubtext: data.hero_subtext || mockCMSConfig.heroSubtext,
       stats: { ...mockCMSConfig.stats, ...data.stats },
-      announcement: data.announcement || { enabled: false, text: "", link: "" },
+      announcements: data.announcements || (data.announcement ? [ { id: "legacy", ...data.announcement } ] : mockCMSConfig.announcements),
       fees: { ...mockCMSConfig.fees, ...data.fees },
       officeHours: data.office_hours || mockCMSConfig.officeHours,
       introduction: data.introduction || mockCMSConfig.introduction,
@@ -47,7 +47,7 @@ export const cmsService = {
         hero_tagline: config.heroTagline,
         hero_subtext: config.heroSubtext,
         stats: config.stats,
-        announcement: config.announcement,
+        announcements: config.announcements,
         fees: config.fees,
         office_hours: config.officeHours,
         introduction: config.introduction,
@@ -60,6 +60,64 @@ export const cmsService = {
       console.error("Error updating CMS config:", error);
       throw error;
     }
+  },
+
+  async getContactInfo(): Promise<any> {
+    const defaultContact = {
+      line: { link: "", qrcode: "", description: "加入官方 LINE 帳號，即時獲取社團資訊。" },
+      instagram: { link: "", qrcode: "", description: "追蹤我們的 IG，查看精采活動花絮。" },
+      facebook: { link: "", qrcode: "", description: "關注 FB 粉絲專頁，掌握最新公告。" },
+      email: { link: "mountaineering@mail.ntust.edu.tw", qrcode: "", description: "正式事務聯繫請寄送至社團電子信箱。" },
+      basecamp: { 
+        location: "國立臺灣科技大學 學生活動中心 B1 登山社", 
+        hours: "每週一至五 12:20 - 13:20 (學期期間)", 
+        mapsLink: "https://maps.app.goo.gl/..." 
+      }
+    };
+    if (!isSupabaseConfigured) return defaultContact;
+    const { data, error } = await supabase
+      .from("cms_config")
+      .select("content")
+      .eq("id", "contact_info")
+      .single();
+    if (error || !data) return defaultContact;
+    return data.content;
+  },
+
+  async saveContactInfo(content: any) {
+    if (!isSupabaseConfigured) throw new Error("Supabase not configured");
+    const { error } = await supabase
+      .from("cms_config")
+      .upsert({
+        id: "contact_info",
+        content: content,
+        updated_at: new Date().toISOString()
+      });
+    if (error) throw error;
+  },
+
+  async getSemesterCalendars(): Promise<any[]> {
+    const defaultCalendars: any[] = [];
+    if (!isSupabaseConfigured) return defaultCalendars;
+    const { data, error } = await supabase
+      .from("cms_config")
+      .select("content")
+      .eq("id", "semester_calendars")
+      .single();
+    if (error) return defaultCalendars;
+    return data.content;
+  },
+
+  async saveSemesterCalendars(calendars: any[]) {
+    if (!isSupabaseConfigured) throw new Error("Supabase not configured");
+    const { error } = await supabase
+      .from("cms_config")
+      .upsert({
+        id: "semester_calendars",
+        content: calendars,
+        updated_at: new Date().toISOString()
+      });
+    if (error) throw error;
   }
 };
 
@@ -204,30 +262,6 @@ export const historyService = {
         updated_at: new Date().toISOString()
       });
 
-    if (error) throw error;
-  },
-
-  async getSemesterCalendars(): Promise<any[]> {
-    const defaultCalendars: any[] = [];
-    if (!isSupabaseConfigured) return defaultCalendars;
-    const { data, error } = await supabase
-      .from("cms_config")
-      .select("content")
-      .eq("id", "semester_calendars")
-      .single();
-    if (error) return defaultCalendars;
-    return data.content;
-  },
-
-  async saveSemesterCalendars(calendars: any[]) {
-    if (!isSupabaseConfigured) throw new Error("Supabase not configured");
-    const { error } = await supabase
-      .from("cms_config")
-      .upsert({
-        id: "semester_calendars",
-        content: calendars,
-        updated_at: new Date().toISOString()
-      });
     if (error) throw error;
   }
 };

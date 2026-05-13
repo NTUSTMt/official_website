@@ -13,7 +13,7 @@ export async function updateGlobalConfigAction(config: any) {
         hero_tagline: config.heroTagline,
         hero_subtext: config.heroSubtext,
         stats: config.stats,
-        announcement: config.announcement,
+        announcements: config.announcements,
         fees: config.fees,
         office_hours: config.officeHours,
         introduction: config.introduction,

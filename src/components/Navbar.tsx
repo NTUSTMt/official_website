@@ -7,37 +7,40 @@ import { navigationConfig, NavItem } from "@/config/navigation";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 interface NavbarProps {
-  announcement?: {
+  announcements?: {
+    id: string;
     enabled: boolean;
     text: string;
     link: string;
-  };
+  }[];
+  className?: string;
 }
 
-export default function Navbar({ announcement: initialAnnouncement }: NavbarProps) {
+export default function Navbar({ announcements: initialAnnouncements, className }: NavbarProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [announcement, setAnnouncement] = useState(initialAnnouncement);
+  const [announcements, setAnnouncements] = useState(initialAnnouncements || []);
 
   useEffect(() => {
-    async function fetchAnnouncement() {
+    async function fetchAnnouncements() {
       if (!isSupabaseConfigured) return;
       
       const { data } = await supabase
         .from("cms_config")
-        .select("announcement")
+        .select("announcements, announcement")
         .eq("id", "global_config")
         .single();
       
-      if (data?.announcement) {
-        setAnnouncement(data.announcement);
+      if (data) {
+        const list = data.announcements || (data.announcement ? [{ id: "legacy", ...data.announcement }] : []);
+        setAnnouncements(list);
       }
     }
     
-    if (!initialAnnouncement) {
-      fetchAnnouncement();
+    if (!initialAnnouncements) {
+      fetchAnnouncements();
     }
-  }, [initialAnnouncement]);
+  }, [initialAnnouncements]);
 
   const toggleExpand = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -48,29 +51,31 @@ export default function Navbar({ announcement: initialAnnouncement }: NavbarProp
   };
 
   const navRef = useRef<HTMLElement>(null);
+  const linksRef = useRef<HTMLDivElement>(null);
   const [navHeight, setNavHeight] = useState(0);
 
   useLayoutEffect(() => {
-    if (navRef.current) {
-      const updateHeight = () => {
-        if (navRef.current) {
-          setNavHeight(navRef.current.offsetHeight);
-        }
-      };
-      updateHeight();
-      window.addEventListener('resize', updateHeight);
-      return () => window.removeEventListener('resize', updateHeight);
-    }
-  }, [announcement]);
+    const updateHeights = () => {
+      if (navRef.current) {
+        setNavHeight(navRef.current.offsetHeight);
+      }
+      if (linksRef.current) {
+        document.documentElement.style.setProperty('--nav-links-height', `${linksRef.current.offsetHeight}px`);
+      }
+    };
+    
+    updateHeights();
+    window.addEventListener('resize', updateHeights);
+    return () => window.removeEventListener('resize', updateHeights);
+  }, [announcements, expandedItems]);
 
   return (
     <>
       <nav 
         ref={navRef}
-        style={{ marginTop: pathname === "/" ? `-${navHeight}px` : undefined }}
-        className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300`}
+        className={`sticky top-0 z-50 glass border-b border-border shadow-sm transition-all duration-300 ${className || ""}`}
       >
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div ref={linksRef} className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between md:py-3">
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 w-full font-mono">
@@ -107,7 +112,7 @@ export default function Navbar({ announcement: initialAnnouncement }: NavbarProp
                         key={sub.href}
                         href={sub.href}
                         className={`text-[11px] font-mono whitespace-nowrap transition-colors ${
-                          pathname === sub.href ? "text-accent font-bold" : "text-muted hover:text-accent"
+                          pathname === sub.href ? "text-accent font-bold" : "text-foreground hover:text-accent"
                         }`}
                       >
                         {sub.label}
@@ -121,13 +126,15 @@ export default function Navbar({ announcement: initialAnnouncement }: NavbarProp
           </div>
         </div>
         
-        {announcement?.enabled && announcement.text && (
-          <div className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20 shadow-sm border-t border-white/10">
-            <Link href={announcement.link} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all">
-              {announcement.text} →
-            </Link>
-          </div>
-        )}
+        <div className="flex flex-col">
+          {announcements.filter(a => a.enabled && a.text).map((a, idx) => (
+            <div key={a.id || idx} className="bg-accent text-accent-foreground py-2 px-4 text-center relative z-20 shadow-sm border-t border-white/10 last:border-b-0">
+              <Link href={a.link || "#"} className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-widest hover:underline transition-all block">
+                {a.text} {a.link && "→"}
+              </Link>
+            </div>
+          ))}
+        </div>
       </nav>
     </>
   );
@@ -141,7 +148,7 @@ function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
         className={`flex items-center justify-center gap-1 cursor-pointer transition-all px-2 py-1 border-b-2 whitespace-nowrap text-center ${
           active 
             ? "border-accent text-accent font-bold" 
-            : "border-transparent text-muted hover:text-foreground"
+            : "border-transparent text-foreground hover:text-accent"
         }`}
       >
         <span className="text-[12px] lg:text-[13px] font-bold tracking-[0.05em]">{item.label}</span>
@@ -160,7 +167,7 @@ function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
               <Link
                 key={sub.href}
                 href={sub.href}
-                className="px-5 py-2.5 text-[12px] text-muted hover:text-accent hover:bg-background transition-colors border-l-4 border-transparent hover:border-accent"
+                className="px-5 py-2.5 text-[12px] text-foreground hover:text-accent hover:bg-background transition-colors border-l-4 border-transparent hover:border-accent"
               >
                 {sub.label}
               </Link>
@@ -189,7 +196,7 @@ function NavItemMobile({
     <div className={`flex items-center gap-1 cursor-pointer transition-all px-3 py-2 border-b-2 whitespace-nowrap text-center ${
       active 
         ? "border-accent text-accent font-bold" 
-        : "border-transparent text-muted hover:text-foreground"
+        : "border-transparent text-foreground hover:text-accent"
     }`}>
       <span className="text-[12px] font-bold tracking-[0.05em]">{item.label}</span>
       {hasSubItems && (
