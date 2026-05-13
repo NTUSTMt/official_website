@@ -105,16 +105,23 @@ export default function AdminEquipmentPage() {
   const handleUpdateRentalStatus = async (id: string, status: string) => {
     try {
       await rentalService.updateStatus(id, status);
-      setRentals(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+      // Refresh both rentals and inventory to see stock changes
+      const [updatedRentals, updatedInventory] = await Promise.all([
+        rentalService.getAllApplications(),
+        equipmentService.getAllEquipment()
+      ]);
+      setRentals(updatedRentals);
+      setInventory(updatedInventory);
     } catch (err) {
       alert("更新失敗");
     }
   };
 
+
   const categories: EquipmentCategory[] = ["炊事系統", "營帳系統", "睡眠系統", "行進裝備", "技術裝備"];
 
   if (isLoading) {
-    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">LOADING_EQUIPMENT...</div></AdminLayout>;
+    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">裝備資料讀取中...</div></AdminLayout>;
   }
 
   return (
@@ -132,7 +139,7 @@ export default function AdminEquipmentPage() {
                 className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <Plus className="w-3 h-3" />
-                Add Equipment
+                新增裝備
               </button>
             )}
           </div>
@@ -145,7 +152,7 @@ export default function AdminEquipmentPage() {
               activeTab === "INVENTORY" ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
             }`}
           >
-            Inventory_Stock
+            裝備庫存
           </button>
           <button 
             onClick={() => setActiveTab("RENTALS")}
@@ -153,7 +160,7 @@ export default function AdminEquipmentPage() {
               activeTab === "RENTALS" ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
             }`}
           >
-            Rental_Requests ({rentals.filter(r => r.status === "PENDING").length})
+            租借申請 ({rentals.filter(r => r.status === "PENDING").length})
           </button>
         </div>
 
@@ -209,12 +216,12 @@ export default function AdminEquipmentPage() {
                     {/* 5. Pricing (Base & Extra) */}
                     <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
                       <div className="font-mono">
-                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">基本租金 (2天)</div>
                         <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
                       </div>
                       <div className="w-px h-6 bg-border/50"></div>
                       <div className="font-mono text-right">
-                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
+                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">每日加價</div>
                         <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
                       </div>
                     </div>
@@ -223,7 +230,7 @@ export default function AdminEquipmentPage() {
                       onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
                       className="w-full py-4 bg-background border border-border text-muted hover:text-accent hover:border-accent rounded-full font-mono text-xs uppercase tracking-[0.2em] transition-all"
                     >
-                      Edit Equipment
+                      編輯裝備資訊
                     </button>
                   </div>
                 </div>
@@ -261,15 +268,15 @@ export default function AdminEquipmentPage() {
                 <div className="flex flex-row lg:flex-col gap-2 justify-center">
                   {request.status === "PENDING" && (
                     <>
-                      <button onClick={() => handleUpdateRentalStatus(request.id, "APPROVED")} className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-mono uppercase font-bold">Approve</button>
-                      <button onClick={() => handleUpdateRentalStatus(request.id, "CANCELLED")} className="flex-1 px-6 py-3 bg-surface border border-border text-muted rounded-xl text-[10px] font-mono uppercase font-bold">Reject</button>
+                      <button onClick={() => handleUpdateRentalStatus(request.id, "APPROVED")} className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-mono uppercase font-bold">核准申請</button>
+                      <button onClick={() => handleUpdateRentalStatus(request.id, "CANCELLED")} className="flex-1 px-6 py-3 bg-surface border border-border text-muted rounded-xl text-[10px] font-mono uppercase font-bold">拒絕申請</button>
                     </>
                   )}
                   {request.status === "APPROVED" && (
-                    <button onClick={() => handleUpdateRentalStatus(request.id, "PICKED_UP")} className="flex-1 px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-mono uppercase font-bold">Mark Picked Up</button>
+                    <button onClick={() => handleUpdateRentalStatus(request.id, "PICKED_UP")} className="flex-1 px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-mono uppercase font-bold">標記已取貨</button>
                   )}
                   {request.status === "PICKED_UP" && (
-                    <button onClick={() => handleUpdateRentalStatus(request.id, "RETURNED")} className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-mono uppercase font-bold">Mark Returned</button>
+                    <button onClick={() => handleUpdateRentalStatus(request.id, "RETURNED")} className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-mono uppercase font-bold">標記已歸還</button>
                   )}
                 </div>
               </div>
@@ -314,7 +321,7 @@ export default function AdminEquipmentPage() {
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-muted/40">
                           <Plus className="w-8 h-8 mb-2" />
-                          <span className="text-[10px] font-mono uppercase">Upload Image</span>
+                          <span className="text-[10px] font-mono uppercase">上傳圖片</span>
                         </div>
                       )}
                       <input 
@@ -332,7 +339,7 @@ export default function AdminEquipmentPage() {
                       />
                       {previewImage && (
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-mono uppercase tracking-widest">
-                          Change Image
+                          更換圖片
                         </div>
                       )}
                     </div>
@@ -399,21 +406,14 @@ export default function AdminEquipmentPage() {
                   disabled={uploading}
                   className="px-8 py-3 text-[10px] font-mono text-muted uppercase tracking-widest font-bold hover:text-foreground transition-colors disabled:opacity-50"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button 
                   type="submit" 
                   disabled={uploading}
                   className="px-12 py-3 bg-accent text-white rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20 hover:brightness-110 transition-all flex items-center gap-3 disabled:opacity-50"
                 >
-                  {uploading ? (
-                    <>
-                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Uploading...
-                    </>
-                  ) : (
-                    "Save_Equipment"
-                  )}
+                    {uploading ? "上傳中..." : "儲存裝備資訊"}
                 </button>
               </div>
             </form>

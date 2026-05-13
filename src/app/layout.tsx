@@ -33,6 +33,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+import { Providers } from "@/components/Providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,11 +44,14 @@ export default function RootLayout({
     <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${crimsonPro.variable}`} suppressHydrationWarning>
       <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
         <TopographyBackground />
-        <div className="flex-1">
-          {children}
-        </div>
+        <Providers>
+          <div className="flex-1">
+            {children}
+          </div>
+        </Providers>
         <Footer />
       </body>
     </html>
   );
 }
+

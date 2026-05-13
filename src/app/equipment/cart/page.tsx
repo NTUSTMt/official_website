@@ -4,15 +4,22 @@ import React, { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { useCart } from "@/components/CartProvider";
 import Link from "next/link";
+import { rentalService } from "@/services/equipmentService";
+import { useSession, signIn } from "next-auth/react";
+import { userService } from "@/services/userService";
+import { useEffect } from "react";
+
 
 export default function RentalCartPage() {
+  const { data: session, status } = useSession();
   const { state, dispatch } = useCart();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form States
   const [formData, setFormData] = useState({
     name: "",
-    studentId: "",
     phone: "",
     lineId: "",
     identity: "MEMBER" as "MEMBER" | "NON_MEMBER",
@@ -21,6 +28,26 @@ export default function RentalCartPage() {
     returnDate: "",
     notes: ""
   });
+
+  // Auto-populate user data
+  useEffect(() => {
+    async function loadUserData() {
+      if (status === "authenticated") {
+        const user = await userService.getCurrentUser();
+        if (user) {
+          setFormData(prev => ({
+            ...prev,
+            name: user.real_name || prev.name,
+            phone: user.phone || prev.phone,
+            identity: (user.membership_status === "active" || user.membership_status === "alumni") ? "MEMBER" : "NON_MEMBER"
+          }));
+        }
+      }
+    }
+    loadUserData();
+  }, [status]);
+
+
 
   const days = useMemo(() => {
     if (!formData.borrowDate || !formData.returnDate) return 0;
@@ -50,14 +77,41 @@ export default function RentalCartPage() {
     return total;
   }, [state.items, days, formData.identity, formData.purpose]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send data to a backend
-    console.log("Submitting Rental Request:", { ...formData, items: state.items, total: pricing });
-    setIsSubmitted(true);
-    dispatch({ type: "CLEAR_CART" });
-    window.scrollTo(0, 0);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const applicationData = {
+        userId: (session?.user as any)?.lineUserId || "anonymous",
+        userName: formData.name,
+        userType: formData.identity,
+        isClubEvent: formData.purpose === "CLUB",
+        items: state.items.map(item => ({
+          equipmentId: item.id,
+          name: item.name,
+          qty: item.quantity
+        })),
+        startDate: formData.borrowDate,
+        endDate: formData.returnDate,
+        totalFee: pricing,
+        notes: formData.notes
+      };
+
+      await rentalService.submitApplication(applicationData);
+      
+      setIsSubmitted(true);
+      dispatch({ type: "CLEAR_CART" });
+      window.scrollTo(0, 0);
+    } catch (err: any) {
+      setError(err.message || "提交失敗，請稍後再試。");
+      window.scrollTo(0, 0);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   if (isSubmitted) {
     return (
@@ -91,6 +145,13 @@ export default function RentalCartPage() {
           <h1 className="text-5xl md:text-6xl font-display italic mb-6 tracking-tight">我的租借單</h1>
           <p className="text-lg font-serif text-muted">確認裝備與租借資訊，完成後點擊提交。</p>
         </section>
+
+        {error && (
+          <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-3xl text-red-600 font-serif flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
+            <span className="text-2xl">⚠️</span>
+            {error}
+          </div>
+        )}
 
         {state.items.length === 0 ? (
           <div className="py-24 text-center border border-dashed border-border rounded-[3rem]">
@@ -198,13 +259,13 @@ export default function RentalCartPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">學號 Student ID</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">手機 Phone</label>
                     <input 
                       required
-                      type="text"
-                      value={formData.studentId}
-                      onChange={(e) => setFormData({...formData, studentId: e.target.value})}
-                      placeholder="B112..."
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      placeholder="0912..."
                       className="w-full bg-background border border-border p-4 rounded-2xl font-serif text-sm focus:border-accent outline-none"
                     />
                   </div>
@@ -220,6 +281,8 @@ export default function RentalCartPage() {
                     />
                   </div>
                 </div>
+
+
 
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
@@ -260,12 +323,31 @@ export default function RentalCartPage() {
                   </div>
                 </div>
 
-                <button 
-                  type="submit"
-                  className="w-full py-6 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-accent/20"
-                >
-                  提交租借單 Submit
-                </button>
+                {status === "unauthenticated" ? (
+                  <button 
+                    type="button"
+                    onClick={() => signIn("line")}
+                    className="w-full py-6 bg-emerald-500 text-white rounded-full font-mono text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
+                  >
+                    <span className="text-xl">💬</span>
+                    登入 LINE 以預約租借
+                  </button>
+                ) : (
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-6 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? "正在提交..." : "提交租借單 Submit"}
+                  </button>
+                )}
+                
+                {status === "unauthenticated" && (
+                  <p className="text-[10px] font-serif text-muted text-center italic">
+                    * 預約租借需登錄社員身分以核對資料。
+                  </p>
+                )}
+
               </div>
             </form>
           </div>

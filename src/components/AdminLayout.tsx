@@ -7,9 +7,10 @@ import { Globe, Tent, Package, Users, LogOut, LayoutDashboard, FileText } from "
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  fullWidth?: boolean;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function AdminLayout({ children, fullWidth = false }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -43,7 +44,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   if (isAuthenticated === null && !pathname.startsWith("/admin/login")) {
-    return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-xs text-muted">AUTHENTICATING...</div>;
+    return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-xs text-muted">身分驗證中...</div>;
   }
 
   if (pathname.startsWith("/admin/login")) {
@@ -59,12 +60,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="h-20 flex items-center px-6 border-b border-border">
           <Link href="/" className="font-display italic text-2xl group flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-accent group-hover:scale-150 transition-transform"></span>
-            Admin
+            管理後台
           </Link>
         </div>
         
         <div className="p-6 flex-1">
-          <div className="text-[10px] font-mono text-muted uppercase tracking-widest mb-4">Dashboard_Modules</div>
+          <div className="text-[10px] font-mono text-muted uppercase tracking-widest mb-4">管理模組控制台</div>
           <nav className="flex flex-col gap-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -92,7 +93,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             className="w-full py-3 px-4 rounded-xl text-xs font-mono tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-200 flex items-center justify-center gap-2"
           >
             <LogOut className="w-3 h-3" />
-            LOGOUT
+            登出系統
           </button>
         </div>
       </aside>
@@ -102,13 +103,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <header className="h-20 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-serif">
-              {navItems.find(i => i.href === pathname)?.label || "Dashboard"}
+              {navItems.find(i => i.href === pathname)?.label || "管理控制台"}
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <div className="text-xs font-serif text-foreground">管理員</div>
-              <div className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest">Authenticated Session</div>
+              <div className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest">管理員已登入</div>
             </div>
             <div className="w-10 h-10 rounded-full bg-surface border-2 border-accent flex items-center justify-center font-mono text-xs font-bold text-accent">
               AD
@@ -116,8 +117,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </header>
 
-        <div className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
+        <div className={`flex-1 overflow-y-auto bg-background ${fullWidth ? "" : "p-6 md:p-12"}`}>
+          <div className={fullWidth ? "" : "max-w-7xl mx-auto"}>
             {children}
           </div>
         </div>

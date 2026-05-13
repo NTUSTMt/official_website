@@ -130,7 +130,7 @@ export const registrationService = {
     if (error) throw error;
   },
 
-  async registerForEvent(eventId: string, userId: string, note?: string) {
+  async registerForEvent(eventId: string, userId: string, note?: string, registrationData?: any) {
     // 1. 檢查是否已報名
     const { data: existing } = await supabase
       .from("event_registrations")
@@ -154,7 +154,7 @@ export const registrationService = {
       throw new Error("此活動目前不開放報名。");
     }
 
-    // 3. 執行報名
+    // 3. 執行報名 - 將詳細資料存入報名表單作為快照
     const { data, error } = await supabase
       .from("event_registrations")
       .insert({
@@ -163,7 +163,22 @@ export const registrationService = {
         note: note,
         signup_date: new Date().toISOString(),
         status: 'pending',
-        payment_status: 'unpaid'
+        payment_status: 'unpaid',
+        // 存入保險與聯絡快照
+        real_name: registrationData?.real_name,
+        gender: registrationData?.gender,
+        birth_date: registrationData?.birth_date,
+        nationality_type: registrationData?.nationality_type,
+        id_number: registrationData?.id_number,
+        line_id: registrationData?.line_id,
+        phone: registrationData?.phone,
+        email: registrationData?.email,
+        address: registrationData?.address,
+        emergency_contact_name: registrationData?.emergency_contact_name,
+        emergency_contact_phone: registrationData?.emergency_contact_phone,
+        emergency_contact_relationship: registrationData?.emergency_contact_relationship,
+        emergency_contact_address: registrationData?.emergency_contact_address,
+        student_id: registrationData?.student_id,
       })
       .select()
       .single();
@@ -171,6 +186,7 @@ export const registrationService = {
     if (error) throw error;
     return data;
   },
+
 
   async getMyRegistration(eventId: string, userId: string) {
     const { data, error } = await supabase

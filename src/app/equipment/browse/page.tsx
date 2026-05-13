@@ -1,24 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { equipmentData, EquipmentCategory } from "@/data/equipment";
+import { equipmentData, EquipmentCategory, EquipmentItem } from "@/data/equipment";
 import { useCart } from "@/components/CartProvider";
 import Link from "next/link";
+import { equipmentService } from "@/services/equipmentService";
+
 
 const CATEGORIES: (EquipmentCategory | "全部")[] = ["全部", "炊事系統", "營帳系統", "睡眠系統", "行進裝備", "技術裝備"];
 
 export default function EquipmentBrowsePage() {
   const [activeCategory, setActiveCategory] = useState<EquipmentCategory | "全部">("全部");
+  const [items, setItems] = useState<EquipmentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { state, dispatch } = useCart();
 
+  useEffect(() => {
+    async function loadData() {
+      const dbItems = await equipmentService.getAllEquipment();
+      setItems(dbItems.length > 0 ? dbItems : equipmentData);
+      setIsLoading(false);
+    }
+    loadData();
+  }, []);
+
   const filteredItems = activeCategory === "全部" 
-    ? equipmentData 
-    : equipmentData.filter(item => item.category === activeCategory);
+    ? items 
+    : items.filter(item => item.category === activeCategory);
 
   const cartTotalItems = state.items.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleAddToCart = (item: any) => {
+    if (item.availableQty <= 0) return;
     dispatch({ 
       type: "ADD_ITEM", 
       item: { 
@@ -38,12 +52,17 @@ export default function EquipmentBrowsePage() {
 
   const updateQty = (id: string, delta: number) => {
     const current = getItemQty(id);
+    const item = items.find(i => i.id === id);
+    
+    if (delta > 0 && item && current >= item.availableQty) return;
+
     if (current + delta <= 0) {
       dispatch({ type: "REMOVE_ITEM", id });
     } else {
       dispatch({ type: "UPDATE_QUANTITY", id, quantity: current + delta });
     }
   };
+
 
   return (
     <main className="min-h-screen bg-background pb-32">
@@ -71,100 +90,117 @@ export default function EquipmentBrowsePage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredItems.map((item) => {
-            const qty = getItemQty(item.id);
-            return (
-              <div 
-                key={item.id}
-                className="group bg-surface border border-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500"
-              >
-                {/* 1. Image Area */}
-                <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
-                  
-                  {item.image ? (
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  ) : (
-                    <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
-                      {item.category === "炊事系統" && "🍳"}
-                      {item.category === "營帳系統" && "⛺"}
-                      {item.category === "睡眠系統" && "🛌"}
-                      {item.category === "行進裝備" && "🎒"}
-                      {item.category === "技術裝備" && "⛏️"}
-                    </div>
-                  )}
-
-                  {item.isMemberOnly && (
-                    <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
-                      🔒 社員限定
-                    </div>
-                  )}
-                </div>
-
-                {/* Content Container */}
-                <div className="p-8 flex flex-1 flex-col">
-                  {/* 2. System & Remaining Qty */}
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="font-mono text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
-                    <div className="font-mono text-xs text-muted uppercase tracking-widest">
-                      剩餘: <span className="text-foreground font-bold">{item.availableQty}</span>
-                    </div>
-                  </div>
-
-                  {/* 3. Name */}
-                  <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
-
-                  {/* 4. Note (Details) */}
-                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
-                    {item.details || "專業登山裝備，提供完善防護與便利性。"}
-                  </p>
-
-                  <div className="mt-auto">
-                    {/* 5. Pricing (Base & Extra) */}
-                    <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
-                      <div className="font-mono">
-                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
-                        <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
-                      </div>
-                      <div className="w-px h-6 bg-border/50"></div>
-                      <div className="font-mono text-right">
-                        <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
-                        <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
-                      </div>
-                    </div>
-
-                    {qty > 0 ? (
-                      <div className="flex items-center justify-between bg-accent text-white rounded-full p-1">
-                        <button 
-                          onClick={() => updateQty(item.id, -1)}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold"
-                        >
-                          -
-                        </button>
-                        <span className="font-mono font-bold">{qty}</span>
-                        <button 
-                          onClick={() => updateQty(item.id, 1)}
-                          disabled={qty >= item.availableQty}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold disabled:opacity-30"
-                        >
-                          +
-                        </button>
-                      </div>
+        {isLoading ? (
+          <div className="py-32 text-center font-mono animate-pulse text-muted uppercase tracking-widest">
+            Loading_Equipment...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredItems.map((item) => {
+              const qty = getItemQty(item.id);
+              const isOutOfStock = item.availableQty <= 0;
+              
+              return (
+                <div 
+                  key={item.id}
+                  className={`group bg-surface border border-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 ${isOutOfStock ? "opacity-75 grayscale-[0.5]" : ""}`}
+                >
+                  {/* 1. Image Area */}
+                  <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
+                    
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     ) : (
-                      <button 
-                        onClick={() => handleAddToCart(item)}
-                        className="w-full py-4 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg shadow-accent/20"
-                      >
-                        加入租借單
-                      </button>
+                      <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
+                        {item.category === "炊事系統" && "🍳"}
+                        {item.category === "營帳系統" && "⛺"}
+                        {item.category === "睡眠系統" && "🛌"}
+                        {item.category === "行進裝備" && "🎒"}
+                        {item.category === "技術裝備" && "⛏️"}
+                      </div>
+                    )}
+
+                    {item.isMemberOnly && (
+                      <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
+                        🔒 社員限定
+                      </div>
+                    )}
+                    
+                    {isOutOfStock && (
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30">
+                        <div className="bg-white/90 px-6 py-2 rounded-full font-display italic text-red-600 text-sm shadow-xl">
+                          已借光 Out of Stock
+                        </div>
+                      </div>
                     )}
                   </div>
+
+                  {/* Content Container */}
+                  <div className="p-8 flex flex-1 flex-col">
+                    {/* 2. System & Remaining Qty */}
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="font-mono text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
+                      <div className="font-mono text-xs text-muted uppercase tracking-widest">
+                        剩餘: <span className={`font-bold ${isOutOfStock ? "text-red-500" : "text-foreground"}`}>{item.availableQty}</span>
+                      </div>
+                    </div>
+
+                    {/* 3. Name */}
+                    <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
+
+                    {/* 4. Note (Details) */}
+                    <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
+                      {item.details || "專業登山裝備，提供完善防護與便利性。"}
+                    </p>
+
+                    <div className="mt-auto">
+                      {/* 5. Pricing (Base & Extra) */}
+                      <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
+                        <div className="font-mono">
+                          <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
+                          <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
+                        </div>
+                        <div className="w-px h-6 bg-border/50"></div>
+                        <div className="font-mono text-right">
+                          <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
+                          <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
+                        </div>
+                      </div>
+
+                      {qty > 0 ? (
+                        <div className="flex items-center justify-between bg-accent text-white rounded-full p-1">
+                          <button 
+                            onClick={() => updateQty(item.id, -1)}
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="font-mono font-bold">{qty}</span>
+                          <button 
+                            onClick={() => updateQty(item.id, 1)}
+                            disabled={qty >= item.availableQty}
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold disabled:opacity-30"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleAddToCart(item)}
+                          disabled={isOutOfStock}
+                          className="w-full py-4 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg shadow-accent/20 disabled:bg-muted/20 disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
+                        >
+                          {isOutOfStock ? "暫時借光" : "加入租借單"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Sticky Checkout Bar */}
         {cartTotalItems > 0 && (

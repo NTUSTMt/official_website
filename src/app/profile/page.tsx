@@ -5,12 +5,17 @@ import ProfileLayout from "@/components/ProfileLayout";
 import { userService, UserProfile } from "@/services/userService";
 import { peakService } from "@/services/peakService";
 import Link from "next/link";
-import { Shield, Award, Calendar, Package, ChevronRight, User } from "lucide-react";
+import { Shield, Award, Calendar, Package, ChevronRight, User, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [recentPeaks, setRecentPeaks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -59,33 +64,43 @@ export default function ProfilePage() {
   return (
     <ProfileLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <header className="flex flex-col md:flex-row items-center gap-10 mb-16">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-accent rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <div className="w-40 h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt={user.real_name} className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-16 h-16 text-accent" />
-              )}
+        <header className="flex flex-col md:flex-row items-center justify-between gap-10 mb-16">
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-accent rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+              <div className="w-40 h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt={user.real_name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-16 h-16 text-accent" />
+                )}
+              </div>
+              <div className="absolute -bottom-2 right-4 z-20 px-3 py-1 bg-white border border-border rounded-full text-[9px] font-mono font-bold uppercase tracking-widest shadow-sm">
+                {user.membership_status}
+              </div>
             </div>
-            <div className="absolute -bottom-2 right-4 z-20 px-3 py-1 bg-white border border-border rounded-full text-[9px] font-mono font-bold uppercase tracking-widest shadow-sm">
-              {user.membership_status}
+            <div className="text-center md:text-left">
+              <div className="font-mono text-[10px] text-accent mb-3 font-bold tracking-[0.3em] uppercase">
+                Club_Member {user.student_id || "ID_PENDING"}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-display italic mb-6">{user.real_name || user.nickname || "神秘社員"}</h1>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
+                {user.skills?.map((skill, i) => (
+                  <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="text-center md:text-left">
-            <div className="font-mono text-[10px] text-accent mb-3 font-bold tracking-[0.3em] uppercase">
-              Club_Member {user.student_id || "ID_PENDING"}
-            </div>
-            <h1 className="text-4xl md:text-5xl font-display italic mb-6">{user.real_name || user.nickname || "神秘社員"}</h1>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
-              {user.skills?.map((skill, i) => (
-                <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="group flex items-center gap-3 px-6 py-3 border border-red-200 text-red-500 hover:bg-red-50 rounded-2xl font-mono text-[10px] uppercase tracking-widest font-bold transition-all"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Logout_Sign_Out
+          </button>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

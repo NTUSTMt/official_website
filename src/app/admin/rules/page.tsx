@@ -104,10 +104,10 @@ export default function AdminRulesPage() {
             disabled={isSaving || isLoading || !data}
             className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-xs uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 min-w-[120px] flex items-center justify-center gap-2"
           >
-            {isSaving ? "SAVING..." : (
+            {isSaving ? "儲存中..." : (
               <>
                 <Save className="w-3.5 h-3.5" />
-                SAVE_TO_DB
+                儲存至資料庫
               </>
             )}
           </button>
@@ -123,7 +123,7 @@ export default function AdminRulesPage() {
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 font-mono text-xs animate-pulse">
-            FETCHING_RULE_DATA...
+            規章資料讀取中...
           </div>
         ) : !data ? (
           <div className="text-center py-20 text-muted font-serif">資料載入失敗或不存在。</div>
@@ -133,7 +133,7 @@ export default function AdminRulesPage() {
             <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-1">
-                  <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3 mb-2">Page_Identity</h3>
+                  <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-accent pl-3 mb-2">頁面身分設定</h3>
                   <p className="text-xs text-muted font-serif italic">設定該頁面的標題與引導文字。</p>
                 </div>
                 <div className="md:col-span-2 space-y-6">
@@ -163,8 +163,8 @@ export default function AdminRulesPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-end px-2">
                 <div>
-                  <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-emerald-500 pl-3">Content_Sections</h3>
-                  <p className="text-[10px] text-muted font-mono mt-1">MANAGE_PARAGRAPHS_AND_LISTS</p>
+                  <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest border-l-2 border-emerald-500 pl-3">章節內容管理</h3>
+                  <p className="text-[10px] text-muted font-mono mt-1">內文段落與列表管理</p>
                 </div>
                 {activeTab !== "constitution" && (
                   <button 
@@ -172,7 +172,7 @@ export default function AdminRulesPage() {
                     className="px-4 py-2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-lg text-[10px] font-mono uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center gap-2"
                   >
                     <Plus className="w-3 h-3" />
-                    Add Section
+                    新增章節
                   </button>
                 )}
               </div>
@@ -185,7 +185,7 @@ export default function AdminRulesPage() {
                       <div className="md:col-span-1">
                         <div className="flex items-center gap-3 mb-2">
                           <FileText className="w-4 h-4 text-accent" />
-                          <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest">Document_Link</h3>
+                          <h3 className="text-sm font-mono text-foreground font-bold uppercase tracking-widest">文件外部連結</h3>
                         </div>
                         <p className="text-xs text-muted font-serif italic">請貼上 Google 文件的「發佈到網路」連結。</p>
                       </div>

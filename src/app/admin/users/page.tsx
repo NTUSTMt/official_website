@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { memberService } from "@/services/memberService";
 import { UserProfile } from "@/services/userService";
-import { Search, User, CreditCard, ShieldCheck, Mail, GraduationCap, Phone, Info, X } from "lucide-react";
+import { Search, User, CreditCard, ShieldCheck, Mail, GraduationCap, Phone, Info, X, ChevronRight } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [members, setMembers] = useState<UserProfile[]>([]);
@@ -29,57 +29,111 @@ export default function AdminUsersPage() {
      m.student_id?.includes(searchTerm))
   );
 
+  const handleExportCSV = () => {
+    const headers = [
+      "姓名", "暱稱", "學號/單位", "性別", "出生年月日", 
+      "國籍", "證件號碼", "Email", "電話", "通訊地址", 
+      "緊急聯絡人", "緊急聯絡人電話", "關係", "緊急聯絡人地址",
+      "狀態", "餘額", "Line ID"
+    ];
+    
+    const rows = filteredMembers.map(m => [
+      m.real_name || "",
+      m.nickname || "",
+      m.student_id || "",
+      m.gender || "",
+      m.birth_date || "",
+      m.nationality_type || "",
+      m.id_number || "",
+      m.email || "",
+      m.phone || "",
+      m.address || "",
+      m.emergency_contact_name || "",
+      m.emergency_contact_phone || "",
+      m.emergency_contact_relationship || "",
+      m.emergency_contact_address || "",
+      m.membership_status || "",
+      m.balance || 0,
+      m.line_id || ""
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `NTUST_Mountaineering_Members_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
   if (isLoading) {
     return (
       <AdminLayout>
         <div className="p-20 text-center font-mono animate-pulse text-xs tracking-widest text-muted">
-          LOADING_MEMBER_DATABASE...
+          社員資料庫讀取中...
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout fullWidth={true}>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6 p-8 md:px-12 bg-surface/30 border-b border-border">
           <div>
             <h1 className="text-3xl md:text-4xl font-display italic mb-2">會員管理中心</h1>
             <p className="text-sm font-serif text-muted">Excel 式高效管理介面：快速搜尋、身分審核與財務記錄。</p>
           </div>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
-            <input 
-              type="text" 
-              placeholder="搜尋姓名或學號..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-surface border border-border pl-12 pr-4 py-3 rounded-2xl text-sm outline-none focus:border-accent transition-all shadow-sm"
-            />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <button 
+              onClick={handleExportCSV}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-foreground text-background rounded-2xl font-mono text-[10px] uppercase tracking-widest font-bold hover:bg-accent hover:text-white transition-all shadow-xl shadow-foreground/10 whitespace-nowrap"
+            >
+              <Search className="w-3.5 h-3.5 rotate-90" />
+              匯出全體社員 CSV
+            </button>
+            <div className="relative min-w-[320px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
+              <input 
+                type="text" 
+                placeholder="搜尋姓名或學號..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-background border border-border pl-12 pr-4 py-3 rounded-2xl text-sm outline-none focus:border-accent transition-all shadow-sm"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-sm">
+        <div className="border-y border-border bg-surface/50 backdrop-blur-sm shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[1100px]">
               <thead>
                 <tr className="bg-background border-b border-border">
-                  <th className="px-8 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Student_ID</th>
-                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Member_Identity</th>
-                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Department</th>
+                  <th className="px-8 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Member_Identity</th>
+                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Student_ID</th>
+                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">LINE ID</th>
+                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Email</th>
                   <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Status</th>
                   <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Balance</th>
                   <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Actions</th>
+                  <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-[0.2em] w-10"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
                 {filteredMembers.map((member) => (
                   <tr key={member.id} className="hover:bg-background/50 transition-colors group">
-                    <td className="px-8 py-6 text-xs font-mono text-foreground font-bold">{member.student_id || "N/A"}</td>
-                    <td className="px-6 py-6">
+                    <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold shadow-inner">
-                          {member.real_name?.[0] || "?"}
+                        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold shadow-inner overflow-hidden border border-accent/5">
+                          {member.avatar_url ? (
+                            <img src={member.avatar_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            member.real_name?.[0] || "?"
+                          )}
                         </div>
                         <div>
                           <div className="text-sm font-display italic font-bold">{member.real_name || "未填寫"}</div>
@@ -87,12 +141,9 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-6">
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="w-3 h-3 text-muted/40" />
-                        <span className="text-xs font-mono text-muted uppercase">{member.department || "N/A"}</span>
-                      </div>
-                    </td>
+                    <td className="px-6 py-6 text-xs font-mono text-foreground font-bold">{member.student_id || "N/A"}</td>
+                    <td className="px-6 py-6 text-xs font-mono text-muted">{member.line_id || "N/A"}</td>
+                    <td className="px-6 py-6 text-xs font-mono text-muted">{member.email || "N/A"}</td>
                     <td className="px-6 py-6">
                       <select 
                         value={member.membership_status}
@@ -141,11 +192,28 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-6">
+                      <div className="flex items-center gap-3">
+                        <button 
+                          className="p-2 text-muted/40 hover:text-accent transition-colors"
+                          title="Send Email"
+                          onClick={() => window.location.href = `mailto:${member.email}`}
+                        >
+                          <Mail className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="p-2 text-muted/40 hover:text-emerald-500 transition-colors"
+                          title="Verified"
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
                       <button 
                         onClick={() => setSelectedMember(member)}
-                        className="text-[10px] font-mono text-muted hover:text-accent uppercase tracking-widest transition-all opacity-0 group-hover:opacity-100 underline decoration-accent/30 underline-offset-4"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-muted/20 group-hover:text-accent group-hover:bg-accent/5 transition-all"
                       >
-                        Details_&_History
+                        <ChevronRight className="w-5 h-5" />
                       </button>
                     </td>
                   </tr>
@@ -155,7 +223,7 @@ export default function AdminUsersPage() {
             {filteredMembers.length === 0 && (
               <div className="py-20 text-center">
                 <p className="text-sm font-serif text-muted italic">找不到符合條件的社員</p>
-                <button onClick={() => setSearchTerm("")} className="mt-4 text-[10px] font-mono text-accent uppercase tracking-widest hover:underline">Clear Search</button>
+                <button onClick={() => setSearchTerm("")} className="mt-4 text-[10px] font-mono text-accent uppercase tracking-widest hover:underline">清除搜尋</button>
               </div>
             )}
           </div>
@@ -183,69 +251,98 @@ export default function AdminUsersPage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Left Column: Basic Info */}
-                <div className="space-y-8">
+                {/* Left Column: Basic & Identity */}
+                <div className="space-y-10">
                   <section>
-                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Member_Profile</h3>
+                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-6 font-bold border-b border-border pb-2">01 Basic & Identity</h3>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-3.5 h-3.5 text-muted" />
-                        <span className="text-xs font-mono">{selectedMember.phone || "No Phone Registered"}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <span className="text-[10px] font-mono text-muted uppercase">Gender</span>
+                        <span className="text-sm font-serif">{selectedMember.gender || "N/A"}</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <GraduationCap className="w-3.5 h-3.5 text-muted" />
-                        <span className="text-xs font-serif">{selectedMember.department || "No Department Info"}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <span className="text-[10px] font-mono text-muted uppercase">Birth Date</span>
+                        <span className="text-sm font-mono">{selectedMember.birth_date || "N/A"}</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <ShieldCheck className={`w-3.5 h-3.5 ${selectedMember.membership_status === 'active' ? 'text-emerald-500' : 'text-muted'}`} />
-                        <span className="text-xs font-mono uppercase font-bold tracking-wider">{selectedMember.membership_status} Member</span>
+                      <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <span className="text-[10px] font-mono text-muted uppercase">Nationality</span>
+                        <span className="text-sm font-serif">{selectedMember.nationality_type || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <span className="text-[10px] font-mono text-muted uppercase">ID Number</span>
+                        <span className="text-sm font-mono font-bold tracking-wider">{selectedMember.id_number || "N/A"}</span>
                       </div>
                     </div>
                   </section>
 
                   <section>
-                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Emergency_Contact</h3>
-                    <div className="bg-background/50 p-6 rounded-2xl border border-border/50">
-                      <div className="text-sm font-serif font-bold mb-1">{selectedMember.emergency_contact_name || "未填寫"}</div>
-                      <div className="flex items-center gap-2 text-xs font-mono text-muted">
-                        <Phone className="w-3 h-3" />
-                        {selectedMember.emergency_contact_phone || "無電話資訊"}
+                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-6 font-bold border-b border-border pb-2">02 Contact Info</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-3.5 h-3.5 text-muted" />
+                        <span className="text-xs font-mono">{selectedMember.email || "No Email"}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-3.5 h-3.5 text-muted" />
+                        <span className="text-xs font-mono">{selectedMember.phone || "No Phone"}</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Info className="w-3.5 h-3.5 text-muted mt-0.5" />
+                        <span className="text-xs font-serif leading-relaxed">{selectedMember.address || "No Address Registered"}</span>
                       </div>
                     </div>
                   </section>
                 </div>
 
-                {/* Right Column: Skills & Balance */}
-                <div className="space-y-8">
+                {/* Right Column: Emergency & Financial */}
+                <div className="space-y-10">
                   <section>
-                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Technical_Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedMember.skills && selectedMember.skills.length > 0 ? (
-                        selectedMember.skills.map((skill, i) => (
-                          <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider">
-                            {skill}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs font-serif text-muted italic">暫無登記專業技能</span>
-                      )}
+                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-6 font-bold border-b border-border pb-2">03 Emergency Contact</h3>
+                    <div className="bg-background/50 p-6 rounded-[2rem] border border-border/50 space-y-4">
+                      <div>
+                        <div className="text-[9px] font-mono text-muted uppercase mb-1">Contact Name / Rel.</div>
+                        <div className="text-sm font-serif font-bold">
+                          {selectedMember.emergency_contact_name || "未填寫"} 
+                          {selectedMember.emergency_contact_relationship && ` (${selectedMember.emergency_contact_relationship})`}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-mono text-muted uppercase mb-1">Phone</div>
+                        <div className="text-sm font-mono text-accent font-bold">{selectedMember.emergency_contact_phone || "無"}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-mono text-muted uppercase mb-1">Address</div>
+                        <div className="text-xs font-serif text-muted leading-relaxed">{selectedMember.emergency_contact_address || "無"}</div>
+                      </div>
                     </div>
                   </section>
 
                   <section>
-                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-4 font-bold border-b border-border pb-2">Financial_Summary</h3>
-                    <div className={`p-6 rounded-2xl border ${selectedMember.balance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
-                      <div className="text-[9px] font-mono text-muted uppercase mb-1">Current_Balance</div>
-                      <div className={`text-2xl font-mono font-bold ${selectedMember.balance < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {selectedMember.balance < 0 ? `-$${Math.abs(selectedMember.balance)}` : `$${selectedMember.balance}`}
+                    <h3 className="text-[10px] font-mono text-accent uppercase tracking-widest mb-6 font-bold border-b border-border pb-2">04 Status & Skills</h3>
+                    <div className={`p-6 rounded-[2rem] border mb-6 ${selectedMember.balance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <div className="text-[9px] font-mono text-muted uppercase mb-1">Balance</div>
+                          <div className={`text-2xl font-mono font-bold ${selectedMember.balance < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                            ${selectedMember.balance}
+                          </div>
+                        </div>
+                        <div className="text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 bg-white/50 rounded border border-black/5">
+                          {selectedMember.membership_status}
+                        </div>
                       </div>
-                      <p className="text-[9px] font-serif text-muted mt-2 leading-tight">
-                        {selectedMember.balance < 0 ? "該社員目前尚有欠費，請提醒其繳納。" : "該社員帳戶狀態正常。"}
-                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMember.skills?.map((skill, i) => (
+                        <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[9px] font-mono font-bold uppercase">
+                          {skill}
+                        </span>
+                      ))}
                     </div>
                   </section>
                 </div>
               </div>
+
             </div>
             <div className="bg-background p-8 flex justify-end border-t border-border">
               <button 

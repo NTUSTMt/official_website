@@ -12,7 +12,10 @@ interface RegistrationCTAProps {
   event: EventItem;
 }
 
+import { useSession, signIn } from "next-auth/react";
+
 export default function RegistrationCTA({ event }: RegistrationCTAProps) {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +23,8 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
 
   useEffect(() => {
     async function loadStatus() {
+      if (status === "loading") return;
+      
       const currentUser = await userService.getCurrentUser();
       setUser(currentUser);
       
@@ -30,7 +35,8 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
       setIsLoading(false);
     }
     loadStatus();
-  }, [event.id]);
+  }, [event.id, status]);
+
 
   if (isLoading) {
     return (
@@ -40,21 +46,23 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
     );
   }
 
-  if (!user) {
+  if (status === "unauthenticated" || !user) {
     return (
       <div className="space-y-4">
-        <Link 
-          href="/login"
-          className="block w-full py-6 bg-accent text-white rounded-full font-mono text-center text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-accent/20"
+        <button 
+          onClick={() => signIn("line")}
+          className="w-full py-6 bg-emerald-500 text-white rounded-full font-mono text-center text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
         >
-          立即登入報名
-        </Link>
+          <span className="text-xl">💬</span>
+          登入 LINE 報名活動
+        </button>
         <p className="text-[9px] font-mono text-muted/60 uppercase tracking-widest text-center">
           需登入後方可參與社團活動
         </p>
       </div>
     );
   }
+
 
   if (registration) {
     return (

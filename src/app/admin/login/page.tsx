@@ -49,13 +49,13 @@ export default function AdminLoginPage() {
           <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Lock className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-display italic text-foreground mb-2">Basecamp Login</h1>
-          <p className="text-[10px] font-mono text-muted uppercase tracking-[0.2em]">Management_Portal_v2.0</p>
+          <h1 className="text-3xl font-display italic text-foreground mb-2">管理員登入</h1>
+          <p className="text-[10px] font-mono text-muted uppercase tracking-[0.2em]">後台管理系統 v2.0</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Username</label>
+            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">帳號 Username</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
               <input 
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Password</label>
+            <label className="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">密碼 Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/50" />
               <input 
@@ -95,7 +95,7 @@ export default function AdminLoginPage() {
             disabled={isLoading}
             className="w-full bg-foreground text-background py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.3em] hover:bg-accent hover:text-white transition-all duration-300 shadow-xl shadow-foreground/10"
           >
-            {isLoading ? "AUTHENTICATING..." : "Enter_Basecamp"}
+            {isLoading ? "身分驗證中..." : "進入系統"}
           </button>
         </form>
 

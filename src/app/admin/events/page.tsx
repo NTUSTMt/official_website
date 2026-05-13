@@ -162,7 +162,7 @@ export default function AdminEventsPage() {
   };
 
   if (isLoading) {
-    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">LOADING_DATA...</div></AdminLayout>;
+    return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">資料載入中...</div></AdminLayout>;
   }
 
   return (
@@ -189,7 +189,7 @@ export default function AdminEventsPage() {
                 className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <Save className="w-3.5 h-3.5" />
-                {isSaving ? "SAVING..." : "SAVE_TO_DB"}
+                {isSaving ? "正在儲存..." : "儲存至資料庫"}
               </button>
             )}
             {view !== "LIST" && (
@@ -198,7 +198,7 @@ export default function AdminEventsPage() {
                 className="px-6 py-2.5 bg-surface border border-border text-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:bg-background transition-all flex items-center gap-2"
               >
                 <ChevronLeft className="w-3 h-3" />
-                Back to List
+                返回列表
               </button>
             )}
             {view === "LIST" && activeTab === "EVENTS" && (
@@ -207,7 +207,7 @@ export default function AdminEventsPage() {
                 className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <Plus className="w-3 h-3" />
-                New Event
+                新增活動
               </button>
             )}
           </div>
@@ -314,19 +314,19 @@ export default function AdminEventsPage() {
                                   className="flex-1 py-2 bg-accent/5 text-accent border border-accent/10 rounded-xl text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-accent/10 transition-all flex items-center justify-center gap-1.5"
                                 >
                                   <UsersIcon className="w-3 h-3" />
-                                  Staff
+                                  隊員審核
                                 </button>
                                 <button 
                                   onClick={() => { setSelectedEvent(event); setView("EDIT_EVENT"); }}
                                   className="flex-1 py-2 bg-background border border-border rounded-xl text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-surface transition-all flex items-center justify-center gap-1.5"
                                 >
                                   <Edit className="w-3 h-3" />
-                                  Edit
+                                  編輯活動
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteEvent(event.id)}
                                   className="p-2 text-muted hover:text-red-500 transition-colors"
-                                  title="Delete Event"
+                                  title="刪除活動"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -350,13 +350,13 @@ export default function AdminEventsPage() {
               <div className="flex justify-between items-center mb-10">
                 <div className="border-l-4 border-accent pl-4">
                   <h2 className="text-xl font-display italic text-foreground mb-1">學期行事曆管理</h2>
-                  <p className="text-xs font-mono text-muted uppercase tracking-widest">Semester_Calendar_CMS</p>
+                  <p className="text-xs font-mono text-muted uppercase tracking-widest">學期行事曆 CMS</p>
                 </div>
                 <button 
                   onClick={() => setCalendars(prev => [...prev, { semester: "", url: "" }])}
                   className="px-6 py-2 bg-accent text-white rounded-full text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all"
                 >
-                  + Add Semester
+                  + 新增學期
                 </button>
               </div>
 
@@ -392,7 +392,7 @@ export default function AdminEventsPage() {
                             <img src={cal.url} alt="Semester Calendar" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                               <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest">
-                                Replace Image
+                                更換圖片
                                 <input 
                                   type="file" 
                                   className="hidden" 
@@ -415,7 +415,7 @@ export default function AdminEventsPage() {
                         ) : (
                           <label className="flex flex-col items-center justify-center aspect-[3/4] w-full border-2 border-dashed border-border rounded-2xl hover:border-accent hover:bg-accent/5 transition-all cursor-pointer">
                             <Upload className="w-8 h-8 text-muted mb-4" />
-                            <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Upload Calendar Image</span>
+                            <span className="text-[10px] font-mono text-muted uppercase tracking-widest">上傳行事曆圖片</span>
                             <input 
                               type="file" 
                               className="hidden" 
@@ -441,7 +441,7 @@ export default function AdminEventsPage() {
                 {calendars.length === 0 && (
                   <div className="col-span-full py-20 border-2 border-dashed border-border rounded-[2.5rem] flex flex-col items-center justify-center text-muted/30">
                     <ImageIcon className="w-12 h-12 mb-4 opacity-20" />
-                    <span className="text-xs font-mono uppercase tracking-[0.2em]">No_Semester_Calendars_Added</span>
+                    <span className="text-xs font-mono uppercase tracking-[0.2em]">目前尚未上傳學期行事曆</span>
                   </div>
                 )}
               </div>
@@ -456,14 +456,14 @@ export default function AdminEventsPage() {
               {/* Left Column: Metadata Card Preview */}
               <div className="lg:col-span-5 flex flex-col">
                 <div className="border-l-4 border-accent pl-4 mb-6">
-                  <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest">Metadata_Preview</h3>
+                  <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest">中繼資料預覽 (Metadata)</h3>
                 </div>
                 
                 <div className="flex-1 bg-background border border-border rounded-[2.5rem] overflow-hidden shadow-lg p-6 space-y-6">
                   {/* Row 1: Difficulty & Status */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Difficulty</label>
+                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">活動難度 (Difficulty)</label>
                       <select 
                         name="difficulty" 
                         defaultValue={selectedEvent?.difficulty || "初級"}
@@ -477,7 +477,7 @@ export default function AdminEventsPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Status</label>
+                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">活動狀態 (Status)</label>
                       <select 
                         name="status" 
                         defaultValue={selectedEvent?.status || "open"} 
@@ -492,13 +492,13 @@ export default function AdminEventsPage() {
 
                   {/* Row 2: Image */}
                   <div className="space-y-2">
-                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Cover Image</label>
+                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">封面圖片 (Cover Image)</label>
                     {previewImage ? (
                       <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border group/img">
                         <img src={previewImage} alt="Cover Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
                           <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest hover:scale-105 transition-transform">
-                            Replace
+                            更換
                             <input 
                               type="file" 
                               className="hidden" 
@@ -524,7 +524,7 @@ export default function AdminEventsPage() {
                     ) : (
                       <label className="flex flex-col items-center justify-center aspect-video w-full border-2 border-dashed border-border rounded-2xl hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group/upload">
                         <Upload className="w-6 h-6 text-muted mb-2 group-hover/upload:text-accent transition-colors" />
-                        <span className="text-[8px] font-mono text-muted uppercase tracking-widest group-hover/upload:text-accent">Upload_Image</span>
+                        <span className="text-[8px] font-mono text-muted uppercase tracking-widest group-hover/upload:text-accent">上傳圖片</span>
                         <input 
                           type="file" 
                           className="hidden" 
@@ -544,7 +544,7 @@ export default function AdminEventsPage() {
                   {/* Row 3: Date & Cost */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Event Date</label>
+                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">活動日期 (Event Date)</label>
                       <input 
                         name="date" 
                         type="text" 
@@ -555,7 +555,7 @@ export default function AdminEventsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Cost</label>
+                      <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">預估費用 (Cost)</label>
                       <input 
                         name="cost" 
                         type="text" 
@@ -568,7 +568,7 @@ export default function AdminEventsPage() {
 
                   {/* Row 4: Title */}
                   <div>
-                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Activity Title</label>
+                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">活動名稱 (Activity Title)</label>
                     <input 
                       name="title" 
                       type="text" 
@@ -581,7 +581,7 @@ export default function AdminEventsPage() {
 
                   {/* Row 5: Summary */}
                   <div>
-                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Summary</label>
+                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">簡短摘要 (Summary)</label>
                     <textarea 
                       name="summary" 
                       rows={2}
@@ -593,7 +593,7 @@ export default function AdminEventsPage() {
 
                   {/* Row 6: Registration Deadline */}
                   <div>
-                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">Registration Deadline</label>
+                    <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">報名截止日期 (Registration Deadline)</label>
                     <input 
                       name="registrationDeadline" 
                       type="text" 
@@ -608,7 +608,7 @@ export default function AdminEventsPage() {
               {/* Right Column: Detailed Description */}
               <div className="lg:col-span-7 flex flex-col">
                 <div className="border-l-4 border-accent pl-4 mb-6">
-                  <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest">Detailed_Content</h3>
+                  <h3 className="text-sm font-mono text-accent font-bold uppercase tracking-widest">詳細內容介紹 (Detailed Content)</h3>
                 </div>
                 <div className="flex-1 flex flex-col">
                   <textarea 
@@ -627,14 +627,14 @@ export default function AdminEventsPage() {
                 onClick={() => setView("LIST")} 
                 className="text-[10px] font-mono text-muted uppercase tracking-widest hover:text-foreground transition-colors"
               >
-                Discard changes
+                捨棄所有變更
               </button>
               <button 
                 type="submit" 
                 className="px-12 py-4 bg-accent text-accent-foreground rounded-2xl text-[10px] font-mono uppercase tracking-widest font-bold shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
-                Publish_to_Site
+                發佈至網站
               </button>
             </div>
           </form>
@@ -677,7 +677,7 @@ export default function AdminEventsPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-full font-mono text-[10px] uppercase tracking-widest hover:bg-accent hover:text-white transition-all shadow-md"
               >
                 <Download className="w-3.5 h-3.5" />
-                Export_CSV
+                匯出全體隊員 CSV
               </button>
             </div>
 
@@ -686,18 +686,18 @@ export default function AdminEventsPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-background border-b border-border">
-                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Team_Member</th>
-                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Contact_Info</th>
-                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Payment</th>
-                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest text-right">Actions</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">隊員資訊 (Team Member)</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">聯絡資訊 (Contact Info)</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">審核狀態 (Status)</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">繳費狀況 (Payment)</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest text-right">操作 (Actions)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
                     {isLoadingRegs ? (
                       <tr>
                         <td colSpan={5} className="p-20 text-center font-mono text-[10px] text-muted animate-pulse uppercase tracking-[0.2em]">
-                          Loading_Registrations...
+                          報名資料載入中...
                         </td>
                       </tr>
                     ) : participants.map(p => {
@@ -731,10 +731,10 @@ export default function AdminEventsPage() {
                                 "border-muted/30 text-muted"
                               }`}
                             >
-                              <option value="pending">PENDING</option>
-                              <option value="confirmed">CONFIRMED</option>
-                              <option value="waitlist">WAITLIST</option>
-                              <option value="cancelled">CANCELLED</option>
+                               <option value="pending">待審核 (PENDING)</option>
+                               <option value="confirmed">已錄取 (CONFIRMED)</option>
+                               <option value="waitlist">候補中 (WAITLIST)</option>
+                               <option value="cancelled">已取消 (CANCELLED)</option>
                             </select>
                           </td>
                           <td className="px-6 py-6">
@@ -754,7 +754,7 @@ export default function AdminEventsPage() {
                                   : 'bg-muted/10 border-border text-muted hover:border-accent/40'
                               }`}
                             >
-                              {p.payment_status === 'paid' ? 'PAID' : 'UNPAID'}
+                              {p.payment_status === 'paid' ? '已繳費 (PAID)' : '未繳費 (UNPAID)'}
                             </button>
                           </td>
                           <td className="px-6 py-6 text-right">
@@ -764,7 +764,7 @@ export default function AdminEventsPage() {
                                 else alert("該隊員無報名備註");
                               }}
                               className="p-2 text-muted hover:text-accent transition-colors"
-                              title="View Note"
+                              title="查看報名備註"
                             >
                               <FileText className="w-4 h-4" />
                             </button>
