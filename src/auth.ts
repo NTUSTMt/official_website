@@ -14,11 +14,14 @@ const supabaseAdmin = createClient(
 );
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
+  secret: process.env.AUTH_SECRET,
   debug: process.env.NODE_ENV === "development" || process.env.VERCEL === "1",
   providers: [
     LineProvider({
       clientId: process.env.LINE_CLIENT_ID,
       clientSecret: process.env.LINE_CLIENT_SECRET,
+      checks: ["state"], // 避免 PKCE 可能導致的 state 解析問題
       authorization: {
         params: {
           scope: "profile openid",
