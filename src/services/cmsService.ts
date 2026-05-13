@@ -14,7 +14,10 @@ export const cmsService = {
 
     if (error) {
       console.error("Error fetching CMS config:", error);
-      return mockCMSConfig; // Fallback to mock data
+      return {
+        ...mockCMSConfig,
+        announcement: { enabled: false, text: "", link: "" }
+      };
     }
     
     return {
@@ -22,7 +25,7 @@ export const cmsService = {
       heroTagline: data.hero_tagline || mockCMSConfig.heroTagline,
       heroSubtext: data.hero_subtext || mockCMSConfig.heroSubtext,
       stats: { ...mockCMSConfig.stats, ...data.stats },
-      announcement: { ...mockCMSConfig.announcement, ...data.announcement },
+      announcement: data.announcement || { enabled: false, text: "", link: "" },
       fees: { ...mockCMSConfig.fees, ...data.fees },
       officeHours: data.office_hours || mockCMSConfig.officeHours,
     };

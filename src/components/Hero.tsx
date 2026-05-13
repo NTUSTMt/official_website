@@ -17,7 +17,7 @@ export default function Hero() {
       <div className="relative z-20 text-center px-4 hero-text-shadow max-w-4xl">
         <h1 className="flex flex-col items-center">
           <span className="text-5xl md:text-8xl font-display leading-[1.1] tracking-tighter mb-4 italic text-white uppercase drop-shadow-2xl">
-            台灣科技大學登山社
+            臺灣科技大學登山社
           </span>
           <span className="text-white font-mono text-sm md:text-lg tracking-[0.5em] uppercase mt-2 opacity-90 font-bold drop-shadow-md">
             NTUST Mountaineering Club

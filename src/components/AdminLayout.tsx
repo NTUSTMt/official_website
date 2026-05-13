@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Globe, Tent, Package, Users, LogOut, LayoutDashboard, FileText } from "lucide-react";
+import { Globe, Tent, Package, Users, LogOut, LayoutDashboard, FileText, Camera } from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -39,6 +39,7 @@ export default function AdminLayout({ children, fullWidth = false }: AdminLayout
     { label: "全站內容 CMS", href: "/admin", icon: Globe },
     { label: "活動與報名", href: "/admin/events", icon: Tent },
     { label: "裝備與訂單", href: "/admin/equipment", icon: Package },
+    { label: "歷史花絮 CMS", href: "/admin/highlights", icon: Camera },
     { label: "會員管理中心", href: "/admin/users", icon: Users },
     { label: "規章制度", href: "/admin/rules", icon: FileText },
   ];

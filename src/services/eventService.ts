@@ -3,7 +3,7 @@ import { EventItem, eventsData } from "@/data/events";
 
 export const eventService = {
   async getAllEvents() {
-    if (!isSupabaseConfigured) return eventsData;
+    if (!isSupabaseConfigured) return [];
     
     const { data, error } = await supabase
       .from("events")
@@ -12,16 +12,14 @@ export const eventService = {
     
     if (error) {
       console.error("Error fetching events from Supabase:", error);
-      return eventsData;
+      return [];
     }
     
-    return data.length > 0 ? data.map(this.mapDbToEvent) : eventsData;
+    return data.map((db: any) => this.mapDbToEvent(db));
   },
 
   async getEventById(id: string) {
-    if (!isSupabaseConfigured) {
-      return eventsData.find(e => e.id === id) || null;
-    }
+    if (!isSupabaseConfigured) return null;
 
     const { data, error } = await supabase
       .from("events")
@@ -31,13 +29,10 @@ export const eventService = {
 
     if (error) {
       console.error(`Error fetching event ${id} from Supabase:`, error);
-      // Fallback to mock data if DB fetch fails
-      return eventsData.find(e => e.id === id) || null;
+      return null;
     }
 
-    if (!data) {
-      return eventsData.find(e => e.id === id) || null;
-    }
+    if (!data) return null;
 
     return this.mapDbToEvent(data);
   },
