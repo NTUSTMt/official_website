@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js"
 
 // 建立一個擁有管理權限的 Supabase 客戶端來寫入資料
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key",
   {
     auth: {
       persistSession: false,
@@ -14,6 +14,7 @@ const supabaseAdmin = createClient(
 );
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: process.env.NODE_ENV === "development" || process.env.VERCEL === "1",
   providers: [
     LineProvider({
       clientId: process.env.LINE_CLIENT_ID,

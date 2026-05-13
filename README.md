@@ -32,5 +32,13 @@
 *   **SQL 同步**：新增功能請執行 `src/lib/activity_schema.sql`。
 *   **活動管理**：後台管理介面將持續擴充活動新增與報名名單匯出功能。
 
+## ⚠️ 部署注意事項 (Vercel Deployment)
+若在 Vercel 部署後遇到 `Server error: There is a problem with the server configuration`，通常是因為缺少 NextAuth (Auth.js) v5 所需的環境變數。請確保在 Vercel Settings > Environment Variables 中設定以下變數：
+
+1.  **`AUTH_SECRET`** (必填): 可使用 `npx auth secret` 產生。
+2.  **`AUTH_TRUST_HOST`**: 設定為 `true`。
+3.  **`LINE_CLIENT_ID`** & **`LINE_CLIENT_SECRET`**: LINE Login 專案的憑證。
+4.  **`NEXT_PUBLIC_SUPABASE_URL`** & **`SUPABASE_SERVICE_ROLE_KEY`**: Supabase 專案的連接資訊。
+
 ---
 *語言：繁體中文 / English*
