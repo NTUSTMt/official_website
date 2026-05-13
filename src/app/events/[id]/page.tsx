@@ -4,6 +4,7 @@ import { difficultyLevels } from "@/data/events";
 import { eventService } from "@/services/eventService";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import RegistrationCTA from "@/components/RegistrationCTA";
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -129,23 +130,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             </div>
 
             <div className="space-y-4">
-              {event.status === "open" && event.signupUrl ? (
-                <a 
-                  href={event.signupUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full py-6 bg-accent text-white rounded-full font-mono text-center text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-accent/20"
-                >
-                  一鍵報名
-                </a>
-              ) : (
-                <button 
-                  disabled
-                  className="block w-full py-6 bg-muted/10 text-muted/40 rounded-full font-mono text-center text-xs uppercase tracking-[0.3em] cursor-not-allowed"
-                >
-                  無法報名
-                </button>
-              )}
+              <RegistrationCTA event={event} />
               
               <div className="p-6 border border-border/50 rounded-2xl text-center">
                 <p className="text-[10px] font-mono text-muted/60 uppercase tracking-widest leading-relaxed">

@@ -5,25 +5,32 @@
 ## 🚀 新增功能亮點
 
 ### 1. 後台管理中心 (Admin Dashboard)
-*   **安全存取**：隱藏式登入路徑 `/admin/login`，採用環境變數進行憑證驗證，並透過 HttpOnly Cookie 維持安全會話。
-*   **會員管理 (Excel-like)**：提供高效的表格介面，支援即時搜尋、社員狀態切換（Active/Unpaid/Alumni）及財務餘額調整。
-*   **權限守衛**：實作 Middleware 自動攔截未授權的後台存取請求。
+*   **全站內容管理 (`/admin`)**：負責 CMS 設定，包括「關於我們」、歷任幹部、活動分級說明及社務職掌等內容。
+*   **活動與報名管理 (`/admin/events`)**：專門用於管理活動行程、新增活動以及進行「隊員名單審核」。
+    *   **名單深度整合**：自動關聯隊員個人資料（真實姓名、系級、學號、緊急聯絡資訊）。
+    *   **狀態即時控制**：快速切換審核狀態（待審核/已確認）與繳費狀態（已繳費/未繳費）。
+    *   **報表匯出**：支援一鍵下載 CSV 報名表，提升幹部統計效率。
+*   **安全守衛**：採用環境變數驗證與 Middleware 攔截，確保管理路徑的安全。
 
 ### 2. 我的足跡 (My Footprints)
 *   **個人簡介**：動態展示社員身分、專業技能標籤及財務狀態。
 *   **山岳足跡**：允許社員手動登錄攀登歷史，並能自動同步社團官方出隊紀錄。
 *   **詳細資料管理**：社員可自行完善緊急聯絡人、證件號碼等資訊，用於自動化報名流程。
 
+### 3. 活動報名系統 (Activity Registration)
+*   **一鍵報名**：整合 LINE 登入身分，自動帶入個人檔案中的緊急聯絡人資訊。
+*   **後端驗證**：自動檢查重複報名、活動名額限制及報名截止狀態。
+*   **狀態追蹤**：提供即時的報名狀態回饋（待審核/已確認）及繳費狀態管理。
+
 ## 🛠 技術實作細節
-*   **資料庫**：Supabase (PostgreSQL) 擴充 `user_profiles` 與 `user_peaks` 資料表。
-*   **認證**：自定義 API Auth 路由 + Next.js Middleware。
-*   **介面**：採用高級感 (Premium) 的現代化設計，包含微動畫、磨砂玻璃效果與 HSL 調色盤。
-*   **修正**：解決了 `userService.ts` 中物件方法間遺漏逗號導致的語法錯誤 (Build Error)。
+*   **資料庫**：Supabase (PostgreSQL) 擴充 `events` 與 `event_registrations` 資料表。
+*   **認證**：整合 LINE 登入 (NextAuth) 與 Supabase Adapter。
+*   **前端**：使用 Framer Motion 實作流暢的報名彈窗 (RegistrationModal)。
 
 ## 📝 後續維護說明 (README Update)
-*   **環境變數**：請確保 `.env.local` 包含 `ADMIN_USER` 與 `ADMIN_PASS`。
-*   **SQL 同步**：若新增欄位，請執行 `src/lib/database.sql` 中的定義。
-*   **租借系統連動**：目前已預留餘額欄位，後續可串接裝備歸還後的逾期自動扣款邏輯。
+*   **環境變數**：請確保 `.env.local` 包含 `SUPABASE_SERVICE_ROLE_KEY`。
+*   **SQL 同步**：新增功能請執行 `src/lib/activity_schema.sql`。
+*   **活動管理**：後台管理介面將持續擴充活動新增與報名名單匯出功能。
 
 ---
 *語言：繁體中文 / English*

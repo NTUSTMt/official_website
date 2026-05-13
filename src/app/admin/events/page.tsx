@@ -5,8 +5,9 @@ import AdminLayout from "@/components/AdminLayout";
 import { eventsData, EventItem, difficultyLevels } from "@/data/events";
 import { eventService, registrationService } from "@/services/eventService";
 import { historyService } from "@/services/cmsService";
+import { userService } from "@/services/userService";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon } from "lucide-react";
+import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText } from "lucide-react";
 
 type ViewState = "LIST" | "EDIT_EVENT" | "VIEW_PARTICIPANTS";
 type Tab = "EVENTS" | "CALENDAR";
@@ -17,8 +18,10 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<Record<string, any>>({});
   const [calendars, setCalendars] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingRegs, setIsLoadingRegs] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string>("");
 
@@ -41,9 +44,32 @@ export default function AdminEventsPage() {
 
   // Load participants when viewing an event
   useEffect(() => {
-    if (view === "VIEW_PARTICIPANTS" && selectedEvent) {
-      registrationService.getRegistrations(selectedEvent.id).then(setParticipants);
+    async function loadParticipants() {
+      if (view === "VIEW_PARTICIPANTS" && selectedEvent) {
+        setIsLoadingRegs(true);
+        try {
+          const regs = await registrationService.getRegistrations(selectedEvent.id);
+          setParticipants(regs);
+          
+          // Fetch user profiles for these registrations
+          const userIds = [...new Set(regs.map((r: any) => r.user_id))];
+          const profiles: Record<string, any> = {};
+          
+          await Promise.all(userIds.map(async (uid: any) => {
+            const profile = await userService.getProfile(uid);
+            if (profile) profiles[uid] = profile;
+          }));
+          
+          setRegisteredUsers(profiles);
+        } catch (err) {
+          console.error("Failed to load participants:", err);
+        } finally {
+          setIsLoadingRegs(false);
+        }
+      }
     }
+    loadParticipants();
+    
     if (view === "EDIT_EVENT") {
       setPreviewImage(selectedEvent?.coverImage || "");
     }
@@ -620,58 +646,136 @@ export default function AdminEventsPage() {
             <div className="bg-accent/5 border border-accent/20 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
                 <h3 className="text-lg font-serif mb-1">報名統計數據</h3>
-                <p className="text-xs font-mono text-muted uppercase">Total: {participants.length} | Pending: {participants.filter(p => p.status === "PENDING").length}</p>
+                <p className="text-xs font-mono text-muted uppercase">
+                  Total: {participants.length} | Admitted: {participants.filter(p => p.status === "ADMITTED" || p.status === "confirmed").length}
+                </p>
               </div>
+              <button 
+                onClick={() => {
+                  const headers = ["姓名", "系級", "學號", "電話", "緊急聯絡人", "緊急聯絡電話", "狀態", "繳費", "備註"];
+                  const rows = participants.map(p => {
+                    const profile = registeredUsers[p.user_id];
+                    return [
+                      profile?.real_name || "Unknown",
+                      profile?.department || "-",
+                      profile?.student_id || "-",
+                      profile?.phone || "-",
+                      profile?.emergency_contact_name || "-",
+                      profile?.emergency_contact_phone || "-",
+                      p.status,
+                      p.payment_status,
+                      p.note || ""
+                    ];
+                  });
+                  const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
+                  const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `registrations_${selectedEvent.title}_${new Date().toLocaleDateString()}.csv`;
+                  link.click();
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-full font-mono text-[10px] uppercase tracking-widest hover:bg-accent hover:text-white transition-all shadow-md"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export_CSV
+              </button>
             </div>
 
             <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-sm">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-background border-b border-border">
-                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Team_Member</th>
-                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Payment</th>
-                    <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Signup_Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {participants.map(p => (
-                    <tr key={p.id} className="hover:bg-background/50 transition-colors">
-                      <td className="px-6 py-6">
-                        <div className="text-sm font-serif font-bold">{p.real_name}</div>
-                        <div className="text-[10px] font-mono text-muted/60">{p.student_id} • {p.phone}</div>
-                      </td>
-                      <td className="px-6 py-6">
-                        <select 
-                          value={p.status} 
-                          onChange={(e) => handleUpdateParticipantStatus(p.id, e.target.value)}
-                          className={`text-[9px] font-mono px-2 py-1 rounded border uppercase font-bold outline-none ${
-                            p.status === "ADMITTED" ? "border-emerald-500/30 text-emerald-600" :
-                            p.status === "WAITLISTED" ? "border-amber-500/30 text-amber-600" :
-                            "border-muted/30 text-muted"
-                          }`}
-                        >
-                          <option value="PENDING">PENDING</option>
-                          <option value="ADMITTED">ADMITTED</option>
-                          <option value="WAITLISTED">WAITLISTED</option>
-                          <option value="CANCELLED">CANCELLED</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-6">
-                        <span className={`text-[9px] font-mono px-2 py-1 rounded bg-surface border border-border tracking-widest ${
-                          p.payment_status === "PAID" ? "text-emerald-500" : p.payment_status === "VERIFYING" ? "text-amber-500" : "text-red-400"
-                        }`}>
-                          {p.payment_status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-6 font-mono text-[10px] text-muted">
-                        {new Date(p.signup_date).toLocaleDateString()}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-background border-b border-border">
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Team_Member</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Contact_Info</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Status</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest">Payment</th>
+                      <th className="px-6 py-5 text-[10px] font-mono text-muted uppercase tracking-widest text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {participants.length === 0 && (
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {isLoadingRegs ? (
+                      <tr>
+                        <td colSpan={5} className="p-20 text-center font-mono text-[10px] text-muted animate-pulse uppercase tracking-[0.2em]">
+                          Loading_Registrations...
+                        </td>
+                      </tr>
+                    ) : participants.map(p => {
+                      const profile = registeredUsers[p.user_id];
+                      return (
+                        <tr key={p.id} className="hover:bg-background/50 transition-colors group">
+                          <td className="px-6 py-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[10px] font-mono uppercase">
+                                {profile?.real_name?.charAt(0) || "?"}
+                              </div>
+                              <div>
+                                <div className="text-sm font-serif font-bold">{profile?.real_name || "未填寫姓名"}</div>
+                                <div className="text-[10px] font-mono text-muted/60 uppercase">{profile?.department || "DEPT_UNKNOWN"} • {profile?.student_id || "ID_UNKNOWN"}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-6">
+                            <div className="text-[10px] font-mono text-muted leading-relaxed">
+                              Phone: {profile?.phone || "NO_PHONE"}<br />
+                              Emergency: {profile?.emergency_contact_name || "-"}: {profile?.emergency_contact_phone || "-"}
+                            </div>
+                          </td>
+                          <td className="px-6 py-6">
+                            <select 
+                              value={p.status} 
+                              onChange={(e) => handleUpdateParticipantStatus(p.id, e.target.value)}
+                              className={`text-[9px] font-mono px-2 py-1 rounded border uppercase font-bold outline-none cursor-pointer hover:border-accent transition-colors ${
+                                p.status === "ADMITTED" || p.status === "confirmed" ? "border-emerald-500/30 text-emerald-600" :
+                                p.status === "WAITLISTED" || p.status === "waitlist" ? "border-amber-500/30 text-amber-600" :
+                                "border-muted/30 text-muted"
+                              }`}
+                            >
+                              <option value="pending">PENDING</option>
+                              <option value="confirmed">CONFIRMED</option>
+                              <option value="waitlist">WAITLIST</option>
+                              <option value="cancelled">CANCELLED</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-6">
+                            <button
+                              onClick={async () => {
+                                const newStatus = p.payment_status === 'paid' ? 'unpaid' : 'paid';
+                                try {
+                                  await registrationService.updatePaymentStatus(p.id, newStatus);
+                                  setParticipants(prev => prev.map(item => item.id === p.id ? { ...item, payment_status: newStatus } : item));
+                                } catch (err) {
+                                  alert("更新失敗");
+                                }
+                              }}
+                              className={`px-3 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest border transition-all ${
+                                p.payment_status === 'paid' 
+                                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' 
+                                  : 'bg-muted/10 border-border text-muted hover:border-accent/40'
+                              }`}
+                            >
+                              {p.payment_status === 'paid' ? 'PAID' : 'UNPAID'}
+                            </button>
+                          </td>
+                          <td className="px-6 py-6 text-right">
+                            <button 
+                              onClick={() => {
+                                if (p.note) alert(`報名備註：\n${p.note}`);
+                                else alert("該隊員無報名備註");
+                              }}
+                              className="p-2 text-muted hover:text-accent transition-colors"
+                              title="View Note"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {!isLoadingRegs && participants.length === 0 && (
                 <div className="p-20 text-center text-muted font-serif italic">目前尚無隊員報名</div>
               )}
             </div>

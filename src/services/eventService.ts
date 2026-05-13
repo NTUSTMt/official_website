@@ -119,5 +119,68 @@ export const registrationService = {
       .eq("id", id);
     
     if (error) throw error;
+  },
+
+  async updatePaymentStatus(id: string, payment_status: string) {
+    const { error } = await supabase
+      .from("event_registrations")
+      .update({ payment_status })
+      .eq("id", id);
+    
+    if (error) throw error;
+  },
+
+  async registerForEvent(eventId: string, userId: string, note?: string) {
+    // 1. 檢查是否已報名
+    const { data: existing } = await supabase
+      .from("event_registrations")
+      .select("id")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) {
+      throw new Error("您已經報名過此活動囉！");
+    }
+
+    // 2. 檢查活動狀態與名額 (選擇性，若有設定 max_participants)
+    const { data: event } = await supabase
+      .from("events")
+      .select("status, max_participants")
+      .eq("id", eventId)
+      .single();
+
+    if (event && event.status !== 'open') {
+      throw new Error("此活動目前不開放報名。");
+    }
+
+    // 3. 執行報名
+    const { data, error } = await supabase
+      .from("event_registrations")
+      .insert({
+        event_id: eventId,
+        user_id: userId,
+        note: note,
+        signup_date: new Date().toISOString(),
+        status: 'pending',
+        payment_status: 'unpaid'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getMyRegistration(eventId: string, userId: string) {
+    const { data, error } = await supabase
+      .from("event_registrations")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) return null;
+    return data;
   }
 };

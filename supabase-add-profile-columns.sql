@@ -8,4 +8,5 @@ ADD COLUMN IF NOT EXISTS emergency_contact_name text,
 ADD COLUMN IF NOT EXISTS emergency_contact_phone text,
 ADD COLUMN IF NOT EXISTS skills text[],
 ADD COLUMN IF NOT EXISTS balance integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS role text DEFAULT 'USER',
 ADD COLUMN IF NOT EXISTS created_at timestamp with time zone DEFAULT now();
