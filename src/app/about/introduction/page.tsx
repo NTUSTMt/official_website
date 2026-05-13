@@ -30,6 +30,7 @@ export default function IntroductionPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <Navbar />
       <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
         <section className={`mb-20 transition-opacity duration-700 ${isLoading ? "opacity-50" : "opacity-100"}`}>
           <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">

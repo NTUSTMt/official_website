@@ -55,7 +55,7 @@ export default function EventListPage() {
   }, [filter]);
 
   return (
-    <main className="min-h-screen pb-24 overflow-x-hidden">
+    <main className="min-h-screen pb-24">
       <Navbar />
       
       <div className="pt-32">
