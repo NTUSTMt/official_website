@@ -21,7 +21,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     LineProvider({
       clientId: process.env.LINE_CLIENT_ID,
       clientSecret: process.env.LINE_CLIENT_SECRET,
-      checks: ["state"], // 避免 PKCE 可能導致的 state 解析問題
+      checks: ["state"],
+      // 確保 callbackUrl 正確，避免出現 /callback/line/callback/line 的情況
+      callbackUrl: process.env.AUTH_URL 
+        ? `${process.env.AUTH_URL}/api/auth/callback/line` 
+        : undefined,
       authorization: {
         params: {
           scope: "profile openid",
