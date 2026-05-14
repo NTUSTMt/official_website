@@ -6,6 +6,7 @@ import { galleryService } from "@/services/galleryService";
 import { upsertGalleryAction, deleteGalleryAction } from "./actions";
 import { EventGallery } from "@/data/events";
 import { Save, Plus, Trash2, Camera, ChevronLeft, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { uploadFilesAction } from "../uploadAction";
 
 type ViewMode = "LIST" | "EDIT";
 
@@ -87,7 +88,14 @@ export default function AdminHighlightsPage() {
 
     setIsUploading(true);
     try {
-      const urls = await galleryService.uploadImages(files);
+      const formData = new FormData();
+      files.forEach(file => formData.append("files", file));
+      formData.append("bucket", "activity-images");
+
+      const result = await uploadFilesAction(formData);
+      if (!result.success) throw new Error(result.error);
+      
+      const urls = result.publicUrls!;
       const newImages = urls.map(url => ({ src: url, caption: "" }));
       setSelectedGallery({
         ...selectedGallery,

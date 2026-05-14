@@ -8,6 +8,7 @@ import { committeeData } from "@/data/committee";
 import { historyService, cmsService } from "@/services/cmsService";
 import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAction, saveCmsConfigAction } from "./cms-actions";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { uploadFileAction } from "./uploadAction";
 import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X, Mail, Link as LinkIcon, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS" | "CONTACT" | "FOOTER";
@@ -161,15 +162,19 @@ export default function AdminDashboardPage() {
       const fileName = `${committees[yIdx].year}_${committees[yIdx].members[mIdx].name}_${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      // Create FormData for server action
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", fileName);
+      formData.append("bucket", "avatars");
 
-      if (uploadError) throw uploadError;
+      const result = await uploadFileAction(formData);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const publicUrl = result.publicUrl!;
 
       const newCommittees = [...committees];
       newCommittees[yIdx].members[mIdx].avatar = publicUrl;
@@ -310,9 +315,15 @@ export default function AdminDashboardPage() {
                                     try {
                                       const fileExt = file.name.split('.').pop();
                                       const fileName = `contact_${platform}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                                      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
-                                      if (uploadError) throw uploadError;
-                                      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+                                      const formData = new FormData();
+                                      formData.append("file", file);
+                                      formData.append("fileName", fileName);
+                                      formData.append("bucket", "avatars");
+
+                                      const result = await uploadFileAction(formData);
+                                      if (!result.success) throw new Error(result.error);
+                                      
+                                      const publicUrl = result.publicUrl!;
                                       const newContact = { ...contactInfo };
                                       newContact[platform].qrcode = publicUrl;
                                       setContactInfo(newContact);

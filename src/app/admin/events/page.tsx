@@ -7,6 +7,7 @@ import { eventService, registrationService } from "@/services/eventService";
 import { historyService, cmsService } from "@/services/cmsService";
 import { userService } from "@/services/userService";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { uploadFileAction } from "../uploadAction";
 import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText } from "lucide-react";
 
 type ViewState = "LIST" | "EDIT_EVENT" | "VIEW_PARTICIPANTS";
@@ -82,17 +83,19 @@ export default function AdminEventsPage() {
       const fileName = `${bucketName}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file);
+      // Create FormData for server action
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", fileName);
+      formData.append("bucket", bucketName);
 
-      if (uploadError) throw uploadError;
+      const result = await uploadFileAction(formData);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(filePath);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
-      return publicUrl;
+      return result.publicUrl!;
     } catch (error) {
       console.error('Error uploading:', error);
       alert(`上傳失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
