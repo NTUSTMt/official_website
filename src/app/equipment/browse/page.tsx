@@ -68,18 +68,18 @@ export default function EquipmentBrowsePage() {
     <main className="min-h-screen bg-background pb-32">
       <Navbar />
       
-      <div className="pt-32 px-6 max-w-7xl mx-auto">
-        <section className="mb-12">
+      <div className="pt-24 px-6 max-w-7xl mx-auto">
+        <section className="mb-6">
           
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-3 mb-12">
+          <div className="flex overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap gap-3 mb-6 pb-4 md:pb-0">
             {CATEGORIES.map(cat => (cat !== undefined && (
               <button 
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-6 py-2 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
+                className={`flex-shrink-0 px-6 py-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
                   activeCategory === cat 
-                    ? "bg-accent text-white shadow-lg shadow-accent/20" 
+                    ? "bg-accent text-white shadow-lg shadow-accent/20 scale-105" 
                     : "bg-surface text-muted border border-border hover:border-accent"
                 }`}
               >
@@ -94,7 +94,7 @@ export default function EquipmentBrowsePage() {
             Loading_Equipment...
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8">
             {filteredItems.map((item) => {
               const qty = getItemQty(item.id);
               const isOutOfStock = item.availableQty <= 0;
@@ -102,7 +102,7 @@ export default function EquipmentBrowsePage() {
               return (
                 <div 
                   key={item.id}
-                  className={`group bg-surface border border-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 ${isOutOfStock ? "opacity-75 grayscale-[0.5]" : ""}`}
+                  className={`group bg-surface border border-border rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 ${isOutOfStock ? "opacity-75 grayscale-[0.5]" : ""}`}
                 >
                   {/* 1. Image Area */}
                   <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
@@ -121,14 +121,14 @@ export default function EquipmentBrowsePage() {
                     )}
 
                     {item.isMemberOnly && (
-                      <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
+                      <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[8px] md:text-[10px] font-mono px-2 md:px-3 py-0.5 md:py-1 rounded-full uppercase tracking-widest font-bold z-20">
                         🔒 社員限定
                       </div>
                     )}
                     
                     {isOutOfStock && (
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30">
-                        <div className="bg-white/90 px-6 py-2 rounded-full font-display italic text-red-600 text-sm shadow-xl">
+                        <div className="bg-white/90 px-4 md:px-6 py-1 md:py-2 rounded-full font-display italic text-red-600 text-[10px] md:text-sm shadow-xl">
                           已借光 Out of Stock
                         </div>
                       </div>
@@ -136,50 +136,51 @@ export default function EquipmentBrowsePage() {
                   </div>
 
                   {/* Content Container */}
-                  <div className="p-8 flex flex-1 flex-col">
+                  <div className="p-4 md:p-8 flex flex-1 flex-col">
                     {/* 2. System & Remaining Qty */}
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="font-mono text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
-                      <div className="font-mono text-xs text-muted uppercase tracking-widest">
-                        剩餘: <span className={`font-bold ${isOutOfStock ? "text-red-500" : "text-foreground"}`}>{item.availableQty}</span>
+                    <div className="flex justify-between items-center mb-1 md:mb-2">
+                      <div className="font-mono text-[8px] md:text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
+                      <div className="font-mono text-muted uppercase tracking-widest flex items-baseline gap-0.5">
+                        <span className={`font-bold text-xs md:text-sm ${isOutOfStock ? "text-red-500" : "text-foreground"}`}>{item.availableQty}</span>
+                        <span className="opacity-40 text-[8px] md:text-[10px]">/{item.quantity}</span>
                       </div>
                     </div>
 
                     {/* 3. Name */}
-                    <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
+                    <h3 className="text-base md:text-xl font-display italic mb-1 md:mb-2 line-clamp-1">{item.name}</h3>
 
                     {/* 4. Note (Details) */}
-                    <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
+                    <p className="text-[11px] md:text-sm font-serif text-muted/60 mb-4 md:mb-6 line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] leading-relaxed break-words">
                       {item.details || "專業登山裝備，提供完善防護與便利性。"}
                     </p>
 
                     <div className="mt-auto">
                       {/* 5. Pricing (Base & Extra) */}
-                      <div className="flex justify-between items-end mb-6 p-4 bg-background/50 border border-border/50 rounded-2xl">
+                      <div className="flex justify-between items-end mb-4 md:mb-6 p-2 md:p-4 bg-background/50 border border-border/50 rounded-xl md:rounded-2xl">
                         <div className="font-mono">
-                          <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Base (2D)</div>
-                          <div className="text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
+                          <div className="text-[7px] md:text-[8px] text-muted/40 uppercase tracking-widest mb-0.5 md:mb-1">Base</div>
+                          <div className="text-xs md:text-sm font-bold text-accent">${item.pricing?.base2Days || 0}</div>
                         </div>
-                        <div className="w-px h-6 bg-border/50"></div>
+                        <div className="w-px h-4 md:h-6 bg-border/50"></div>
                         <div className="font-mono text-right">
-                          <div className="text-[8px] text-muted/40 uppercase tracking-widest mb-1">Extra / Day</div>
-                          <div className="text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
+                          <div className="text-[7px] md:text-[8px] text-muted/40 uppercase tracking-widest mb-0.5 md:mb-1">Extra</div>
+                          <div className="text-xs md:text-sm font-bold">${item.pricing?.perExtraDay || 0}</div>
                         </div>
                       </div>
 
                       {qty > 0 ? (
-                        <div className="flex items-center justify-between bg-accent text-white rounded-full p-1">
+                        <div className="flex items-center justify-between bg-accent text-white rounded-full h-10 md:h-14 p-1">
                           <button 
                             onClick={() => updateQty(item.id, -1)}
-                            className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold"
+                            className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold text-sm md:text-lg"
                           >
                             -
                           </button>
-                          <span className="font-mono font-bold">{qty}</span>
+                          <span className="font-mono font-bold text-sm md:text-base">{qty}</span>
                           <button 
                             onClick={() => updateQty(item.id, 1)}
                             disabled={qty >= item.availableQty}
-                            className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold disabled:opacity-30"
+                            className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors font-bold text-sm md:text-lg disabled:opacity-30"
                           >
                             +
                           </button>
@@ -188,9 +189,9 @@ export default function EquipmentBrowsePage() {
                         <button 
                           onClick={() => handleAddToCart(item)}
                           disabled={isOutOfStock}
-                          className="w-full py-4 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg shadow-accent/20 disabled:bg-muted/20 disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
+                          className="w-full h-10 md:h-14 bg-accent text-white rounded-full font-mono text-[10px] md:text-sm uppercase tracking-wide hover:brightness-110 transition-all shadow-lg shadow-accent/20 disabled:bg-muted/20 disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
                         >
-                          {isOutOfStock ? "暫時借光" : "加入租借單"}
+                          {isOutOfStock ? "已借光" : "加入租借單"}
                         </button>
                       )}
                     </div>
@@ -203,7 +204,7 @@ export default function EquipmentBrowsePage() {
 
         {/* Sticky Checkout Bar */}
         {cartTotalItems > 0 && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-50">
+          <div className="fixed bottom-12 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-50 px-safe">
             <div className="bg-surface/80 backdrop-blur-xl border border-accent/30 p-3 md:p-6 rounded-[2.5rem] shadow-2xl flex items-center justify-between gap-2 md:gap-6">
               <div className="flex items-center gap-3 md:gap-6 px-2 md:px-4 min-w-0">
                 <div className="relative flex-shrink-0">

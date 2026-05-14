@@ -64,11 +64,11 @@ export default function ProfilePage() {
   return (
     <ProfileLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <header className="flex flex-col md:flex-row items-center justify-between gap-10 mb-16">
-          <div className="flex flex-col md:flex-row items-center gap-10">
+        <header className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 mb-8 md:mb-16">
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
             <div className="relative group">
               <div className="absolute inset-0 bg-accent rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-              <div className="w-40 h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt={user.real_name} className="w-full h-full object-cover" />
                 ) : (
@@ -81,10 +81,10 @@ export default function ProfilePage() {
             </div>
             <div className="text-center md:text-left">
               <div className="font-mono text-[10px] text-accent mb-3 font-bold tracking-[0.3em] uppercase">
-                Club_Member {user.student_id || "ID_PENDING"}
+                ID: {user.student_id || "ID_PENDING"}
               </div>
-              <h1 className="text-4xl md:text-5xl font-display italic mb-6">{user.real_name || user.nickname || "神秘社員"}</h1>
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
+               <h1 className="text-3xl md:text-5xl font-display italic mb-4 md:mb-6">{user.real_name || user.nickname || "神秘社員"}</h1>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4 md:mb-6">
                 {user.skills?.map((skill, i) => (
                   <span key={i} className="px-3 py-1 bg-accent/5 text-accent border border-accent/10 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
                     {skill}
@@ -105,7 +105,7 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Recent Peaks */}
-          <div className="p-10 bg-background border border-border rounded-[2.5rem] flex flex-col justify-between">
+          <div className="p-6 md:p-10 bg-background border border-border rounded-[2rem] md:rounded-[2.5rem] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <Award className="w-5 h-5 text-accent" />
@@ -133,7 +133,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Account Status */}
-          <div className="p-10 bg-background border border-border rounded-[2.5rem] flex flex-col justify-between">
+          <div className="p-6 md:p-10 bg-background border border-border rounded-[2rem] md:rounded-[2.5rem] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <Shield className="w-5 h-5 text-accent" />

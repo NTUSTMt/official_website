@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, User, Phone, ShieldAlert, MessageSquare, CheckCircle2 } from "lucide-react";
 import { EventItem } from "@/data/events";
 import { registrationService } from "@/services/eventService";
@@ -35,6 +36,22 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
+  // Validation: Check if all fields except 'note' are filled
+  const isFormValid = Object.entries(formData).every(([key, value]) => {
+    if (typeof value === 'string') return value.trim() !== "";
+    return !!value;
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,9 +82,11 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
     }
   };
 
+  if (!mounted) return null;
+
   if (isSuccess) {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
         <div className="bg-surface w-full max-w-md p-12 rounded-[3rem] border border-emerald-500/20 shadow-2xl text-center">
           <div className="w-20 h-20 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10" />
@@ -75,13 +94,14 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
           <h3 className="text-3xl font-display italic mb-4">報名成功！</h3>
           <p className="text-muted font-serif">您的報名資料已送出，請靜候幹部審核。</p>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-surface w-full max-w-3xl rounded-[3rem] border border-border shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-surface w-full max-w-4xl rounded-[3rem] border border-border shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
         <button 
           onClick={onClose}
           className="absolute top-8 right-8 p-2 text-muted hover:text-foreground transition-colors z-20 bg-surface/80 backdrop-blur-md rounded-full border border-border"
@@ -89,7 +109,7 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-8 md:p-12">
+        <div className="p-6">
           <header className="mb-10">
             <span className="text-[10px] font-mono text-accent uppercase tracking-[0.2em] block mb-2 font-bold">Insurance & Registration</span>
             <h2 className="text-3xl font-display italic text-foreground leading-tight">
@@ -344,10 +364,14 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
 
               <button 
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-6 bg-foreground text-background rounded-full font-mono text-xs uppercase tracking-[0.4em] hover:bg-accent hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-foreground/10"
+                disabled={isSubmitting || !isFormValid}
+                className={`w-full py-6 rounded-full font-mono text-xs uppercase tracking-[0.4em] transition-all shadow-xl ${
+                  isFormValid 
+                    ? "bg-foreground text-background hover:bg-accent hover:text-white shadow-foreground/10" 
+                    : "bg-muted/10 text-muted/40 cursor-not-allowed shadow-none"
+                }`}
               >
-                {isSubmitting ? "PROCESSING..." : "CONFIRM_AND_SUBMIT"}
+                {isSubmitting ? "PROCESSING..." : isFormValid ? "CONFIRM_AND_SUBMIT" : "請填寫完整資訊以報名"}
               </button>
               
               <p className="text-center text-[9px] font-mono text-muted uppercase tracking-widest">
@@ -357,6 +381,7 @@ export default function RegistrationModal({ event, user, onClose, onSuccess }: R
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

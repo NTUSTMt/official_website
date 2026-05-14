@@ -32,8 +32,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center border-t border-border pt-6">
           <p className="text-[11px] font-mono text-muted/80 leading-relaxed mb-6">
-            登入即表示您同意將您的 LINE User ID 提供給社團，<br/>
-            以便未來接收出隊推播與租借提醒。
+            登入即表示您同意將您的 LINE User ID 提供給社團，以便未來接收出隊推播與租借提醒。
           </p>
           <Link href="/" className="text-[10px] font-mono text-muted hover:text-accent transition-colors uppercase tracking-widest underline underline-offset-4">
             Back_to_Home

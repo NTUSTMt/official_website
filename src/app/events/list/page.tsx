@@ -53,7 +53,7 @@ export default function EventListPage() {
     <main className="min-h-screen pb-24">
       <Navbar />
       
-      <div className="pt-32">
+      <div className="pt-24">
 
 
         {isLoading ? (
@@ -109,11 +109,11 @@ export default function EventListPage() {
                                 <div className="font-mono text-[10px] text-muted/60">{event.cost}</div>
                               </div>
                               
-                              <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors line-clamp-2">
+                              <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors line-clamp-2 break-words">
                                 {event.title}
                               </h3>
                               
-                              <p className="text-sm font-serif text-muted leading-relaxed mb-8 line-clamp-3">
+                              <p className="text-sm font-serif text-muted leading-relaxed mb-8 line-clamp-3 break-words">
                                 {event.summary}
                               </p>
 

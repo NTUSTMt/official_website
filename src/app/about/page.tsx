@@ -11,7 +11,7 @@ export default function AboutDirectoryPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
         <section className="mb-20 text-center">
           <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
             關於山社 <span className="text-muted/20">About Us</span>

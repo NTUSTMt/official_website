@@ -30,8 +30,8 @@ export default function DynamicHero() {
   const segments = pathname.split("/").filter(Boolean);
   const rootPath = segments[0] || "";
   
-  // Don't show on admin pages
-  if (rootPath === "admin") return null;
+  // Don't show on admin or login pages
+  if (rootPath === "admin" || rootPath === "login") return null;
 
   const bgImage = HERO_IMAGES[rootPath] || HERO_IMAGES[""];
   const bgPosition = HERO_POSITIONS[rootPath] || "center";

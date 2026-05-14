@@ -4,7 +4,9 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { equipmentData, EquipmentItem, EquipmentCategory } from "@/data/equipment";
 import { equipmentService, rentalService } from "@/services/equipmentService";
-import { Trash2, Pencil, Plus, Search, Package, CheckCircle, XCircle } from "lucide-react";
+import { Trash2, Pencil, Plus, Search, Package, CheckCircle, XCircle, Save, Upload, X } from "lucide-react";
+import { uploadFileAction } from "../uploadAction";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 type Tab = "INVENTORY" | "RENTALS";
 
@@ -41,6 +43,35 @@ export default function AdminEquipmentPage() {
       setPreviewImage(null);
     }
   }, [editingItem, isModalOpen]);
+  
+  const handleFileUpload = async (file: File, bucketName: string = "equipment") => {
+    if (!isSupabaseConfigured) return null;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${bucketName}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", fileName);
+      formData.append("bucket", bucketName);
+
+      const result = await uploadFileAction(formData);
+
+      if (!result.success) {
+        // 特別檢查如果是桶子不存在的錯誤
+        if (result.error.includes("not found")) {
+          throw new Error(`儲存桶「${bucketName}」不存在，請先在 Supabase 控制台建立此 Storage Bucket 並設為 Public。`);
+        }
+        throw new Error(`儲存服務錯誤: ${result.error}`);
+      }
+
+      return result.publicUrl!;
+    } catch (error) {
+      console.error('Error uploading:', error);
+      alert(`上傳失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
+      return null;
+    }
+  };
 
   const handleSaveItem = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,11 +79,14 @@ export default function AdminEquipmentPage() {
     const formData = new FormData(e.currentTarget);
     const file = (formData.get("image") as File);
     
-    let imageUrl = editingItem?.image || "";
+    let imageUrl = previewImage || "";
     
-    if (file && file.size > 0) {
+    // Image was already handled by handleFileUpload in the onChange handler
+    // but just in case we have a direct file from the form
+    if (file && file.size > 0 && !previewImage?.startsWith('http')) {
       try {
-        imageUrl = await equipmentService.uploadImage(file);
+        const uploadedUrl = await handleFileUpload(file, "equipment");
+        if (uploadedUrl) imageUrl = uploadedUrl;
       } catch (err) {
         console.error("Upload error:", err);
         alert("圖片上傳失敗");
@@ -208,7 +242,7 @@ export default function AdminEquipmentPage() {
                   <h3 className="text-xl font-display italic mb-2">{item.name}</h3>
 
                   {/* 4. Note (Details) */}
-                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem]">
+                  <p className="text-sm font-serif text-muted/60 mb-6 line-clamp-2 min-h-[2.5rem] break-words">
                     {item.details || "專業登山裝備，提供完善防護與便利性。"}
                   </p>
 
@@ -328,11 +362,11 @@ export default function AdminEquipmentPage() {
                         type="file" 
                         name="image" 
                         accept="image/*"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const url = URL.createObjectURL(file);
-                            setPreviewImage(url);
+                            const url = await handleFileUpload(file, "equipment");
+                            if (url) setPreviewImage(url);
                           }
                         }}
                         className="absolute inset-0 opacity-0 cursor-pointer" 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import ProfileLayout from "@/components/ProfileLayout";
 import { userService, UserProfile } from "@/services/userService";
 import { peakService } from "@/services/peakService";
-import { Plus, Mountain, Calendar, Hash, Trash2, MapPin, Search, ChevronRight } from "lucide-react";
+import { Plus, Mountain, Calendar, Hash, Trash2, MapPin, Search, X } from "lucide-react";
 import Link from "next/link";
 
 export default function PeaksPage() {
@@ -17,7 +17,7 @@ export default function PeaksPage() {
   const [formData, setFormData] = useState({
     peak_name: "",
     climb_date: new Date().toISOString().split('T')[0],
-    notes: ""
+    note: ""
   });
 
   useEffect(() => {
@@ -48,9 +48,10 @@ export default function PeaksPage() {
       });
       setPeaks([newPeak, ...peaks]);
       setIsModalOpen(false);
-      setFormData({ peak_name: "", climb_date: new Date().toISOString().split('T')[0], notes: "" });
-    } catch (err) {
-      alert("新增失敗");
+      setFormData({ peak_name: "", climb_date: new Date().toISOString().split('T')[0], note: "" });
+    } catch (err: any) {
+      console.error("Save peak error:", err);
+      alert("新增失敗: " + (err.message || "未知錯誤"));
     }
   };
 
@@ -99,9 +100,9 @@ export default function PeaksPage() {
   return (
     <ProfileLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
           <div>
-            <h1 className="text-4xl font-display italic mb-2">山岳足跡</h1>
+            <h1 className="text-3xl md:text-4xl font-display italic mb-2">山岳足跡</h1>
             <p className="text-sm font-serif text-muted">記錄您的每一次登頂，見證在高山上的成長與感動。</p>
           </div>
           <button 
@@ -113,20 +114,20 @@ export default function PeaksPage() {
           </button>
         </header>
 
-        <div className="relative mb-10">
+        <div className="relative mb-8">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/40" />
           <input 
             type="text" 
             placeholder="搜尋山名..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-surface border border-border pl-14 pr-6 py-4 rounded-3xl text-sm outline-none focus:border-accent transition-all shadow-sm"
+            className="w-full bg-surface border border-border pl-12 md:pl-14 pr-6 py-3 md:py-4 rounded-[1.5rem] md:rounded-3xl text-sm outline-none focus:border-accent transition-all shadow-sm"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPeaks.map((peak) => (
-            <div key={peak.id} className="group relative bg-surface border border-border p-8 rounded-[2.5rem] hover:border-accent/30 transition-all hover:shadow-xl hover:shadow-accent/5">
+            <div key={peak.id} className="group relative bg-surface border border-border p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] hover:border-accent/30 transition-all hover:shadow-xl hover:shadow-accent/5">
               <div className="flex justify-between items-start mb-6">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${peak.is_official ? 'bg-accent text-white' : 'bg-background text-muted'}`}>
                   <Mountain className="w-6 h-6" />
@@ -145,9 +146,9 @@ export default function PeaksPage() {
                 {peak.climb_date}
               </div>
 
-              {peak.notes && (
+              {peak.note && (
                 <p className="text-xs font-serif text-muted/80 line-clamp-2 italic border-l-2 border-accent/20 pl-4 py-1">
-                  "{peak.notes}"
+                  "{peak.note}"
                 </p>
               )}
 
@@ -171,12 +172,12 @@ export default function PeaksPage() {
       {/* Add Peak Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-surface border border-border w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10 md:p-12">
+          <div className="bg-surface border border-border w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 md:p-12">
               <div className="flex justify-between items-center mb-10">
                 <h2 className="text-3xl font-display italic">登錄山岳足跡</h2>
                 <button onClick={() => setIsModalOpen(false)} className="text-muted hover:text-foreground transition-colors">
-                  <ChevronRight className="w-6 h-6 rotate-90" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
@@ -209,8 +210,8 @@ export default function PeaksPage() {
                   <textarea 
                     rows={4}
                     placeholder="寫下當時的心情或路況..."
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    value={formData.note}
+                    onChange={(e) => setFormData({...formData, note: e.target.value})}
                     className="w-full bg-background border border-border px-6 py-4 rounded-2xl text-sm outline-none focus:border-accent transition-all resize-none font-serif"
                   />
                 </div>

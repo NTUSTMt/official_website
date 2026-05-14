@@ -11,7 +11,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { uploadFileAction } from "./uploadAction";
 import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X, Mail, Link as LinkIcon, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
-type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS" | "CONTACT" | "FOOTER";
+type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "CONTACT" | "FOOTER";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("HOMEPAGE");
@@ -28,13 +28,7 @@ export default function AdminDashboardPage() {
     commonResponsibilities: [],
     mountainDuties: []
   });
-  const [levels, setLevels] = useState<{
-    level: number;
-    label: string;
-    description: string;
-    example: string;
-    color: string;
-  }[]>([]);
+
   const [contactInfo, setContactInfo] = useState<{
     line: { link: string, qrcode: string, description: string },
     instagram: { link: string, qrcode: string, description: string },
@@ -84,9 +78,7 @@ export default function AdminDashboardPage() {
         const dbRoles = await historyService.getCommitteeRoles();
         if (dbRoles) setRolesData(dbRoles);
 
-        // Fetch Activity Levels
-        const dbLevels = await historyService.getActivityLevels();
-        if (dbLevels) setLevels(dbLevels);
+
 
         // Fetch Contact Info
         const dbContact = await cmsService.getContactInfo();
@@ -125,11 +117,7 @@ export default function AdminDashboardPage() {
         if (isSupabaseConfigured) {
           await saveCommitteesAction(committees);
         }
-      } else if (activeTab === "LEVELS") {
-        // Save Activity Levels
-        if (isSupabaseConfigured) {
-          await saveCmsConfigAction("activity_levels", levels);
-        }
+
       } else if (activeTab === "CONTACT") {
         // Save Contact Info
         if (isSupabaseConfigured) {
@@ -181,9 +169,9 @@ export default function AdminDashboardPage() {
       setCommittees(newCommittees);
       
       alert("照片上傳成功！");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert("照片上傳失敗，請確保 Supabase Storage 已建立名為 'official' 的公開 Bucket。");
+      alert(`照片上傳失敗: ${error.message || "未知錯誤"}`);
     }
   };
 
@@ -271,7 +259,7 @@ export default function AdminDashboardPage() {
             <TabButton id="HOMEPAGE" label="首頁內容 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="ABOUT_CMS" label="關於山社 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEADERSHIP" label="歷任幹部管理" activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton id="LEVELS" label="活動分級 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
+
             <TabButton id="CONTACT" label="聯絡我們管理" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="FOOTER" label="頁腳設定 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="GENERAL" label="公告管理" activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -1091,65 +1079,7 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {activeTab === "LEVELS" && (
-            <div className="space-y-12">
-              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <SectionHeader title="活動分級說明管理" subtitle="活動難度與分級標準" />
-                <div className="space-y-8">
-                  {levels.map((level, idx) => (
-                    <div key={idx} className="p-8 bg-background border border-border rounded-2xl group hover:border-accent transition-all relative">
-                      <div className="flex flex-col md:flex-row gap-8">
-                        <div className="md:w-32 flex-shrink-0">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-mono text-xl mb-4 ${level.color}`}>
-                            L{level.level}
-                          </div>
-                          <input 
-                            type="text" 
-                            value={level.label} 
-                            onChange={(e) => {
-                              const newLevels = [...levels];
-                              newLevels[idx].label = e.target.value;
-                              setLevels(newLevels);
-                            }}
-                            className="w-full bg-surface border border-border px-3 py-1 rounded text-lg font-display italic"
-                            placeholder="Label"
-                          />
-                        </div>
-                        <div className="flex-1 space-y-4">
-                          <div>
-                            <label className="block text-[9px] font-mono text-muted uppercase tracking-widest mb-1">Description</label>
-                            <textarea 
-                              value={level.description} 
-                              onChange={(e) => {
-                                const newLevels = [...levels];
-                                newLevels[idx].description = e.target.value;
-                                setLevels(newLevels);
-                              }}
-                              className="w-full bg-surface border border-border px-4 py-2 rounded-xl text-sm font-serif leading-relaxed"
-                              rows={3}
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[9px] font-mono text-muted uppercase tracking-widest mb-1">Example Routes</label>
-                            <input 
-                              type="text" 
-                              value={level.example} 
-                              onChange={(e) => {
-                                const newLevels = [...levels];
-                                newLevels[idx].example = e.target.value;
-                                setLevels(newLevels);
-                              }}
-                              className="w-full bg-surface border border-border px-4 py-2 rounded-xl text-xs font-serif italic"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          )}
+
 
           {activeTab === "FOOTER" && (
             <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">

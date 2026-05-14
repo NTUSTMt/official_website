@@ -140,7 +140,7 @@ export default function RentalCartPage() {
     <main className="min-h-screen pb-24">
       <Navbar />
       
-      <div className="pt-32 px-6 max-w-6xl mx-auto">
+      <div className="pt-24 px-6 max-w-6xl mx-auto">
         <section className="mb-12">
           <p className="text-lg font-serif text-muted">確認裝備與租借資訊，完成後點擊提交。</p>
         </section>
@@ -172,25 +172,25 @@ export default function RentalCartPage() {
                 </div>
                 <div className="divide-y divide-border">
                   {state.items.map((item) => (
-                    <div key={item.id} className="p-8 flex items-center justify-between group">
-                      <div className="flex items-center gap-6">
-                        <div className="w-12 h-12 bg-accent/5 rounded-2xl flex items-center justify-center text-2xl">
+                    <div key={item.id} className="p-5 md:p-8 flex items-center justify-between group gap-4">
+                      <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
+                        <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-accent/5 rounded-2xl flex items-center justify-center text-xl md:text-2xl">
                           {item.category === "炊事系統" && "🍳"}
                           {item.category === "營帳系統" && "⛺"}
                           {item.category === "睡眠系統" && "🛌"}
                           {item.category === "行進裝備" && "🎒"}
                           {item.category === "技術裝備" && "⛏️"}
                         </div>
-                        <div>
-                          <h4 className="font-display italic text-lg">{item.name}</h4>
-                          <span className="text-[10px] font-mono text-muted/60 uppercase tracking-widest">{item.category}</span>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-display italic text-base md:text-lg truncate">{item.name}</h4>
+                          <span className="text-[10px] font-mono text-muted/60 uppercase tracking-widest block truncate">{item.category}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-8">
-                        <div className="text-right">
+                      <div className="flex items-center gap-4 md:gap-8 flex-shrink-0">
+                        <div className="text-right flex-shrink-0">
                           <div className="font-mono text-sm font-bold">x{item.quantity}</div>
-                          <div className="text-[10px] font-mono text-muted/40 uppercase tracking-widest">
-                            ${item.basePrice} Base
+                          <div className="text-[9px] md:text-[10px] font-mono text-muted/40 uppercase tracking-widest leading-none">
+                            ${item.basePrice} <span className="hidden sm:inline">BASE</span>
                           </div>
                         </div>
                         <button 
@@ -213,12 +213,12 @@ export default function RentalCartPage() {
             </div>
 
             {/* Right: Order Form */}
-            <form onSubmit={handleSubmit} className="lg:col-span-5 bg-surface border border-border p-10 rounded-[3rem] shadow-xl space-y-8">
+            <form onSubmit={handleSubmit} className="lg:col-span-5 bg-surface border border-border p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl space-y-8">
               <h3 className="text-2xl font-display italic border-b border-border pb-4">租借資訊 Form</h3>
               
               <div className="space-y-6">
                 {/* Identity & Purpose */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">你的身份</label>
                     <select 
@@ -256,7 +256,7 @@ export default function RentalCartPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">手機 Phone</label>
                     <input 
@@ -284,7 +284,7 @@ export default function RentalCartPage() {
 
 
                 {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">領取日期</label>
                     <input 

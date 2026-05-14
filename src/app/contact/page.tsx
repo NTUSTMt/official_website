@@ -35,32 +35,29 @@ export default function ContactPage() {
     <main className="min-h-screen bg-white pb-32">
       <Navbar />
       
-      <div className="pt-24 px-6 max-w-7xl mx-auto">
-        <div className="flex flex-col gap-6 mb-24">
+      <div className="pt-24 px-6 max-w-5xl mx-auto">
+        <div className="flex flex-col gap-8 mb-24">
           {platforms.map((p) => {
             const info = contactInfo?.[p.id];
             return (
-              <div key={p.id} className="group bg-surface border border-border p-6 md:p-10 rounded-[2.5rem] hover:border-accent hover:shadow-2xl transition-all duration-500 flex flex-col md:flex-row items-center gap-10">
+              <div key={p.id} className="group bg-surface border border-border p-8 md:p-12 rounded-[2.5rem] hover:border-accent hover:shadow-2xl transition-all duration-500 flex flex-col md:flex-row items-center text-center md:text-left gap-8 md:gap-16">
                 {/* QR Code Section */}
                 <div className="flex-shrink-0">
                   {info?.qrcode ? (
-                    <div className="w-32 h-32 bg-white p-3 rounded-2xl shadow-inner border border-border group-hover:rotate-2 transition-transform duration-500">
+                    <div className="w-48 h-48 md:w-56 md:h-56 bg-white p-4 rounded-3xl shadow-inner border border-border group-hover:scale-105 transition-transform duration-500">
                       <img src={info.qrcode} alt={`${p.label} QR Code`} className="w-full h-full object-contain" />
                     </div>
                   ) : (
-                    <div className="w-32 h-32 bg-background/50 rounded-2xl flex items-center justify-center border border-dashed border-border">
+                    <div className="w-48 h-48 md:w-56 md:h-56 bg-background/50 rounded-3xl flex items-center justify-center border border-dashed border-border">
                       <span className="text-[10px] font-mono text-muted/30 uppercase tracking-widest">No QR Code</span>
                     </div>
                   )}
                 </div>
-
+ 
                 {/* Content Section */}
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                    <h3 className="text-3xl font-display italic tracking-tight">{p.label}</h3>
-                    <div className="h-px flex-1 bg-border/50 hidden md:block"></div>
-                  </div>
-                  <p className="text-base font-serif text-muted leading-relaxed mb-6 max-w-2xl whitespace-pre-wrap">
+                <div className="flex-1">
+                  <h3 className="text-4xl font-display italic tracking-tight mb-4">{p.label}</h3>
+                  <p className="text-base font-serif text-muted leading-relaxed mb-8 max-w-lg mx-auto md:mx-0 whitespace-pre-wrap">
                     {info?.description || "即時獲取社團資訊與聯繫。"}
                   </p>
                   
@@ -69,7 +66,7 @@ export default function ContactPage() {
                       href={info.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex px-8 py-3 bg-white border border-border rounded-xl text-[10px] font-mono font-bold uppercase tracking-widest items-center gap-3 hover:bg-accent hover:text-white hover:border-accent transition-all shadow-sm"
+                      className="inline-flex px-10 py-4 bg-white border border-border rounded-2xl text-[10px] font-mono font-bold uppercase tracking-widest items-center gap-3 hover:bg-accent hover:text-white hover:border-accent transition-all shadow-sm"
                     >
                       前往連結 <ExternalLink className="w-3 h-3" />
                     </a>
@@ -81,39 +78,55 @@ export default function ContactPage() {
         </div>
 
         {/* Physical Location Section */}
-        <section className="bg-surface border border-border rounded-[3rem] p-12 md:p-16 relative overflow-hidden group">
+        <section className="bg-surface border border-border rounded-[3rem] p-10 md:p-16 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-accent/10 transition-all duration-700"></div>
           
-          <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center">
-            <div className="w-20 h-20 bg-accent text-white rounded-3xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/20">
-              <MapPin className="w-10 h-10" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
+            {/* Left: Icon & Title */}
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-16 h-16 bg-accent text-white rounded-2xl flex items-center justify-center shadow-lg shadow-accent/20 group-hover:rotate-6 transition-transform duration-500">
+                <MapPin className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-display italic mb-1">社辦位置</h2>
+                <span className="text-muted/40 font-mono text-[10px] uppercase tracking-[0.3em]">Basecamp</span>
+              </div>
             </div>
             
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-display italic mb-4">社辦位置 <span className="text-muted/40 font-mono text-xs uppercase tracking-widest not-italic ml-2">Basecamp</span></h2>
-              <div className="mb-4">
-                <p className="text-xl font-serif text-foreground mb-1">
-                  {contactInfo?.basecamp?.location || "國立臺灣科技大學 學生活動中心"}
-                </p>
-                {contactInfo?.basecamp?.detail && (
-                  <p className="text-accent font-display font-bold italic text-lg tracking-tight">
-                    {contactInfo.basecamp.detail}
+            {/* Middle: Details with Vertical Divider on Desktop */}
+            <div className="flex-1 max-w-xl md:border-l md:border-border md:pl-12">
+              <div className="space-y-6">
+                <div>
+                  <p className="text-base font-serif text-muted mb-1">
+                    {contactInfo?.basecamp?.location || "國立臺灣科技大學 學生活動中心"}
                   </p>
-                )}
+                  {contactInfo?.basecamp?.detail && (
+                    <p className="text-2xl font-display font-bold italic text-accent tracking-tight">
+                      {contactInfo.basecamp.detail}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center md:justify-start gap-4">
+                  <p className="text-[10px] text-muted font-mono uppercase tracking-[0.2em] whitespace-nowrap">
+                    Office Hours:
+                  </p>
+                  <p className="text-sm font-serif text-foreground/80 italic">
+                    {contactInfo?.basecamp?.hours || "每週一至五 12:20 - 13:20 (學期期間)"}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-muted font-mono uppercase tracking-widest">
-                Office hours: {contactInfo?.basecamp?.hours || "每週一至五 12:20 - 13:20 (學期期間)"}
-              </p>
             </div>
 
+            {/* Right: Action Button */}
             <div className="w-full md:w-auto">
               <a 
                 href={contactInfo?.basecamp?.mapsLink || "#"} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="px-8 py-4 bg-foreground text-white rounded-2xl font-mono text-xs uppercase tracking-[0.2em] font-bold hover:bg-accent transition-all flex items-center justify-center gap-3"
+                className="px-10 py-4 bg-foreground text-white rounded-2xl font-mono text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-accent transition-all flex items-center justify-center gap-3 shadow-xl shadow-foreground/10"
               >
-                Google Maps <ExternalLink className="w-4 h-4" />
+                Google Maps <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>

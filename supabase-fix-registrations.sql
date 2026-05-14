@@ -1,0 +1,22 @@
+-- 補齊 event_registrations 資料表所有必要的欄位
+ALTER TABLE public.event_registrations
+ADD COLUMN IF NOT EXISTS event_id text,
+ADD COLUMN IF NOT EXISTS user_id text,
+ADD COLUMN IF NOT EXISTS note text,
+ADD COLUMN IF NOT EXISTS signup_date timestamp with time zone DEFAULT now(),
+ADD COLUMN IF NOT EXISTS status text DEFAULT 'pending',
+ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'unpaid',
+ADD COLUMN IF NOT EXISTS real_name text,
+ADD COLUMN IF NOT EXISTS gender text,
+ADD COLUMN IF NOT EXISTS birth_date text,
+ADD COLUMN IF NOT EXISTS nationality_type text,
+ADD COLUMN IF NOT EXISTS id_number text,
+ADD COLUMN IF NOT EXISTS line_id text,
+ADD COLUMN IF NOT EXISTS phone text,
+ADD COLUMN IF NOT EXISTS email text,
+ADD COLUMN IF NOT EXISTS address text,
+ADD COLUMN IF NOT EXISTS emergency_contact_name text,
+ADD COLUMN IF NOT EXISTS emergency_contact_phone text,
+ADD COLUMN IF NOT EXISTS emergency_contact_relationship text,
+ADD COLUMN IF NOT EXISTS emergency_contact_address text,
+ADD COLUMN IF NOT EXISTS student_id text;

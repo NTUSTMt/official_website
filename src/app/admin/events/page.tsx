@@ -8,10 +8,11 @@ import { historyService, cmsService } from "@/services/cmsService";
 import { userService } from "@/services/userService";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { uploadFileAction } from "../uploadAction";
-import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText } from "lucide-react";
+import { saveCmsConfigAction } from "../cms-actions";
+import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText, PlusCircle } from "lucide-react";
 
 type ViewState = "LIST" | "EDIT_EVENT" | "VIEW_PARTICIPANTS";
-type Tab = "EVENTS" | "CALENDAR";
+type Tab = "EVENTS" | "CALENDAR" | "LEVELS";
 
 export default function AdminEventsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("EVENTS");
@@ -21,6 +22,7 @@ export default function AdminEventsPage() {
   const [participants, setParticipants] = useState<any[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<Record<string, any>>({});
   const [calendars, setCalendars] = useState<any[]>([]);
+  const [levels, setLevels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingRegs, setIsLoadingRegs] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -30,12 +32,17 @@ export default function AdminEventsPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [eventList, calendarList] = await Promise.all([
+        const [eventList, calendarList, levelList] = await Promise.all([
           eventService.getAllEvents(),
-          cmsService.getSemesterCalendars()
+          cmsService.getSemesterCalendars(),
+          historyService.getActivityLevels()
         ]);
         setEvents(eventList.length > 0 ? eventList : eventsData);
-        setCalendars(calendarList);
+        setCalendars(calendarList.map((c: any) => ({
+          semester: c.semester || "",
+          urls: c.urls || (c.url ? [c.url] : [])
+        })));
+        setLevels(levelList);
       } finally {
         setIsLoading(false);
       }
@@ -106,15 +113,36 @@ export default function AdminEventsPage() {
   const handleSaveCalendar = async () => {
     setIsSaving(true);
     try {
-      await cmsService.saveSemesterCalendars(calendars);
+      await saveCmsConfigAction("semester_calendars", calendars);
       alert("儲存成功！");
-    } catch (err) {
-      alert("儲存失敗");
+    } catch (err: any) {
+      alert(`儲存失敗: ${err.message || "未知錯誤"}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  const handleSaveLevels = async () => {
+    setIsSaving(true);
+    try {
+      await saveCmsConfigAction("activity_levels", levels, "/events/levels");
+      alert("儲存成功！");
+    } catch (err: any) {
+      alert(`儲存失敗: ${err.message || "未知錯誤"}`);
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleAddLevel = () => {
+    const nextLevel = levels.length > 0 ? Math.max(...levels.map(l => l.level)) + 1 : 1;
+    setLevels(prev => [...prev, { 
+      level: nextLevel, 
+      label: "新分級", 
+      description: "請輸入分級描述", 
+      example: "請輸入範例路線", 
+      color: "bg-gray-500" 
+    }]);
+  };
   const handleUpdateParticipantStatus = async (pId: string, newStatus: string) => {
     try {
       await registrationService.updateStatus(pId, newStatus);
@@ -214,6 +242,24 @@ export default function AdminEventsPage() {
                 新增活動
               </button>
             )}
+            {view === "LIST" && activeTab === "LEVELS" && (
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleAddLevel}
+                  className="px-6 py-2.5 bg-surface border border-border text-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:bg-background transition-all"
+                >
+                  新增分級
+                </button>
+                <button 
+                  onClick={handleSaveLevels}
+                  disabled={isSaving}
+                  className="px-6 py-2.5 bg-accent text-accent-foreground font-mono text-[10px] uppercase tracking-widest font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+                >
+                  <Save className="w-3 h-3" />
+                  {isSaving ? "儲存中..." : "儲存分級"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -234,6 +280,14 @@ export default function AdminEventsPage() {
               }`}
             >
               學期行事曆 (Calendar)
+            </button>
+            <button
+              onClick={() => setActiveTab("LEVELS")}
+              className={`px-8 py-4 text-xs font-mono tracking-widest uppercase border-b-2 transition-all ${
+                activeTab === "LEVELS" ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
+              }`}
+            >
+              分級說明 (Levels)
             </button>
           </div>
         )}
@@ -281,7 +335,7 @@ export default function AdminEventsPage() {
                               />
                               <div className="absolute top-4 left-4">
                                 <span className={`px-3 py-1 rounded-full text-[8px] font-mono text-white uppercase tracking-[0.2em] shadow-lg ${
-                                  difficultyLevels.find(l => l.label === event.difficulty)?.color || "bg-accent"
+                                  levels.find(l => l.label === event.difficulty)?.color || "bg-accent"
                                 }`}>
                                   {event.difficulty}
                                 </span>
@@ -357,7 +411,7 @@ export default function AdminEventsPage() {
                   <p className="text-xs font-mono text-muted uppercase tracking-widest">學期行事曆 CMS</p>
                 </div>
                 <button 
-                  onClick={() => setCalendars(prev => [...prev, { semester: "", url: "" }])}
+                  onClick={() => setCalendars(prev => [...prev, { semester: "", urls: [] }])}
                   className="px-6 py-2 bg-accent text-white rounded-full text-[10px] font-mono uppercase tracking-widest font-bold shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all"
                 >
                   + 新增學期
@@ -373,7 +427,7 @@ export default function AdminEventsPage() {
                     >
                       <X className="w-4 h-4" />
                     </button>
-
+                    
                     <div className="space-y-4">
                       <div>
                         <label className="block text-[9px] font-mono text-muted uppercase tracking-widest mb-1">Semester Name (e.g. 112-2)</label>
@@ -390,36 +444,30 @@ export default function AdminEventsPage() {
                       </div>
 
                       <div className="space-y-4">
-                        <label className="block text-[9px] font-mono text-muted uppercase tracking-widest mb-1">Calendar Image</label>
-                        {cal.url ? (
-                          <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-border group-hover:border-accent/50 transition-colors">
-                            <img src={cal.url} alt="Semester Calendar" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                              <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest">
-                                更換圖片
-                                <input 
-                                  type="file" 
-                                  className="hidden" 
-                                  accept="image/*"
-                                  onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      const url = await handleFileUpload(file, "calendars");
-                                      if (url) {
-                                        const newCals = [...calendars];
-                                        newCals[idx].url = url;
-                                        setCalendars(newCals);
-                                      }
-                                    }
+                        <label className="block text-[9px] font-mono text-muted uppercase tracking-widest mb-1">Calendar Images (Multiple Supported)</label>
+                        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-6 scroll-pl-6 snap-x">
+                          <div className="flex-shrink-0 w-6" />
+                          {cal.urls.map((url: string, urlIdx: number) => (
+                            <div key={urlIdx} className="relative aspect-[3/4] w-48 flex-shrink-0 rounded-2xl overflow-hidden border border-border group/img snap-start">
+                              <img src={url} alt="Semester Calendar" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                <button 
+                                  onClick={() => {
+                                    const newCals = [...calendars];
+                                    newCals[idx].urls = newCals[idx].urls.filter((_: any, i: number) => i !== urlIdx);
+                                    setCalendars(newCals);
                                   }}
-                                />
-                              </label>
+                                  className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <label className="flex flex-col items-center justify-center aspect-[3/4] w-full border-2 border-dashed border-border rounded-2xl hover:border-accent hover:bg-accent/5 transition-all cursor-pointer">
-                            <Upload className="w-8 h-8 text-muted mb-4" />
-                            <span className="text-[10px] font-mono text-muted uppercase tracking-widest">上傳行事曆圖片</span>
+                          ))}
+                          
+                          <label className="flex flex-col items-center justify-center aspect-[3/4] w-48 flex-shrink-0 border-2 border-dashed border-border rounded-2xl hover:border-accent hover:bg-accent/5 transition-all cursor-pointer snap-start">
+                            <PlusCircle className="w-6 h-6 text-muted mb-2" />
+                            <span className="text-[8px] font-mono text-muted uppercase tracking-widest text-center px-2">新增圖片</span>
                             <input 
                               type="file" 
                               className="hidden" 
@@ -427,17 +475,18 @@ export default function AdminEventsPage() {
                               onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  const url = await handleFileUpload(file, "calendars");
+                                  const url = await handleFileUpload(file, "events");
                                   if (url) {
                                     const newCals = [...calendars];
-                                    newCals[idx].url = url;
+                                    newCals[idx].urls = [...newCals[idx].urls, url];
                                     setCalendars(newCals);
                                   }
                                 }
                               }}
                             />
                           </label>
-                        )}
+                          <div className="flex-shrink-0 w-6" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -450,6 +499,117 @@ export default function AdminEventsPage() {
                 )}
               </div>
             </section>
+          </div>
+        )}
+
+        {/* View: Difficulty Levels CMS */}
+        {view === "LIST" && activeTab === "LEVELS" && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-6">
+              {levels.map((level, idx) => (
+                <div key={idx} className="bg-surface border border-border rounded-3xl p-8 shadow-sm group relative">
+                  <button 
+                    onClick={() => setLevels(prev => prev.filter((_, i) => i !== idx))}
+                    className="absolute top-6 right-6 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex flex-col md:flex-row gap-8">
+                    {/* Left Column: Level & Color */}
+                    <div className="w-full md:w-48 space-y-6">
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-[0.2em] font-bold">Level</label>
+                        <div className="relative">
+                          <input 
+                            type="number" 
+                            value={level.level}
+                            onChange={(e) => {
+                              const newLevels = [...levels];
+                              newLevels[idx].level = parseInt(e.target.value);
+                              setLevels(newLevels);
+                            }}
+                            className="w-full h-14 bg-background border border-border px-4 rounded-2xl text-2xl font-display italic text-center outline-none focus:border-accent transition-colors"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-[0.2em] font-bold">Color Class</label>
+                        <div className="space-y-3">
+                          <input 
+                            type="text" 
+                            value={level.color}
+                            onChange={(e) => {
+                              const newLevels = [...levels];
+                              newLevels[idx].color = e.target.value;
+                              setLevels(newLevels);
+                            }}
+                            className="w-full h-10 bg-background border border-border px-3 rounded-xl text-[11px] font-mono outline-none focus:border-accent transition-colors"
+                            placeholder="bg-emerald-500"
+                          />
+                          <div className={`h-2.5 w-full rounded-full ${level.color} shadow-inner`}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Details */}
+                    <div className="flex-1 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="md:col-span-4 space-y-1.5">
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-[0.2em] font-bold">Label</label>
+                          <input 
+                            type="text" 
+                            value={level.label}
+                            onChange={(e) => {
+                              const newLevels = [...levels];
+                              newLevels[idx].label = e.target.value;
+                              setLevels(newLevels);
+                            }}
+                            className="w-full h-14 bg-background border border-border px-5 rounded-2xl text-xl font-display italic outline-none focus:border-accent transition-colors"
+                            placeholder="如：入門"
+                          />
+                        </div>
+                        <div className="md:col-span-8 space-y-1.5">
+                          <label className="block text-[10px] font-mono text-muted uppercase tracking-[0.2em] font-bold">Examples</label>
+                          <input 
+                            type="text" 
+                            value={level.example}
+                            onChange={(e) => {
+                              const newLevels = [...levels];
+                              newLevels[idx].example = e.target.value;
+                              setLevels(newLevels);
+                            }}
+                            className="w-full h-14 bg-background border border-border px-5 rounded-2xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                            placeholder="如：大坑步道、象山..."
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-[0.2em] font-bold">Description</label>
+                        <textarea 
+                          value={level.description}
+                          onChange={(e) => {
+                            const newLevels = [...levels];
+                            newLevels[idx].description = e.target.value;
+                            setLevels(newLevels);
+                          }}
+                          rows={3}
+                          className="w-full bg-background border border-border p-5 rounded-2xl text-sm font-serif leading-relaxed outline-none focus:border-accent transition-colors resize-none"
+                          placeholder="詳細描述該分級的要求與路況..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {levels.length === 0 && (
+                <div className="py-20 border-2 border-dashed border-border rounded-[3rem] flex flex-col items-center justify-center text-muted/20">
+                  <div className="text-4xl font-display italic mb-4">No Levels Found</div>
+                  <button type="button" onClick={handleAddLevel} className="text-accent hover:underline font-mono text-xs uppercase tracking-widest">點擊新增第一個分級</button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -470,14 +630,12 @@ export default function AdminEventsPage() {
                       <label className="block text-[8px] font-mono text-muted uppercase tracking-widest mb-1">活動難度 (Difficulty)</label>
                       <select 
                         name="difficulty" 
-                        defaultValue={selectedEvent?.difficulty || "初級"}
+                        defaultValue={selectedEvent?.difficulty || (levels[0]?.label || "入門")}
                         className="w-full bg-surface border border-border px-3 py-2 rounded-xl text-xs font-serif outline-none focus:border-accent transition-colors"
                       >
-                        <option value="入門">入門 (Easy)</option>
-                        <option value="初級">初級 (Normal)</option>
-                        <option value="中級">中級 (Moderate)</option>
-                        <option value="進階">進階 (Advanced)</option>
-                        <option value="挑戰">挑戰 (Extreme)</option>
+                        {levels.sort((a, b) => a.level - b.level).map(l => (
+                          <option key={l.level} value={l.label}>{l.label} (L{l.level})</option>
+                        ))}
                       </select>
                     </div>
                     <div>

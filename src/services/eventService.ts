@@ -105,6 +105,25 @@ export const registrationService = {
     return data;
   },
 
+  async getUserRegistrations(userId: string) {
+    const { data, error } = await supabase
+      .from("event_registrations")
+      .select(`
+        *,
+        events (
+          title
+        )
+      `)
+      .eq("user_id", userId)
+      .order("signup_date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching user registrations:", error);
+      return [];
+    }
+    return data;
+  },
+
   async updateStatus(id: string, status: string) {
     const { error } = await supabase
       .from("event_registrations")

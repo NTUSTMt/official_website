@@ -19,7 +19,7 @@ interface FieldProps {
 }
 
 const Field = ({ label, value, name, placeholder, isEditing, type = "text", options, formData, setFormData }: FieldProps) => (
-  <div className="py-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4 group">
+  <div className="py-4 md:py-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 group">
     <label className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] md:w-48 group-hover:text-accent transition-colors">{label}</label>
     {isEditing ? (
       type === "select" ? (
@@ -116,9 +116,9 @@ export default function ProfileDetailsPage() {
   return (
     <ProfileLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-16 gap-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-display italic mb-4">詳細資料 Details</h1>
+            <h1 className="text-3xl md:text-5xl font-display italic mb-4">詳細資料 Details</h1>
             <p className="text-lg font-serif text-muted max-w-xl">
               完善資料有助於出隊保險與入園申請的自動化。您的資料將受到加密保護。
             </p>
@@ -157,7 +157,7 @@ export default function ProfileDetailsPage() {
           </div>
         </header>
 
-        <div className="space-y-20">
+        <div className="space-y-10 md:space-y-20">
           {/* 01: Basic Info */}
           <section>
             <div className="flex items-center gap-4 mb-8">
@@ -165,7 +165,7 @@ export default function ProfileDetailsPage() {
               <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.3em] font-bold">基本資料 Basic Info</h3>
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
-            <div className="bg-surface/30 rounded-[2.5rem] p-6 md:p-10 border border-border/50">
+            <div className="bg-surface/30 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 border border-border/50">
               <Field label="真實姓名" value={user.real_name || ""} name="real_name" placeholder="與證件相同" isEditing={isEditing} formData={formData} setFormData={setFormData} />
               <Field 
                 label="性別" 
@@ -194,7 +194,7 @@ export default function ProfileDetailsPage() {
               <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.3em] font-bold">身分驗證 Identity</h3>
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
-            <div className="bg-surface/30 rounded-[2.5rem] p-6 md:p-10 border border-border/50">
+            <div className="bg-surface/30 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 border border-border/50">
               <Field 
                 label="國籍與證件" 
                 value={user.nationality_type || ""} 
@@ -219,7 +219,7 @@ export default function ProfileDetailsPage() {
               <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.3em] font-bold">聯絡資訊 Contact</h3>
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
-            <div className="bg-surface/30 rounded-[2.5rem] p-6 md:p-10 border border-border/50">
+            <div className="bg-surface/30 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 border border-border/50">
               <Field label="聯絡電話" value={user.phone || ""} name="phone" placeholder="09XX-XXX-XXX" isEditing={isEditing} formData={formData} setFormData={setFormData} />
               <Field label="聯絡信箱" value={user.email || ""} name="email" placeholder="example@mail.com" isEditing={isEditing} formData={formData} setFormData={setFormData} />
               <Field label="聯絡地址" value={user.address || ""} name="address" placeholder="詳細通訊地址" isEditing={isEditing} formData={formData} setFormData={setFormData} />
@@ -233,7 +233,7 @@ export default function ProfileDetailsPage() {
               <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.3em] font-bold">緊急聯絡 Emergency</h3>
               <div className="h-px flex-1 bg-border/50"></div>
             </div>
-            <div className="bg-surface/30 rounded-[2.5rem] p-6 md:p-10 border border-border/50">
+            <div className="bg-surface/30 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 border border-border/50">
               <Field label="聯絡人姓名" value={user.emergency_contact_name || ""} name="emergency_contact_name" placeholder="緊急聯絡人姓名" isEditing={isEditing} formData={formData} setFormData={setFormData} />
               <Field label="聯絡人電話" value={user.emergency_contact_phone || ""} name="emergency_contact_phone" placeholder="緊急聯絡人電話" isEditing={isEditing} formData={formData} setFormData={setFormData} />
               <Field label="關係" value={user.emergency_contact_relationship || ""} name="emergency_contact_relationship" placeholder="例如：父子、配偶" isEditing={isEditing} formData={formData} setFormData={setFormData} />
@@ -243,15 +243,12 @@ export default function ProfileDetailsPage() {
         </div>
 
 
-        <footer className="mt-24 p-10 bg-accent/5 rounded-[2.5rem] border border-accent/10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <footer className="mt-12 md:mt-24 p-6 md:p-10 bg-accent/5 rounded-[2rem] md:rounded-[2.5rem] border border-accent/10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <ShieldCheck className="w-8 h-8 text-accent" />
             <p className="text-xs font-serif text-muted leading-relaxed">
               您的資料加密存儲於 Supabase。僅用於活動報名保險及社務行政，非經同意絕不外洩。
             </p>
-          </div>
-          <div className="text-[10px] font-mono text-muted/40 uppercase tracking-widest whitespace-nowrap">
-            SECURE_ENCRYPTION_ACTIVE
           </div>
         </footer>
       </div>

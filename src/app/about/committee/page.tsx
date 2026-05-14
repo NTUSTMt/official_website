@@ -28,7 +28,7 @@ export default function CommitteePage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
 
         {/* Individual Roles */}
         <div className="mb-24">

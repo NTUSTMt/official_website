@@ -62,9 +62,8 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <div className="flex-1 max-w-4xl">
-            <div className="bg-surface border border-border rounded-[3rem] p-8 md:p-16 shadow-sm min-h-[600px]">
+          <div className="flex-1">
+            <div className="bg-surface border border-border rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 shadow-sm min-h-[600px]">
               {children}
             </div>
           </div>

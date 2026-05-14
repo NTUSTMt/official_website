@@ -135,6 +135,20 @@ export const rentalService = {
     return data;
   },
 
+  async getUserRentals(userId: string) {
+    if (!isSupabaseConfigured) return [];
+    const { data, error } = await supabase
+      .from("rental_applications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Error fetching user rentals:", error);
+      return [];
+    }
+    return data;
+  },
+
   async submitApplication(application: any) {
     if (!isSupabaseConfigured) throw new Error("Supabase not configured");
 

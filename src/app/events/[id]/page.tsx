@@ -45,21 +45,21 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-30 grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
         {/* Main Content */}
-        <div className="lg:col-span-8 space-y-12">
-          <div className="bg-surface p-12 md:p-16 border border-border rounded-[3rem] shadow-xl">
+        <div className="lg:col-span-8 space-y-8 md:space-y-12">
+          <div className="bg-surface p-6 md:p-12 lg:p-16 border border-border rounded-[2.5rem] md:rounded-[3rem] shadow-xl">
             <div className="max-w-none">
               <h2 className="text-3xl font-display italic mb-8 border-b border-border pb-6">活動詳情 Description</h2>
               <div className="space-y-4">
                 {Array.isArray(event.description) ? (
                   event.description.map((para, i) => (
-                    <p key={i} className="text-base md:text-lg font-serif text-muted leading-relaxed">
+                    <p key={i} className="text-base md:text-lg font-serif text-muted leading-relaxed break-words whitespace-pre-wrap">
                       {para}
                     </p>
                   ))
                 ) : (
-                  <p className="text-base md:text-lg font-serif text-muted leading-relaxed">{event.description}</p>
+                  <p className="text-base md:text-lg font-serif text-muted leading-relaxed break-words whitespace-pre-wrap">{event.description}</p>
                 )}
               </div>
             </div>
@@ -67,20 +67,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
           </div>
 
-          <div className="flex justify-between items-center">
-            <Link 
-              href="/events/list"
-              className="flex items-center gap-2 font-mono text-[10px] text-muted uppercase tracking-widest hover:text-accent transition-colors"
-            >
-              ← Back to List
-            </Link>
 
-          </div>
         </div>
 
         {/* Sidebar / CTA */}
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-surface p-10 border border-border rounded-[3rem] shadow-lg sticky top-32">
+          <div className="bg-surface p-6 md:p-10 border border-border rounded-[2.5rem] md:rounded-[3rem] shadow-lg sticky top-32">
             <div className="mb-8 text-center space-y-4">
               <div>
                 <div className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 font-bold">Status</div>
@@ -109,6 +101,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
               <RegistrationCTA event={event} />
             </div>
+          </div>
+
+          <div className="px-4">
+            <Link 
+              href="/events/list"
+              className="inline-flex items-center gap-2 font-mono text-[10px] text-muted/40 hover:text-accent transition-colors uppercase tracking-widest"
+            >
+              ← Back to List
+            </Link>
           </div>
         </div>
       </div>

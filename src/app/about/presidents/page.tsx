@@ -7,7 +7,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function PresidentsPage() {
   const [committees, setCommittees] = useState(defaultData);
-  const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function PresidentsPage() {
   }, []);
 
   const sortedCommittees = [...committees].sort((a, b) => b.year.localeCompare(a.year, undefined, { numeric: true }));
-  const displayedData = showAll ? sortedCommittees : sortedCommittees.slice(0, 5);
+  const displayedData = sortedCommittees.slice(0, visibleCount);
 
   return (
     <main className="min-h-screen bg-white">
@@ -75,7 +75,7 @@ export default function PresidentsPage() {
                         
                         <div className="space-y-2">
                           <div className="space-y-1">
-                            <h4 className="text-2xl md:text-3xl font-display italic tracking-tight">{member.name}</h4>
+                            <h4 className="text-2xl md:text-3xl font-display tracking-tight">{member.name}</h4>
                             <div className="font-mono text-[10px] text-muted uppercase tracking-wider">{member.dept}</div>
                           </div>
                           
@@ -96,10 +96,10 @@ export default function PresidentsPage() {
           ))}
         </div>
 
-        {!showAll && committees.length > 5 && (
+        {visibleCount < sortedCommittees.length && (
           <div className="mt-24 text-center">
             <button 
-              onClick={() => setShowAll(true)}
+              onClick={() => setVisibleCount(prev => prev + 5)}
               className="px-12 py-4 bg-accent text-white font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all duration-300 rounded-full shadow-lg shadow-accent/20"
             >
               LOAD MORE HISTORY

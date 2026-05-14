@@ -77,7 +77,7 @@ export async function saveCommitteesAction(data: any[]) {
   }
 }
 
-export async function saveCmsConfigAction(id: string, content: any) {
+export async function saveCmsConfigAction(id: string, content: any, path?: string) {
   try {
     const { error } = await supabaseAdmin
       .from("cms_config")
@@ -87,6 +87,7 @@ export async function saveCmsConfigAction(id: string, content: any) {
         updated_at: new Date().toISOString()
       });
     if (error) throw error;
+    if (path) revalidatePath(path);
     return { success: true };
   } catch (error: any) {
     throw error;
