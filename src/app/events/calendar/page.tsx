@@ -28,7 +28,7 @@ export default function CalendarPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-7xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-7xl mx-auto">
         <section className="mb-20">
           <div className="flex items-center gap-4 mb-4">
             <span className="font-mono text-xs text-accent uppercase tracking-widest font-bold">Schedule</span>

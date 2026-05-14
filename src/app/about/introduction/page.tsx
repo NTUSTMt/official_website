@@ -31,7 +31,7 @@ export default function IntroductionPage() {
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
-      <div className="pt-12 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
         <section className={`mb-20 transition-opacity duration-700 ${isLoading ? "opacity-50" : "opacity-100"}`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div className="prose prose-lg font-serif text-muted leading-relaxed">

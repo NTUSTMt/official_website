@@ -7,7 +7,7 @@ export default function HistoryPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-12 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
 
         <section className="mb-32">
           <div className="relative border-l border-border pl-12 space-y-16">

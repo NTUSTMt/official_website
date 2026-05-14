@@ -29,8 +29,8 @@ const crimsonPro = Crimson_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "台科大登山社 | NTUST Mountaineering Club",
-  description: "台科大登山社官方網站 - 技術與荒野的交匯",
+  title: "臺灣科技大學登山社 | NTUST Mountaineering Club",
+  description: "臺灣科技大學登山社官方網站 - 技術與荒野的交匯",
   manifest: "/manifest.json",
 };
 

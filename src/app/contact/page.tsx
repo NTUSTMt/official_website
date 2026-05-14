@@ -35,7 +35,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-white pb-32">
       <Navbar />
       
-      <div className="pt-12 px-6 max-w-7xl mx-auto">
+      <div className="pt-24 px-6 max-w-7xl mx-auto">
         <div className="flex flex-col gap-6 mb-24">
           {platforms.map((p) => {
             const info = contactInfo?.[p.id];

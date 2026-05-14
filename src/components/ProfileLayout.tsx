@@ -19,7 +19,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
     <main className="min-h-screen">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-7xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Sidebar Navigation */}
           <aside className="lg:w-64 flex-shrink-0">

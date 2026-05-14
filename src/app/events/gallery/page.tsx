@@ -48,7 +48,7 @@ export default function GalleryPage() {
     <main className="min-h-screen pb-24">
       <Navbar />
       
-      <div className="pt-32 px-6 max-w-6xl mx-auto">
+      <div className="pt-24 px-6 max-w-6xl mx-auto">
         <section className="mb-20">
           <div className="flex items-center gap-4 mb-4">
             <span className="font-mono text-xs text-accent uppercase tracking-widest font-bold">Memories</span>

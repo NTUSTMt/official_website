@@ -25,7 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       checks: ["state"],
       authorization: {
         params: {
-          scope: "profile openid",
+          scope: "profile openid email",
           bot_prompt: "normal" 
         },
       },
@@ -35,48 +35,51 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt"
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "line") {
         try {
           const lineUserId = account.providerAccountId;
           
-          // 檢查使用者是否已經存在於我們自己的 public.users 表中
-          const { data: existingUser } = await supabaseAdmin
-            .from("users")
-            .select("id")
-            .eq("email", user.email || `${lineUserId}@line.me`)
-            .single();
-
-          let userId;
-
-          if (!existingUser) {
-            // 如果不存在，手動新增一筆使用者資料
-            const { data: newUser, error: createError } = await supabaseAdmin
-              .from("users")
-              .insert({
-                name: user.name,
-                email: user.email || `${lineUserId}@line.me`,
-                image: user.image,
-              })
-              .select("id")
-              .single();
-            
-            if (createError) throw createError;
-            userId = newUser.id;
-          } else {
-            userId = existingUser.id;
-          }
-
-          // 檢查帳號連結 (accounts table)
+          // 1. 優先透過 accounts 表檢查此 LINE ID 是否已經連結過使用者
           const { data: existingAccount } = await supabaseAdmin
             .from("accounts")
-            .select("id")
+            .select("userId")
             .eq("provider", "line")
             .eq("providerAccountId", lineUserId)
             .single();
 
-          if (!existingAccount && userId) {
-            // 如果還沒綁定 LINE 帳號，幫他綁定
+          let userId = existingAccount?.userId;
+          const isVirtualEmail = user.email?.endsWith("@line.me");
+          const realEmail = isVirtualEmail ? null : user.email;
+
+          if (!userId) {
+            // 2. 如果 LINE ID 沒連結過，檢查是否存在相同 Email 的使用者 (僅限非虛擬信箱)
+            if (realEmail) {
+              const { data: userWithEmail } = await supabaseAdmin
+                .from("users")
+                .select("id")
+                .eq("email", realEmail)
+                .single();
+              userId = userWithEmail?.id;
+            }
+
+            if (!userId) {
+              // 3. 還是找不到，則建立新使用者
+              const { data: newUser, error: createError } = await supabaseAdmin
+                .from("users")
+                .insert({
+                  name: user.name,
+                  email: realEmail, // 如果是虛擬信箱則存入 null
+                  image: user.image,
+                })
+                .select("id")
+                .single();
+              
+              if (createError) throw createError;
+              userId = newUser.id;
+            }
+
+            // 4. 建立帳號連結
             const { error: linkError } = await supabaseAdmin
               .from("accounts")
               .insert({
@@ -91,10 +94,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (linkError) throw linkError;
           }
 
-          return true; // 允許登入
+          return true;
         } catch (error) {
-          console.error("手動寫入 Supabase 失敗:", error);
-          // 即使資料庫寫入失敗，我們依然允許使用者登入 (看您的需求，這裡先回傳 true 確保畫面不會當機)
+          console.error("LINE 登入處理失敗:", error);
           return true;
         }
       }

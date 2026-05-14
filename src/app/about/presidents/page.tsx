@@ -36,7 +36,7 @@ export default function PresidentsPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-12 pb-24 px-6 max-w-7xl mx-auto">
+      <div className="pt-24 pb-24 px-6 max-w-7xl mx-auto">
 
         <div className="space-y-16">
           {displayedData.map((yearGroup) => (
