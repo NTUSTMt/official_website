@@ -36,13 +36,7 @@ export default function PresidentsPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-7xl mx-auto">
-        <section className="mb-20">
-          <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
-            歷任幹部 <span className="text-muted/20">Presidents</span>
-          </h1>
-          <div className="h-1 w-24 bg-accent mb-12"></div>
-        </section>
+      <div className="pt-12 pb-24 px-6 max-w-7xl mx-auto">
 
         <div className="space-y-16">
           {displayedData.map((yearGroup) => (

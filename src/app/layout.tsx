@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Playfair_Display, Crimson_Pro } from "next/font/
 import TopographyBackground from "@/components/TopographyBackground";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DynamicHero from "@/components/DynamicHero";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,8 +45,9 @@ export default function RootLayout({
     <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${crimsonPro.variable}`} suppressHydrationWarning>
       <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
         <TopographyBackground />
+        <DynamicHero />
         <Providers>
-          <div className="flex-1">
+          <div className="flex-1 relative">
             {children}
           </div>
         </Providers>

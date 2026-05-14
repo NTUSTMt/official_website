@@ -11,16 +11,7 @@ export default function EquipmentHubPage() {
     <main className="min-h-screen">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
-        <section className="mb-20 text-center">
-          <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
-            裝備租借 <span className="text-muted/20">Rental Hub</span>
-          </h1>
-          <div className="h-1 w-24 bg-accent mx-auto mb-12"></div>
-          <p className="text-xl font-serif text-muted max-w-2xl mx-auto leading-relaxed">
-            工欲善其事，必先利其器。在這裡找到適合您下一次行程的專業裝備。
-          </p>
-        </section>
+      <div className="pt-12 pb-24 px-6 max-w-5xl mx-auto">
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {subItems.map((item) => (

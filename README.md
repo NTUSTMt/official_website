@@ -1,6 +1,10 @@
 # 台科大登山社官網 - 會員與足跡系統 (NTUST Mountaineering Club)
 
 ### 系統架構重構與導覽強化 (System Architecture & Navigation) - 2026-05-14
+- **全站動態背景 Hero 系統 (Dynamic Hero System)**：
+  - **路徑感知背景**：根據 URL 自動載入 `/images/hero-bg-*.jpg`，並支援個別頁面定位調整。
+  - **中英並列標題**：Hero 標題改為橫向排列，英文副標題透明度調升至 60% 增加易讀性。
+  - **頁面描述整合**：直接在 Hero 顯示分頁說明小字，並同步移除各分頁冗餘的內容標題。
 - **全站公告引擎升級**：從單條公告升級為「多條置頂公告系統」。
   - **動態管理**：支援多條公告同時顯示、開關狀態控制與自定義連結。
   - **排序功能**：後台新增「上下移動」功能，精確控制公告顯示順序。
@@ -9,6 +13,13 @@
   - **後台架構與 TypeScript 修復**：
     *   **服務層重構**：統一將 `getSemesterCalendars` 與 `saveSemesterCalendars` 歸納至 `cmsService`，修正了全站（包含 `admin/events` 與 `events/calendar`）因服務引用路徑錯誤導致的 TypeScript 編譯問題。
     *   **資料遷移**：確保資料庫欄位同步至 `announcements`（JSONB），並實作自動降級機制以兼容舊資料。
+- **頁腳 (Footer) 全面現代化與動態化**：
+    *   **內容重構**：將頁腳升級為專業的四欄佈局，包含：品牌精神、快速導覽、社員專區與社辦基地聯繫資訊。
+    *   **視覺優化**：根據使用者回饋將底色調整為較明亮的 `bg-surface`（米色調），使其與全站視覺更為一致且不沈重。
+    *   **後台管理系統**：將頁腳管理整合至「全站內容 CMS」(/admin) 的分頁中。為解決 RLS (Row-Level Security) 權限問題並維持資料一致性，頁腳的「社辦位置」與「社群連結」已與「聯絡我們管理」完全同步，修改一處即可全站更新。
+    *   **動態品牌管理**：新增「NTUST Mt. Club」標題管理功能，並支援自定義頁腳標語、版權宣告與團隊致謝。
+    *   **相容性修正**：針對 `lucide-react` 版本不包含品牌圖示的問題，改用 `Camera` (IG) 與 `Share2` (FB) 作為替代方案，修復了執行時期的 `undefined` 錯誤。
+    *   **資料同步**：對接 Supabase 實作資料持久化，確保修改後全站同步更新。
 - **首頁 UI 優化**：
     *   **透明導覽列**：實作了 Glassmorphism 效果，並讓導覽列在首頁初始位置時與 Hero 圖片重疊。
     *   **視覺進入點**：首頁進入時導覽列對齊螢幕底部，且公告預設隱藏於螢幕下方，創造更乾淨的視覺開場。
@@ -65,6 +76,7 @@
 *   **資料庫**：Supabase (PostgreSQL) 擴充 `events` 與 `event_registrations` 資料表。
 *   **認證**：整合 LINE 登入 (NextAuth) 與 Supabase Adapter。
 *   **前端**：使用 Framer Motion 實作流暢的報名彈窗 (RegistrationModal)。
+*   **相容性優化**：針對 `lucide-react` (1.14.0) 不包含品牌圖示的問題，實作了圖示降級機制（使用 `Camera` 與 `Share2` 替代）。
 
 ## 📝 後續維護說明 (README Update)
 *   **環境變數**：請確保 `.env.local` 包含 `SUPABASE_SERVICE_ROLE_KEY`。

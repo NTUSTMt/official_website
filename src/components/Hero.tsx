@@ -7,15 +7,7 @@ interface HeroProps {
 
 export default function Hero({ title, subtitle }: HeroProps) {
   return (
-    <header className="relative h-full w-full overflow-hidden flex items-center justify-center bg-white">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ 
-          backgroundImage: "url('/images/hero-bg.jpg')",
-        }}
-      />
-      
+    <header className="relative h-full w-full flex items-center justify-center bg-transparent">
       <div className="relative z-20 text-center px-4 hero-text-shadow max-w-4xl">
         <h1 className="flex flex-col items-center">
           <span className="text-4xl md:text-7xl lg:text-8xl font-display leading-[1.1] tracking-tighter mb-4 italic text-white uppercase drop-shadow-2xl">

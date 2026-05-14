@@ -31,13 +31,8 @@ export default function IntroductionPage() {
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
-      <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-12 pb-24 px-6 max-w-5xl mx-auto">
         <section className={`mb-20 transition-opacity duration-700 ${isLoading ? "opacity-50" : "opacity-100"}`}>
-          <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
-            社團特色 <span className="text-muted/20">Intro</span>
-          </h1>
-          <div className="h-1 w-24 bg-accent mb-12"></div>
-          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div className="prose prose-lg font-serif text-muted leading-relaxed">
               <p className="text-2xl text-foreground font-medium mb-6">

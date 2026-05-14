@@ -69,9 +69,15 @@ export const cmsService = {
       facebook: { link: "", qrcode: "", description: "關注 FB 粉絲專頁，掌握最新公告。" },
       email: { link: "mountaineering@mail.ntust.edu.tw", qrcode: "", description: "正式事務聯繫請寄送至社團電子信箱。" },
       basecamp: { 
-        location: "國立臺灣科技大學 學生活動中心 B1 登山社", 
-        hours: "每週一至五 12:20 - 13:20 (學期期間)", 
-        mapsLink: "https://maps.app.goo.gl/..." 
+        location: "106 台北市大安區基隆路四段 43 號", 
+        hours: "每週三 19:00 - 21:00 (社課期間)", 
+        mapsLink: "https://maps.app.goo.gl/...",
+        detail: "學生活動中心 B1 基地"
+      },
+      footer: {
+        slogan: "自 1985 年起，致力於高山探險、野地技術傳承與荒野守護的精神。",
+        copyright: "NTUST Mountaineering Club",
+        credits: "NTUST Mt. Club Tech Team"
       }
     };
     if (!isSupabaseConfigured) return defaultContact;
@@ -81,7 +87,7 @@ export const cmsService = {
       .eq("id", "contact_info")
       .single();
     if (error || !data) return defaultContact;
-    return data.content;
+    return { ...defaultContact, ...data.content };
   },
 
   async saveContactInfo(content: any) {
@@ -115,9 +121,31 @@ export const cmsService = {
       .upsert({
         id: "semester_calendars",
         content: calendars,
-        updated_at: new Date().toISOString()
       });
     if (error) throw error;
+  },
+
+  async getFooterConfig(): Promise<any> {
+    const global = await this.getConfig();
+    const contact = await this.getContactInfo();
+
+    return {
+      siteName: global.siteName,
+      slogan: contact.footer?.slogan,
+      copyright: contact.footer?.copyright,
+      credits: contact.footer?.credits,
+      address: contact.basecamp.location,
+      basecampDetail: contact.basecamp.detail,
+      officeHours: contact.basecamp.hours,
+      email: contact.email.link,
+      instagram: contact.instagram.link,
+      facebook: contact.facebook.link,
+      line: contact.line.link
+    };
+  },
+
+  async saveFooterConfig(content: any) {
+    // Convenience placeholder - in admin/page.tsx we update sources directly
   }
 };
 

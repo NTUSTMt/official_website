@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { mockCMSConfig } from "@/data/cms";
+import { mockCMSConfig, type GlobalConfig } from "@/data/cms";
 import { historyData, introductionContent } from "@/data/history";
 import { committeeData } from "@/data/committee";
 import { historyService, cmsService } from "@/services/cmsService";
@@ -10,11 +10,11 @@ import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAc
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X, Mail, Link as LinkIcon, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
-type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS" | "CONTACT";
+type Tab = "HOMEPAGE" | "GENERAL" | "ABOUT_CMS" | "LEADERSHIP" | "LEVELS" | "CONTACT" | "FOOTER";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("HOMEPAGE");
-  const [config, setConfig] = useState(mockCMSConfig);
+  const [config, setConfig] = useState<GlobalConfig>(mockCMSConfig);
   const [history, setHistory] = useState(historyData);
   const [intro, setIntro] = useState(introductionContent);
   const [committees, setCommittees] = useState(committeeData);
@@ -39,13 +39,15 @@ export default function AdminDashboardPage() {
     instagram: { link: string, qrcode: string, description: string },
     facebook: { link: string, qrcode: string, description: string },
     email: { link: string, qrcode: string, description: string },
-    basecamp: { location: string, hours: string, mapsLink: string }
+    basecamp: { location: string, hours: string, mapsLink: string, detail: string, mapEmbed?: string },
+    footer: { slogan: string, copyright: string, credits: string }
   }>({
     line: { link: "", qrcode: "", description: "" },
     instagram: { link: "", qrcode: "", description: "" },
     facebook: { link: "", qrcode: "", description: "" },
     email: { link: "", qrcode: "", description: "" },
-    basecamp: { location: "", hours: "", mapsLink: "" }
+    basecamp: { location: "", hours: "", mapsLink: "", detail: "", mapEmbed: "" },
+    footer: { slogan: "", copyright: "", credits: "" }
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,7 +132,13 @@ export default function AdminDashboardPage() {
       } else if (activeTab === "CONTACT") {
         // Save Contact Info
         if (isSupabaseConfigured) {
-          await cmsService.saveContactInfo(contactInfo);
+          await saveCmsConfigAction("contact_info", contactInfo);
+        }
+      } else if (activeTab === "FOOTER") {
+        // Save Footer Config (Source data is in Global and Contact)
+        if (isSupabaseConfigured) {
+          await updateGlobalConfigAction(config);
+          await saveCmsConfigAction("contact_info", contactInfo);
         }
       }
       alert("儲存成功！資料已同步至 Supabase。");
@@ -260,6 +268,7 @@ export default function AdminDashboardPage() {
             <TabButton id="LEADERSHIP" label="歷任幹部管理" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="LEVELS" label="活動分級 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="CONTACT" label="聯絡我們管理" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabButton id="FOOTER" label="頁腳設定 CMS" activeTab={activeTab} setActiveTab={setActiveTab} />
             <TabButton id="GENERAL" label="公告管理" activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
 
@@ -371,8 +380,8 @@ export default function AdminDashboardPage() {
                   <SectionHeader title="社辦位置管理 (Basecamp)" subtitle="管理社辦地址、開放時間與 Google Maps 連結" />
                   <div className="p-8 bg-background border border-border rounded-[2rem] space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社辦地址 (Location)</label>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社辦完整地址 (Location)</label>
                         <input 
                           type="text" 
                           value={contactInfo.basecamp?.location || ""} 
@@ -382,11 +391,37 @@ export default function AdminDashboardPage() {
                             setContactInfo(newContact);
                           }}
                           className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
-                          placeholder="例如：國立臺灣科技大學 學生活動中心 B1 登山社"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Google Maps 連結</label>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">位置詳解 (Detail - e.g. B1 基地)</label>
+                        <input 
+                          type="text" 
+                          value={contactInfo.basecamp?.detail || ""} 
+                          onChange={(e) => {
+                            const newContact = { ...contactInfo };
+                            newContact.basecamp.detail = e.target.value;
+                            setContactInfo(newContact);
+                          }}
+                          className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                          placeholder="學生活動中心 B1 基地"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">開放時間 (Office Hours)</label>
+                        <input 
+                          type="text" 
+                          value={contactInfo.basecamp?.hours || ""} 
+                          onChange={(e) => {
+                            const newContact = { ...contactInfo };
+                            newContact.basecamp.hours = e.target.value;
+                            setContactInfo(newContact);
+                          }}
+                          className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Google Maps 外部連結</label>
                         <input 
                           type="text" 
                           value={contactInfo.basecamp?.mapsLink || ""} 
@@ -396,23 +431,25 @@ export default function AdminDashboardPage() {
                             setContactInfo(newContact);
                           }}
                           className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
-                          placeholder="https://maps.app.goo.gl/..."
                         />
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">開放時間 (Office Hours)</label>
-                      <input 
-                        type="text" 
-                        value={contactInfo.basecamp?.hours || ""} 
-                        onChange={(e) => {
-                          const newContact = { ...contactInfo };
-                          newContact.basecamp.hours = e.target.value;
-                          setContactInfo(newContact);
-                        }}
-                        className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
-                        placeholder="例如：每週一至五 12:20 - 13:20 (學期期間)"
-                      />
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Google Maps 嵌入代碼 (Iframe HTML)</label>
+                        <textarea 
+                          value={contactInfo.basecamp?.mapEmbed || ""} 
+                          onChange={(e) => {
+                            const newContact = { ...contactInfo };
+                            newContact.basecamp.mapEmbed = e.target.value;
+                            setContactInfo(newContact);
+                          }}
+                          rows={3}
+                          className="w-full bg-surface border border-border px-4 py-3 rounded-xl text-[10px] font-mono outline-none focus:border-accent transition-colors"
+                          placeholder='<iframe src="https://www.google.com/maps/embed?..." ...></iframe>'
+                        />
+                        <p className="mt-2 text-[10px] text-muted leading-relaxed">
+                          提示：在 Google 地圖點選「分享」&gt;「嵌入地圖」，複製產生的 HTML 代碼貼上即可。此功能完全免費。
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1098,6 +1135,168 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "FOOTER" && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Footer Basic Branding */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="頁腳品牌與標語" subtitle="網站最底部的品牌精神呈現" />
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">網站標題文字 (Site Title)</label>
+                    <input 
+                      type="text" 
+                      value={config.siteName} 
+                      onChange={(e) => setConfig({ ...config, siteName: e.target.value })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-display font-bold outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社團標語 (Slogan)</label>
+                    <textarea 
+                      value={contactInfo.footer.slogan} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        footer: { ...contactInfo.footer, slogan: e.target.value } 
+                      })}
+                      rows={2}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-serif text-sm italic outline-none focus:border-accent transition-colors leading-relaxed"
+                      placeholder="自 1985 年起，致力於高山探險..."
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Footer Contact Details */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="頁腳聯繫與地址 (同步聯絡我們資料)" subtitle="頁腳顯示的實體基地資訊" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">社辦地址</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.basecamp.location} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        basecamp: { ...contactInfo.basecamp, location: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">位置詳解 (如：B1 基地)</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.basecamp.detail} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        basecamp: { ...contactInfo.basecamp, detail: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">開放時間</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.basecamp.hours} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        basecamp: { ...contactInfo.basecamp, hours: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Footer Social Links */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="頁腳社群連結 (同步官方帳號資料)" subtitle="社群媒體跳轉網址" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Instagram 網址</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.instagram.link} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        instagram: { ...contactInfo.instagram, link: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">Facebook 網址</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.facebook.link} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        facebook: { ...contactInfo.facebook, link: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">LINE 網址/連結</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.line.link} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        line: { ...contactInfo.line, link: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">官方 Email</label>
+                    <input 
+                      type="email" 
+                      value={contactInfo.email.link} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        email: { ...contactInfo.email, link: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-mono outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Footer Bottom Bar */}
+              <section className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+                <SectionHeader title="底欄版權與致謝" subtitle="頁腳最後一行的文字資訊" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">版權宣告文字 (Copyright)</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.footer.copyright} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        footer: { ...contactInfo.footer, copyright: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">製作團隊致謝 (Credits)</label>
+                    <input 
+                      type="text" 
+                      value={contactInfo.footer.credits} 
+                      onChange={(e) => setContactInfo({ 
+                        ...contactInfo, 
+                        footer: { ...contactInfo.footer, credits: e.target.value } 
+                      })}
+                      className="w-full bg-background border border-border px-4 py-3 rounded-xl text-sm font-serif outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
                 </div>
               </section>
             </div>

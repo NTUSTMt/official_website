@@ -35,17 +35,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-white pb-32">
       <Navbar />
       
-      <div className="pt-32 px-6 max-w-7xl mx-auto">
-        <header className="mb-20">
-          <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
-            聯絡我們 <span className="text-muted/20">Contact Us</span>
-          </h1>
-          <div className="h-1 w-24 bg-accent mb-8"></div>
-          <p className="text-muted font-serif italic text-lg max-w-2xl leading-relaxed">
-            無論是入社諮詢、活動合作或是器材租借問題，歡迎透過以下管道與我們聯繫。
-          </p>
-        </header>
-
+      <div className="pt-12 px-6 max-w-7xl mx-auto">
         <div className="flex flex-col gap-6 mb-24">
           {platforms.map((p) => {
             const info = contactInfo?.[p.id];
@@ -101,9 +91,16 @@ export default function ContactPage() {
             
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-3xl md:text-4xl font-display italic mb-4">社辦位置 <span className="text-muted/40 font-mono text-xs uppercase tracking-widest not-italic ml-2">Basecamp</span></h2>
-              <p className="text-xl font-serif text-foreground mb-2">
-                {contactInfo?.basecamp?.location || "國立臺灣科技大學 學生活動中心 B1 登山社"}
-              </p>
+              <div className="mb-4">
+                <p className="text-xl font-serif text-foreground mb-1">
+                  {contactInfo?.basecamp?.location || "國立臺灣科技大學 學生活動中心"}
+                </p>
+                {contactInfo?.basecamp?.detail && (
+                  <p className="text-accent font-display font-bold italic text-lg tracking-tight">
+                    {contactInfo.basecamp.detail}
+                  </p>
+                )}
+              </div>
               <p className="text-sm text-muted font-mono uppercase tracking-widest">
                 Office hours: {contactInfo?.basecamp?.hours || "每週一至五 12:20 - 13:20 (學期期間)"}
               </p>
@@ -121,6 +118,17 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
+
+        {/* Map Embed Section */}
+        {contactInfo?.basecamp?.mapEmbed && (
+          <section className="mt-12 rounded-[3rem] overflow-hidden border border-border h-[400px] md:h-[600px] shadow-2xl relative group">
+            <div 
+              className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full border-none"
+              dangerouslySetInnerHTML={{ __html: contactInfo.basecamp.mapEmbed }}
+            />
+            <div className="absolute inset-0 pointer-events-none border-[12px] border-surface/50 rounded-[3rem]"></div>
+          </section>
+        )}
       </div>
     </main>
   );
