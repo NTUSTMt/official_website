@@ -60,7 +60,7 @@ export default function ContactPage() {
                     <h3 className="text-3xl font-display italic tracking-tight">{p.label}</h3>
                     <div className="h-px flex-1 bg-border/50 hidden md:block"></div>
                   </div>
-                  <p className="text-base font-serif text-muted leading-relaxed mb-6 max-w-2xl">
+                  <p className="text-base font-serif text-muted leading-relaxed mb-6 max-w-2xl whitespace-pre-wrap">
                     {info?.description || "即時獲取社團資訊與聯繫。"}
                   </p>
                   

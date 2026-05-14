@@ -40,7 +40,7 @@ export default function Footer() {
               <h2 className="text-2xl font-display italic tracking-tighter text-stone-900 flex items-center gap-2">
                 {config.siteName}
               </h2>
-              <p className="text-sm font-serif leading-relaxed max-w-xs text-stone-500 italic">
+              <p className="text-sm font-serif leading-relaxed max-w-xs text-stone-500 italic whitespace-pre-wrap">
                 {config.slogan}
               </p>
             </div>
@@ -89,7 +89,7 @@ export default function Footer() {
             <div className="space-y-5 text-sm leading-relaxed">
               <div className="flex gap-3 group">
                 <MapPin size={18} className="text-accent shrink-0 group-hover:scale-110 transition-transform" />
-                <address className="not-italic text-stone-700">
+                <address className="not-italic text-stone-700 whitespace-pre-wrap">
                   {config.address}<br />
                   <span className="text-stone-400 text-xs font-mono">{config.basecampDetail}</span>
                 </address>

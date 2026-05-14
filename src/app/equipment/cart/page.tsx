@@ -142,7 +142,6 @@ export default function RentalCartPage() {
       
       <div className="pt-32 px-6 max-w-6xl mx-auto">
         <section className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-display italic mb-6 tracking-tight">我的租借單</h1>
           <p className="text-lg font-serif text-muted">確認裝備與租借資訊，完成後點擊提交。</p>
         </section>
 

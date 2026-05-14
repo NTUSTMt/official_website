@@ -29,12 +29,6 @@ export default function CommitteePage() {
       <Navbar />
       
       <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
-        <section className="mb-20">
-          <h1 className="text-5xl md:text-7xl font-display italic mb-6 tracking-tight">
-            幹部與職責 <span className="text-muted/20">Roles</span>
-          </h1>
-          <div className="h-1 w-24 bg-accent mb-12"></div>
-        </section>
 
         {/* Individual Roles */}
         <div className="mb-24">
@@ -43,7 +37,7 @@ export default function CommitteePage() {
             {data?.roles?.map((role: any, i: number) => (
               <div key={i} className="p-8 border border-border bg-surface hover:bg-white transition-all duration-300 rounded-3xl shadow-sm hover:shadow-md group">
                 <h3 className="text-xl font-display italic text-foreground mb-4 group-hover:text-accent transition-colors">{role.title}</h3>
-                <p className="font-serif text-muted leading-relaxed">
+                <p className="font-serif text-muted leading-relaxed whitespace-pre-wrap">
                   {role.description}
                 </p>
               </div>
@@ -73,7 +67,7 @@ export default function CommitteePage() {
             {data?.mountainDuties?.map((duty: any, i: number) => (
               <div key={i} className="p-8 border border-border bg-background hover:bg-emerald-50/30 transition-all duration-300 rounded-3xl shadow-sm hover:shadow-md border-t-4 border-t-emerald-600/20">
                 <h3 className="text-lg font-display italic text-emerald-700 mb-4">{duty.title}</h3>
-                <p className="font-serif text-muted text-sm leading-relaxed">
+                <p className="font-serif text-muted text-sm leading-relaxed whitespace-pre-wrap">
                   {duty.description}
                 </p>
               </div>

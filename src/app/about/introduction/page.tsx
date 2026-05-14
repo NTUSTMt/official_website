@@ -35,7 +35,7 @@ export default function IntroductionPage() {
         <section className={`mb-20 transition-opacity duration-700 ${isLoading ? "opacity-50" : "opacity-100"}`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div className="prose prose-lg font-serif text-muted leading-relaxed">
-              <p className="text-2xl text-foreground font-medium mb-6">
+              <p className="text-2xl text-foreground font-medium mb-6 whitespace-pre-wrap">
                 {content.quote}
               </p>
               {content.paragraphs.map((p, i) => (

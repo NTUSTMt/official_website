@@ -55,17 +55,17 @@ export default function AdminLayout({ children, fullWidth = false }: AdminLayout
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen flex bg-background selection:bg-accent/20">
+    <div className="h-screen flex bg-background selection:bg-accent/20 overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-surface border-r border-border hidden md:flex flex-col">
-        <div className="h-20 flex items-center px-6 border-b border-border">
-          <Link href="/" className="font-display italic text-2xl group flex items-center gap-2">
+        <div className="h-14 flex items-center px-6 border-b border-border shrink-0">
+          <Link href="/" className="font-display italic text-xl group flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-accent group-hover:scale-150 transition-transform"></span>
             管理後台
           </Link>
         </div>
         
-        <div className="p-6 flex-1">
+        <div className="p-6 flex-1 overflow-y-auto">
           <div className="text-[10px] font-mono text-muted uppercase tracking-widest mb-4">管理模組控制台</div>
           <nav className="flex flex-col gap-2">
             {navItems.map((item) => {
@@ -88,7 +88,7 @@ export default function AdminLayout({ children, fullWidth = false }: AdminLayout
           </nav>
         </div>
 
-        <div className="p-6 border-t border-border">
+        <div className="p-6 border-t border-border shrink-0">
           <button 
             onClick={handleLogout}
             className="w-full py-3 px-4 rounded-xl text-xs font-mono tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-200 flex items-center justify-center gap-2"
@@ -100,20 +100,16 @@ export default function AdminLayout({ children, fullWidth = false }: AdminLayout
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 sticky top-0 z-30">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="h-14 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 shrink-0 z-30">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-serif">
+            <h1 className="text-lg font-serif">
               {navItems.find(i => i.href === pathname)?.label || "管理控制台"}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-serif text-foreground">管理員</div>
-              <div className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest">管理員已登入</div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-surface border-2 border-accent flex items-center justify-center font-mono text-xs font-bold text-accent">
-              AD
+              <span className="text-[9px] font-mono text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">管理員已登入</span>
             </div>
           </div>
         </header>

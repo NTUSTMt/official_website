@@ -29,15 +29,6 @@ export default function DifficultyLevelsPage() {
       <Navbar />
       
       <div className="pt-32 pb-24 px-6 max-w-5xl mx-auto">
-        <section className="mb-20">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-mono text-xs text-accent uppercase tracking-widest font-bold">Grading System</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-display italic mb-8 tracking-tight">活動分級說明</h1>
-          <p className="text-xl font-serif text-muted max-w-3xl leading-relaxed">
-            為了確保活動安全與品質，我們將所有活動依難度、體能需求與路況分為五個等級。請參考以下說明選擇適合您的行程。
-          </p>
-        </section>
 
         <div className="space-y-12">
           {levels.map((level) => (

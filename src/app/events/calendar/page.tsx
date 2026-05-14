@@ -29,15 +29,6 @@ export default function CalendarPage() {
       <Navbar />
       
       <div className="pt-24 pb-24 px-6 max-w-7xl mx-auto">
-        <section className="mb-20">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-mono text-xs text-accent uppercase tracking-widest font-bold">Schedule</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-display italic mb-8 tracking-tight">行事曆</h1>
-          <p className="text-xl font-serif text-muted max-w-3xl leading-relaxed">
-            台科大登山社每學期皆會規劃豐富的社課、校園活動與出隊行程。請參考下方的學期行事曆安排您的山野計畫。
-          </p>
-        </section>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {calendars.map((cal, idx) => (

@@ -33,7 +33,7 @@ export const navigationConfig: NavItem[] = [
     ]
   },
   { 
-    label: "裝備瀏覽", 
+    label: "裝備租借", 
     href: "/equipment",
     subtitle: "EQUIPMENT",
     description: "專業登山裝備租借服務，工欲善其事，必先利其器。",

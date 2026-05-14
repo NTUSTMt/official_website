@@ -937,8 +937,8 @@ export default function AdminDashboardPage() {
                         </div>
 
                         {/* Members Grid - Horizontal Scroll */}
-                        <div className="flex-1 w-full overflow-x-auto no-scrollbar">
-                          <div className="flex gap-6 pb-6">
+                        <div className="flex-1 w-[calc(100%+3rem)] -mx-6 md:w-full md:mx-0 overflow-x-auto no-scrollbar">
+                          <div className="flex gap-6 pb-6 px-6 md:px-0">
                             {yearGroup.members.map((member, mIdx) => (
                               <div key={mIdx} className="w-[240px] md:w-[280px] flex-shrink-0 bg-surface/50 border border-border p-6 group/member hover:border-accent hover:bg-white transition-all duration-500 rounded-[2rem] shadow-sm hover:shadow-lg relative flex flex-col items-center">
                                 {/* Member Management Bar */}

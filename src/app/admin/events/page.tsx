@@ -138,18 +138,18 @@ export default function AdminEventsPage() {
   const handleSaveEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+    const dateStr = formData.get("date") as string;
+
     const eventToSave: Partial<EventItem> = {
       id: selectedEvent?.id || `event-${Date.now()}`,
       title: formData.get("title") as string,
-      date: formData.get("date") as string,
+      date: dateStr,
       status: formData.get("status") as any,
       cost: formData.get("cost") as string,
       summary: formData.get("summary") as string,
       registrationDeadline: formData.get("registrationDeadline") as string,
       description: (formData.get("description") as string).split("\n"),
       difficulty: formData.get("difficulty") as any,
-      calendarDates: [formData.get("date") as string],
       coverImage: previewImage,
     };
 
@@ -160,7 +160,8 @@ export default function AdminEventsPage() {
       setEvents(updated);
       setView("LIST");
     } catch (err) {
-      alert("儲存失敗");
+      console.error("Save error:", err);
+      alert("儲存失敗，請確認欄位格式。");
     }
   };
 

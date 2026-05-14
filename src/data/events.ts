@@ -2,7 +2,6 @@ export interface EventItem {
   id: string;
   title: string;
   date: string;
-  calendarDates: string[]; // ISO format YYYY-MM-DD
   difficulty: "入門" | "初級" | "中級" | "進階" | "挑戰";
   cost: string;
   status: "open" | "closed" | "upcoming";
@@ -75,7 +74,6 @@ export const eventsData: EventItem[] = [
     id: "yushan-2026-06",
     title: "玉山主峰單攻",
     date: "2026/06/15",
-    calendarDates: ["2026-06-15"],
     difficulty: "中級",
     cost: "NT$ 2,500",
     status: "open",
@@ -101,7 +99,6 @@ export const eventsData: EventItem[] = [
     id: "snow-mountain-2026-04",
     title: "雪山東峰迎新",
     date: "2026/04/20",
-    calendarDates: ["2026-04-20"],
     difficulty: "初級",
     cost: "NT$ 1,200",
     status: "closed",
@@ -120,7 +117,6 @@ export const eventsData: EventItem[] = [
     id: "north-peak-2026-07",
     title: "奇萊北峰三日",
     date: "2026/07/10-12",
-    calendarDates: ["2026-07-10", "2026-07-11", "2026-07-12"],
     difficulty: "進階",
     cost: "NT$ 4,800",
     status: "upcoming",
@@ -135,6 +131,7 @@ export const eventsData: EventItem[] = [
     tags: ["百岳", "宿營", "險峻"]
   }
 ];
+
 
 export const galleryData: EventGallery[] = [
   {

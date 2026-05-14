@@ -20,7 +20,6 @@ const getSemester = (dateStr: string) => {
 
 export default function EventListPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
-  const [filter, setFilter] = useState<string>("ALL");
   const [isLoading, setIsLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeEventRef = useRef<HTMLDivElement>(null);
@@ -32,12 +31,8 @@ export default function EventListPage() {
     });
   }, []);
 
-  const filteredEvents = filter === "ALL" 
-    ? events 
-    : events.filter(e => e.difficulty === filter);
-
   // Group events by semester
-  const groupedEvents = filteredEvents.reduce((acc, event) => {
+  const groupedEvents = events.reduce((acc, event) => {
     const sem = getSemester(event.date.split("-")[0]); // Handle range dates
     if (!acc[sem]) acc[sem] = [];
     acc[sem].push(event);
@@ -52,38 +47,14 @@ export default function EventListPage() {
     if (activeEventRef.current) {
       activeEventRef.current.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
-  }, [filter]);
+  }, [events]);
 
   return (
     <main className="min-h-screen pb-24">
       <Navbar />
       
       <div className="pt-32">
-        <section className="mb-16 max-w-7xl mx-auto px-6">
-          <h1 className="text-5xl md:text-7xl font-display italic mb-8 tracking-tight">活動列表</h1>
-          
-          <div className="flex flex-wrap gap-3 items-center">
-            <button 
-              onClick={() => setFilter("ALL")}
-              className={`px-6 py-2 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
-                filter === "ALL" ? "bg-accent text-white" : "bg-surface text-muted border border-border hover:border-accent"
-              }`}
-            >
-              All Expeditions
-            </button>
-            {difficultyLevels.map(level => (
-              <button 
-                key={level.label}
-                onClick={() => setFilter(level.label)}
-                className={`px-6 py-2 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
-                  filter === level.label ? "bg-accent text-white" : "bg-surface text-muted border border-border hover:border-accent"
-                }`}
-              >
-                {level.label}
-              </button>
-            ))}
-          </div>
-        </section>
+
 
         {isLoading ? (
           <div className="py-32 text-center animate-pulse">
@@ -166,7 +137,7 @@ export default function EventListPage() {
           </div>
         ) : (
           <div className="py-32 text-center border border-dashed border-border rounded-[3rem] max-w-7xl mx-auto px-6">
-            <p className="font-serif text-muted italic">目前沒有符合該難度等級的計畫行程。</p>
+            <p className="font-serif text-muted italic">目前尚無已發布的計畫行程。</p>
           </div>
         )}
       </div>

@@ -36,14 +36,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               <span className={`px-4 py-1 rounded-full text-[10px] font-mono text-white uppercase tracking-[0.2em] ${diffInfo?.color}`}>
                 {event.difficulty}
               </span>
-              <span className="px-4 py-1 rounded-full text-[10px] font-mono bg-white/20 backdrop-blur-md text-white uppercase tracking-[0.2em] border border-white/20">
-                {event.cost}
-              </span>
             </div>
             <h1 className="text-5xl md:text-8xl font-display italic text-white tracking-tight drop-shadow-2xl">
               {event.title}
             </h1>
-            <div className="font-mono text-sm text-white/80 tracking-[0.3em] uppercase">{event.date}</div>
+            <div className="font-mono text-2xl text-white tracking-[0.2em] uppercase font-bold">{event.date}</div>
           </div>
         </div>
       </div>
@@ -67,30 +64,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            {event.itinerary && (
-              <div className="mt-16">
-                <h3 className="font-mono text-[10px] text-accent uppercase tracking-[0.2em] mb-8 font-bold">Itinerary Schedule</h3>
-                <div className="space-y-6">
-                  {event.itinerary.map((item, i) => (
-                    <div key={i} className="flex gap-8 group">
-                      <div className="font-mono text-sm text-muted/40 w-16 group-hover:text-accent transition-colors">{item.time}</div>
-                      <div className="font-serif text-lg text-muted">{item.activity}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {event.requirements && (
-              <div className="mt-16 p-8 bg-background border border-border rounded-2xl">
-                <h3 className="font-mono text-[10px] text-accent uppercase tracking-[0.2em] mb-4 font-bold">Requirements</h3>
-                <ul className="list-disc list-inside font-serif text-muted space-y-2">
-                  {event.requirements.map((req, i) => (
-                    <li key={i}>{req}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+
           </div>
 
           <div className="flex justify-between items-center">
@@ -100,9 +74,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             >
               ← Back to List
             </Link>
-            <div className="font-mono text-[10px] text-muted/40 uppercase tracking-widest">
-              Event ID: {event.id}
-            </div>
+
           </div>
         </div>
 
@@ -129,14 +101,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               )}
             </div>
 
-            <div className="space-y-4">
-              <RegistrationCTA event={event} />
-              
-              <div className="p-6 border border-border/50 rounded-2xl text-center">
-                <p className="text-[10px] font-mono text-muted/60 uppercase tracking-widest leading-relaxed">
-                  如有任何疑問請聯繫<br />出隊負責人
-                </p>
+            <div className="space-y-6">
+              <div className="pt-4 border-t border-border/50 text-center">
+                <div className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-1 font-bold">Event Cost</div>
+                <div className="text-3xl font-display italic text-foreground">{event.cost}</div>
               </div>
+
+              <RegistrationCTA event={event} />
             </div>
           </div>
         </div>

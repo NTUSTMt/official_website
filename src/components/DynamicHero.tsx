@@ -37,6 +37,10 @@ export default function DynamicHero() {
   const bgPosition = HERO_POSITIONS[rootPath] || "center";
   const isHome = rootPath === "";
   
+  // Don't show on activity detail pages (they have their own local hero)
+  const isEventDetail = rootPath === "events" && segments.length === 2 && !["list", "gallery", "calendar", "levels"].includes(segments[1]);
+  if (isEventDetail) return null;
+  
   // Find current nav item label for sub-page title
   const currentNavItem = navigationConfig.reduce((acc: any, item) => {
     if (item.href === pathname) return item;

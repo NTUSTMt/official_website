@@ -70,7 +70,6 @@ export default function EquipmentBrowsePage() {
       
       <div className="pt-32 px-6 max-w-7xl mx-auto">
         <section className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-display italic mb-8 tracking-tight">裝備瀏覽</h1>
           
           {/* Category Filter */}
           <div className="flex flex-wrap gap-3 mb-12">

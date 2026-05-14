@@ -100,14 +100,7 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
           {isClosed ? "報名已截止" : "一鍵報名"}
         </button>
         
-        {!user.emergency_contact_name && !isClosed && (
-          <div className="flex items-center gap-2 text-amber-600 bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span className="text-[10px] font-mono uppercase tracking-widest leading-tight text-left">
-              請先至個人資料補填緊急聯絡人資訊
-            </span>
-          </div>
-        )}
+
       </div>
 
       {isModalOpen && (

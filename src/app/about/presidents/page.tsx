@@ -49,28 +49,34 @@ export default function PresidentsPage() {
                 </div>
 
                 {/* Members List - Horizontal Scroll */}
-                <div className="flex-1 w-full overflow-x-auto no-scrollbar">
-                  <div className="flex gap-6 pb-8">
+                <div className="flex-1 w-[calc(100%+3rem)] -mx-6 md:w-full md:mx-0 overflow-x-auto no-scrollbar">
+                  <div className="flex gap-6 pb-8 px-6 md:px-0">
                     {yearGroup.members.map((member, idx) => (
                       <div key={idx} className="w-[240px] md:w-[280px] flex-shrink-0 bg-surface/50 border border-border p-8 group hover:border-accent hover:bg-white transition-all duration-500 rounded-[2rem] shadow-sm hover:shadow-lg flex flex-col items-center text-center">
-                        {/* Scaled Down Avatar */}
-                        <div className="w-20 h-20 md:w-24 md:h-24 bg-muted/10 rounded-full mb-6 overflow-hidden relative border border-border group-hover:border-accent transition-all duration-500 shadow-inner">
-                          {member.avatar ? (
-                            <img src={member.avatar} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted/20">
-                              <svg className="w-10 h-10 md:w-12 md:h-12" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                              </svg>
-                            </div>
-                          )}
+                        {/* Larger Avatar with Overlapping Role Capsule */}
+                        <div className="relative mb-6">
+                          <div className="w-32 h-32 md:w-40 md:h-40 bg-muted/10 rounded-full overflow-hidden border border-border group-hover:border-accent transition-all duration-500 shadow-inner">
+                            {member.avatar ? (
+                              <img src={member.avatar} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted/20">
+                                <svg className="w-16 h-16 md:w-20 md:h-20" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Role Capsule Overlap - Lighter Version */}
+                          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-accent/10 backdrop-blur-md border border-accent/20 text-accent px-4 py-1.5 rounded-full shadow-sm z-20 whitespace-nowrap">
+                            <div className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold">{member.role}</div>
+                          </div>
                         </div>
                         
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           <div className="space-y-1">
-                            <div className="font-mono text-[9px] text-accent uppercase tracking-[0.2em] font-bold">{member.role}</div>
-                            <h4 className="text-xl md:text-2xl font-display italic tracking-tight">{member.name}</h4>
-                            <div className="font-mono text-[9px] text-muted uppercase tracking-wider">{member.dept}</div>
+                            <h4 className="text-2xl md:text-3xl font-display italic tracking-tight">{member.name}</h4>
+                            <div className="font-mono text-[10px] text-muted uppercase tracking-wider">{member.dept}</div>
                           </div>
                           
                           {member.intro && (
