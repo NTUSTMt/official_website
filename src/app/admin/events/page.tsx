@@ -7,7 +7,6 @@ import { eventService, registrationService } from "@/services/eventService";
 import { historyService, cmsService } from "@/services/cmsService";
 import { userService } from "@/services/userService";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { uploadFileAction } from "../cms-actions";
 import { Trash2, Plus, ChevronLeft, Users as UsersIcon, Edit, Calendar, DollarSign, Save, X, Upload, Image as ImageIcon, Download, FileText } from "lucide-react";
 
 type ViewState = "LIST" | "EDIT_EVENT" | "VIEW_PARTICIPANTS";
@@ -81,17 +80,19 @@ export default function AdminEventsPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${bucketName}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("bucket", bucketName);
-      formData.append("path", fileName);
+      const filePath = fileName;
 
-      const result = await uploadFileAction(formData);
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file);
 
-      if (!result.success) throw new Error(result.error);
+      if (uploadError) throw uploadError;
 
-      return result.publicUrl;
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
+      return publicUrl;
     } catch (error) {
       console.error('Error uploading:', error);
       alert(`上傳失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);

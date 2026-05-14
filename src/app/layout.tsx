@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display, Crimson_Pro } from "next/font/google";
-import dynamic from "next/dynamic";
+import TopographyBackground from "@/components/TopographyBackground";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DynamicHero from "@/components/DynamicHero";
-import { Providers } from "@/components/Providers";
 import "./globals.css";
-
-const TopographyBackground = dynamic(() => import("@/components/TopographyBackground"), {
-  ssr: false,
-});
 
 const inter = Inter({
   variable: "--font-body",
@@ -39,6 +34,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,

@@ -6,7 +6,7 @@ import { mockCMSConfig, type GlobalConfig } from "@/data/cms";
 import { historyData, introductionContent } from "@/data/history";
 import { committeeData } from "@/data/committee";
 import { historyService, cmsService } from "@/services/cmsService";
-import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAction, saveCmsConfigAction, uploadFileAction } from "./cms-actions";
+import { updateGlobalConfigAction, saveHistoryMilestonesAction, saveCommitteesAction, saveCmsConfigAction } from "./cms-actions";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AlertTriangle, Save, Bell, Settings, History, Upload, Image as ImageIcon, X, Mail, Link as LinkIcon, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -159,24 +159,26 @@ export default function AdminDashboardPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${committees[yIdx].year}_${committees[yIdx].members[mIdx].name}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("bucket", "avatars");
-      formData.append("path", fileName);
+      const filePath = fileName;
 
-      const result = await uploadFileAction(formData);
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
 
-      if (!result.success) throw new Error(result.error);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
 
       const newCommittees = [...committees];
-      newCommittees[yIdx].members[mIdx].avatar = result.publicUrl;
+      newCommittees[yIdx].members[mIdx].avatar = publicUrl;
       setCommittees(newCommittees);
       
       alert("照片上傳成功！");
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error uploading image:', error);
-      alert(`照片上傳失敗：${error.message || "請檢查 Supabase Storage 設定"}`);
+      alert("照片上傳失敗，請確保 Supabase Storage 已建立名為 'official' 的公開 Bucket。");
     }
   };
 
@@ -308,22 +310,16 @@ export default function AdminDashboardPage() {
                                     try {
                                       const fileExt = file.name.split('.').pop();
                                       const fileName = `contact_${platform}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                                      
-                                      const formData = new FormData();
-                                      formData.append("file", file);
-                                      formData.append("bucket", "avatars");
-                                      formData.append("path", fileName);
-
-                                      const result = await uploadFileAction(formData);
-                                      if (!result.success) throw new Error(result.error);
-
+                                      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+                                      if (uploadError) throw uploadError;
+                                      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
                                       const newContact = { ...contactInfo };
-                                      newContact[platform].qrcode = result.publicUrl;
+                                      newContact[platform].qrcode = publicUrl;
                                       setContactInfo(newContact);
                                       alert("QR Code 上傳成功！");
-                                    } catch (err: any) {
+                                    } catch (err) {
                                       console.error("Upload failed:", err);
-                                      alert(`上傳失敗: ${err.message}`);
+                                      alert("上傳失敗");
                                     }
                                   }
                                 }}

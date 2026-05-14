@@ -31,14 +31,6 @@
     *   **視覺進入點**：首頁進入時導覽列對齊螢幕底部，且公告預設隱藏於螢幕下方，創造更乾淨的視覺開場。
 - **新增「聯絡我們管理」分頁**：後台新增專屬分頁，支援 LINE、Instagram、Facebook 及 Email 的動態管理。
 
-### Bug Fixes & System Stability (系統穩定性修復)
-- **修復 RLS 上傳權限錯誤 (RLS Upload Fix)**：
-  - **問題**：管理員在後台上傳 QR Code 或活動照片時發生 `new row violates row-level security policy` 錯誤。
-  - **修復**：實作 `uploadFileAction` Server Action，統一改用 `supabaseAdmin` (Service Role) 於伺服器端處理上傳，成功繞過 RLS 權限限制。
-- **解決佈局載入逾時 (Layout ChunkLoad Fix)**：
-  - **問題**：首頁載入時偶爾出現 `ChunkLoadError` 以及 React 掛載前的狀態更新警告。
-  - **修復**：將 `TopographyBackground` 改為 `next/dynamic` 異步載入並禁用 SSR，確保佈局渲染的流暢度與穩定性。
-
 ### 後台 CMS 視覺與結構進化 (Admin CMS Evolution)
 - **結構優化**：將「關於」相關功能整合為「關於山社 CMS」，並將「歷任幹部管理」獨立為專屬分頁，確保管理流程更加專注且直覺。
 - **視覺現代化**：
