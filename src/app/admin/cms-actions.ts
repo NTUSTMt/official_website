@@ -92,3 +92,38 @@ export async function saveCmsConfigAction(id: string, content: any) {
     throw error;
   }
 }
+
+export async function uploadFileAction(formData: FormData) {
+  try {
+    const file = formData.get("file") as File;
+    const bucket = formData.get("bucket") as string || "avatars";
+    const path = formData.get("path") as string;
+
+    if (!file) throw new Error("No file provided");
+    if (!path) throw new Error("No path provided");
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const { data, error } = await supabaseAdmin.storage
+      .from(bucket)
+      .upload(path, buffer, {
+        contentType: file.type,
+        upsert: true
+      });
+
+    if (error) {
+      console.error("Storage upload error:", error);
+      throw new Error(error.message);
+    }
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from(bucket)
+      .getPublicUrl(path);
+
+    return { success: true, publicUrl };
+  } catch (error: any) {
+    console.error("Upload action exception:", error);
+    return { success: false, error: error.message };
+  }
+}
