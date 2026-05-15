@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { cmsService } from "@/services/cmsService";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function CalendarPage() {
+  const { t } = useTranslation();
   const [calendars, setCalendars] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,7 +38,9 @@ export default function CalendarPage() {
             return (
               <div key={idx} className="group space-y-8">
                 <div className="flex items-center gap-4">
-                  <h2 className="text-3xl font-display italic text-foreground whitespace-nowrap">{cal.semester} 學期行事曆 Semester Poster</h2>
+                  <h2 className="text-3xl font-display italic text-foreground whitespace-nowrap">
+                    {cal.semester} {t('nav.events.calendar_title')}
+                  </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
                 
@@ -71,7 +75,7 @@ export default function CalendarPage() {
           {calendars.length === 0 && (
             <div className="py-40 border-2 border-dashed border-border rounded-[3rem] flex flex-col items-center justify-center text-muted/20">
               <div className="text-6xl font-display italic mb-4">Coming Soon</div>
-              <p className="font-serif text-sm">目前尚無上傳的學期行事曆，請靜候社團更新。</p>
+              <p className="font-serif text-sm">{t('nav.events.no_calendars_desc')}</p>
             </div>
           )}
         </div>

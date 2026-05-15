@@ -8,9 +8,12 @@ import { rentalService } from "@/services/equipmentService";
 import { useSession, signIn } from "next-auth/react";
 import { userService } from "@/services/userService";
 import { useEffect } from "react";
+import { useTranslation } from "@/context/LanguageContext";
+
 
 
 export default function RentalCartPage() {
+  const { t } = useTranslation();
   const { data: session, status } = useSession();
   const { state, dispatch } = useCart();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -86,7 +89,7 @@ export default function RentalCartPage() {
     setError(null);
 
     if (new Date(formData.returnDate) <= new Date(formData.borrowDate)) {
-      setError("歸還日期必須晚於領取日期");
+      setError(t('nav.equipment.date_error'));
       setIsSubmitting(false);
       window.scrollTo(0, 0);
       return;
@@ -115,7 +118,7 @@ export default function RentalCartPage() {
       dispatch({ type: "CLEAR_CART" });
       window.scrollTo(0, 0);
     } catch (err: any) {
-      setError(err.message || "提交失敗，請稍後再試。");
+      setError(err.message || t('nav.equipment.submit_error'));
       window.scrollTo(0, 0);
     } finally {
       setIsSubmitting(false);
@@ -131,15 +134,15 @@ export default function RentalCartPage() {
           <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-8 shadow-xl">
             ✓
           </div>
-          <h1 className="text-4xl font-display italic mb-6">預約成功！</h1>
+          <h1 className="text-4xl font-display italic mb-6">{t('nav.equipment.success_title')}</h1>
           <p className="text-xl font-serif text-muted mb-12 leading-relaxed">
-            器材長已收到您的租借單。我們會在一日內透過 LINE 與您聯繫確認領取時間。
+            {t('nav.equipment.success_desc')}
           </p>
           <Link 
             href="/equipment/browse"
             className="inline-block px-12 py-4 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-accent/20"
           >
-            返回裝備瀏覽
+            {t('nav.equipment.return_to_browse')}
           </Link>
         </div>
       </main>
@@ -151,9 +154,6 @@ export default function RentalCartPage() {
       <Navbar />
       
       <div className="pt-24 px-6 max-w-6xl mx-auto">
-        <section className="mb-12">
-          <p className="text-lg font-serif text-muted">確認裝備與租借資訊，完成後點擊提交。</p>
-        </section>
 
         {error && (
           <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-3xl text-red-600 font-serif flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
@@ -164,12 +164,12 @@ export default function RentalCartPage() {
 
         {state.items.length === 0 ? (
           <div className="py-24 text-center border border-dashed border-border rounded-[3rem]">
-            <p className="font-serif text-muted italic mb-8">租借單目前是空的。</p>
+            <p className="font-serif text-muted italic mb-8">{t('nav.equipment.empty_cart')}</p>
             <Link 
               href="/equipment/browse"
               className="px-12 py-4 border border-accent text-accent rounded-full font-mono text-xs uppercase tracking-widest hover:bg-accent hover:text-white transition-all"
             >
-              去逛逛裝備
+              {t('nav.equipment.go_browsing')}
             </Link>
           </div>
         ) : (
@@ -178,7 +178,7 @@ export default function RentalCartPage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-border bg-muted/5 font-mono text-[10px] text-muted uppercase tracking-widest font-bold">
-                  Items Selected ({state.items.length})
+                  {t('nav.equipment.items_selected')} ({state.items.length})
                 </div>
                 <div className="divide-y divide-border">
                   {state.items.map((item) => (
@@ -193,7 +193,9 @@ export default function RentalCartPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-display italic text-base md:text-lg truncate">{item.name}</h4>
-                          <span className="text-[10px] font-mono text-muted/60 uppercase tracking-widest block truncate">{item.category}</span>
+                          <span className="text-[10px] font-mono text-muted/60 uppercase tracking-widest block truncate">
+                            {item.category}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center gap-4 md:gap-8 flex-shrink-0">
@@ -216,59 +218,63 @@ export default function RentalCartPage() {
               </div>
 
               {/* Summary of Rules */}
-              <div className="p-8 border border-accent/20 bg-accent/5 rounded-[2.5rem] italic font-serif text-muted text-sm leading-relaxed">
+              <div className="p-8 border border-accent/20 bg-accent/5 rounded-[2.5rem] italic font-serif text-muted text-sm leading-relaxed mb-6">
                 <span className="font-bold text-accent block mb-2 font-mono uppercase tracking-widest text-xs">Note:</span>
-                領取裝備前請確認已清理乾淨。租借期滿一週內須歸還，損壞或遺失須負擔賠償責任。
+                {t('nav.equipment.rental_rules_desc')}
+              </div>
+
+              <div className="px-8 py-4 bg-muted/5 border border-border rounded-[2rem] text-sm font-serif text-muted italic flex items-center gap-3">
+                {t('nav.equipment.form_subtitle')}
               </div>
             </div>
 
             {/* Right: Order Form */}
             <form onSubmit={handleSubmit} className="lg:col-span-5 bg-surface border border-border p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl space-y-8">
-              <h3 className="text-2xl font-display italic border-b border-border pb-4">租借資訊 Form</h3>
+              <h3 className="text-2xl font-display italic border-b border-border pb-4">{t('nav.equipment.form_title')}</h3>
               
               <div className="space-y-6">
                 {/* Identity & Purpose */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">你的身份</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.identity_label')}</label>
                     <select 
                       value={formData.identity}
                       onChange={(e) => setFormData({...formData, identity: e.target.value as any})}
                       className="w-full bg-background border border-border p-4 rounded-2xl font-serif text-sm focus:border-accent outline-none appearance-none"
                     >
-                      <option value="MEMBER">台科大登山社員</option>
-                      <option value="NON_MEMBER">非社員</option>
+                      <option value="MEMBER">{t('nav.equipment.identity_member')}</option>
+                      <option value="NON_MEMBER">{t('nav.equipment.identity_non_member')}</option>
                     </select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">使用用途</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.purpose_label')}</label>
                     <select 
                       value={formData.purpose}
                       onChange={(e) => setFormData({...formData, purpose: e.target.value as any})}
                       className="w-full bg-background border border-border p-4 rounded-2xl font-serif text-sm focus:border-accent outline-none appearance-none"
                     >
-                      <option value="CLUB">參加社團活動</option>
-                      <option value="PERSONAL">個人/私人行程</option>
+                      <option value="CLUB">{t('nav.equipment.purpose_club')}</option>
+                      <option value="PERSONAL">{t('nav.equipment.purpose_personal')}</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Personal Info */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">姓名 Name</label>
+                  <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.name_label')}</label>
                   <input 
                     required
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="請輸入姓名"
+                    placeholder={t('nav.equipment.name_placeholder')}
                     className="w-full bg-background border border-border p-4 rounded-2xl font-serif text-sm focus:border-accent outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">手機 Phone</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.phone_label')}</label>
                     <input 
                       required
                       type="tel"
@@ -279,13 +285,13 @@ export default function RentalCartPage() {
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">LINE ID</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.line_id_label')}</label>
                     <input 
                       required
                       type="text"
                       value={formData.lineId}
                       onChange={(e) => setFormData({...formData, lineId: e.target.value})}
-                      placeholder="用於聯繫領取"
+                      placeholder={t('nav.equipment.line_placeholder')}
                       className="w-full bg-background border border-border p-4 rounded-2xl font-serif text-sm focus:border-accent outline-none"
                     />
                   </div>
@@ -296,7 +302,7 @@ export default function RentalCartPage() {
                 {/* Dates */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">領取日期</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.borrow_date_label')}</label>
                     <input 
                       required
                       type="date"
@@ -306,7 +312,7 @@ export default function RentalCartPage() {
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">歸還日期</label>
+                    <label className="text-[10px] font-mono text-muted uppercase tracking-widest font-bold">{t('nav.equipment.return_date_label')}</label>
                     <input 
                       required
                       type="date"
@@ -320,14 +326,14 @@ export default function RentalCartPage() {
                 {/* Pricing Summary */}
                 <div className="p-8 bg-muted/5 border border-border rounded-3xl space-y-4">
                   <div className="flex justify-between items-center text-xs font-mono text-muted/60 uppercase tracking-widest">
-                    <span>Rental Duration</span>
-                    <span>{days} Days</span>
+                    <span>{t('nav.equipment.rental_duration')}</span>
+                    <span>{days} {t('nav.equipment.days_unit')}</span>
                   </div>
                   <div className="flex justify-between items-end">
-                    <span className="font-display italic text-xl">預估總計</span>
+                    <span className="font-display italic text-xl">{t('nav.equipment.estimated_total')}</span>
                     <div className="text-right">
                       <div className="text-4xl font-display italic text-accent font-bold">${pricing}</div>
-                      <div className="text-[10px] font-mono text-muted uppercase tracking-widest">Taiwan Dollars</div>
+                      <div className="text-[10px] font-mono text-muted uppercase tracking-widest">{t('nav.equipment.currency_unit')}</div>
                     </div>
                   </div>
                 </div>
@@ -339,7 +345,7 @@ export default function RentalCartPage() {
                     className="w-full py-6 bg-emerald-500 text-white rounded-full font-mono text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
                   >
                     <span className="text-xl">💬</span>
-                    登入 LINE 以預約租借
+                    {t('nav.equipment.login_to_rent')}
                   </button>
                 ) : (
                   <button 
@@ -347,13 +353,13 @@ export default function RentalCartPage() {
                     disabled={isSubmitting}
                     className="w-full py-6 bg-accent text-white rounded-full font-mono text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? "正在提交..." : "提交租借單 Submit"}
+                    {isSubmitting ? t('nav.equipment.submitting') : t('nav.equipment.submit_button')}
                   </button>
                 )}
                 
                 {status === "unauthenticated" && (
                   <p className="text-[10px] font-serif text-muted text-center italic">
-                    * 預約租借需登錄社員身分以核對資料。
+                    {t('nav.equipment.login_required_desc')}
                   </p>
                 )}
 

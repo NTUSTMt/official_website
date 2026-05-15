@@ -9,6 +9,7 @@ export interface EquipmentItem {
   details?: string;
   notes?: string;
   image?: string;
+  emoji?: string;
   isRentable: boolean;
   isMemberOnly?: boolean;
   pricing?: {

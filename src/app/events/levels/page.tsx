@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { historyService } from "@/services/cmsService";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function DifficultyLevelsPage() {
+  const { t } = useTranslation();
   const [levels, setLevels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,14 +49,14 @@ export default function DifficultyLevelsPage() {
 
                 <div className="md:col-span-9 space-y-6">
                   <div>
-                    <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 md:mb-3 font-bold">Description</h3>
+                    <h3 className="font-mono text-[10px] text-muted uppercase tracking-[0.2em] mb-2 md:mb-3 font-bold">{t('nav.events.description_label')}</h3>
                     <p className="text-lg md:text-xl font-serif text-muted leading-relaxed">
                       {level.description}
                     </p>
                   </div>
                   
                   <div className="pt-6 border-t border-border/50">
-                    <h4 className="font-mono text-[10px] text-accent uppercase tracking-[0.2em] mb-3 font-bold">Example Routes</h4>
+                    <h4 className="font-mono text-[10px] text-accent uppercase tracking-[0.2em] mb-3 font-bold">{t('nav.events.example_routes_label')}</h4>
                     <p className="text-base font-serif italic text-muted">
                       {level.example}
                     </p>
@@ -71,10 +73,9 @@ export default function DifficultyLevelsPage() {
         </div>
 
         <div className="mt-16 md:mt-32 p-8 md:p-12 bg-accent/5 border border-accent/20 rounded-[2.5rem] md:rounded-[3rem] text-center max-w-3xl mx-auto">
-          <h3 className="text-2xl font-display italic mb-4 text-accent">安全第一 Safety First</h3>
+          <h3 className="text-2xl font-display italic mb-4 text-accent">{t('nav.events.safety_first')}</h3>
           <p className="text-muted font-serif leading-relaxed italic">
-            「山永遠都在。」如果您對自己的體能或經驗有疑慮，請務必與領隊或幹部諮詢。
-            建議從入門等級開始累積經驗，循序漸進挑戰更高難度的山域。
+            {t('nav.events.safety_desc')}
           </p>
         </div>
       </div>

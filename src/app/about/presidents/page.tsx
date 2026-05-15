@@ -45,16 +45,16 @@ export default function PresidentsPage() {
             <div key={yearGroup.year} className="relative">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 {/* Modern Year Display - Scaled Down */}
-                <div className="md:sticky md:top-32 flex-shrink-0 flex items-start gap-2 group">
-                  <span className="text-3xl md:text-5xl font-display italic text-foreground leading-none">{yearGroup.year}</span>
-                  <span className="text-[9px] font-mono text-muted uppercase tracking-[0.2em] [writing-mode:vertical-rl] h-fit border-l border-border pl-1.5 py-1">
+                <div className="md:sticky md:top-32 flex-shrink-0 flex flex-row md:flex-row items-center md:items-start gap-3 group">
+                  <span className="text-4xl md:text-5xl font-display italic text-foreground leading-none">{yearGroup.year}</span>
+                  <span className="text-[9px] font-mono text-muted uppercase tracking-[0.2em] md:[writing-mode:vertical-rl] h-fit md:border-l border-border md:pl-1.5 md:py-1 whitespace-nowrap">
                     {t('nav.about.academic_year')}
                   </span>
                 </div>
 
                 {/* Members List - Horizontal Scroll */}
-                <div className="flex-1 w-[calc(100%+3rem)] -mx-6 md:w-full md:mx-0 overflow-x-auto no-scrollbar">
-                  <div className="flex gap-6 pb-8 px-6 md:px-0">
+                <div className="flex-1 min-w-0 w-screen -mx-6 md:w-full md:mx-0 overflow-x-auto no-scrollbar">
+                  <div className="flex gap-6 pb-8 px-6 md:px-0 min-w-max">
                     {yearGroup.members.map((member, idx) => (
                       <div key={idx} className="w-[240px] md:w-[280px] flex-shrink-0 bg-surface/50 border border-border p-8 group hover:border-accent hover:bg-white transition-all duration-500 rounded-[2rem] shadow-sm hover:shadow-lg flex flex-col items-center text-center">
                         {/* Larger Avatar with Overlapping Role Capsule */}
@@ -106,7 +106,7 @@ export default function PresidentsPage() {
               onClick={() => setVisibleCount(prev => prev + 5)}
               className="px-12 py-4 bg-accent text-white font-mono text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all duration-300 rounded-full shadow-lg shadow-accent/20"
             >
-              LOAD MORE HISTORY
+              {t('nav.about.load_more')}
             </button>
           </div>
         )}

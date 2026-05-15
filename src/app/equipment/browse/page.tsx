@@ -6,20 +6,25 @@ import { equipmentData, EquipmentCategory, EquipmentItem } from "@/data/equipmen
 import { useCart } from "@/components/CartProvider";
 import Link from "next/link";
 import { equipmentService } from "@/services/equipmentService";
+import { useTranslation } from "@/context/LanguageContext";
 
-
-const CATEGORIES: (EquipmentCategory | "全部")[] = ["全部", "炊事系統", "營帳系統", "睡眠系統", "行進裝備", "技術裝備"];
 
 export default function EquipmentBrowsePage() {
-  const [activeCategory, setActiveCategory] = useState<EquipmentCategory | "全部">("全部");
+  const { t } = useTranslation();
+  const [activeCategory, setActiveCategory] = useState<string>("全部");
+  const [categories, setCategories] = useState<{name: string, emoji: string}[]>([]);
   const [items, setItems] = useState<EquipmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { state, dispatch } = useCart();
 
   useEffect(() => {
     async function loadData() {
-      const dbItems = await equipmentService.getAllEquipment();
+      const [dbItems, dbCategories] = await Promise.all([
+        equipmentService.getAllEquipment(),
+        equipmentService.getCategories()
+      ]);
       setItems(dbItems.length > 0 ? dbItems : equipmentData);
+      setCategories(dbCategories);
       setIsLoading(false);
     }
     loadData();
@@ -72,20 +77,22 @@ export default function EquipmentBrowsePage() {
         <section className="mb-6">
           
           {/* Category Filter */}
-          <div className="flex overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap gap-3 mb-6 pb-4 md:pb-0">
-            {CATEGORIES.map(cat => (cat !== undefined && (
-              <button 
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`flex-shrink-0 px-6 py-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
-                  activeCategory === cat 
-                    ? "bg-accent text-white shadow-lg shadow-accent/20 scale-105" 
-                    : "bg-surface text-muted border border-border hover:border-accent"
-                }`}
-              >
-                {cat}
-              </button>
-            )))}
+          <div className="overflow-x-auto no-scrollbar -mx-6 mb-6">
+            <div className="flex md:flex-wrap gap-3 px-8 md:px-6 py-2">
+              {["全部", ...categories].map(cat => (
+                <button 
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`flex-shrink-0 px-6 py-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest transition-all ${
+                    activeCategory === cat 
+                      ? "bg-accent text-white shadow-lg shadow-accent/20 scale-105" 
+                      : "bg-surface text-muted border border-border hover:border-accent"
+                  }`}
+                >
+                  {cat === "全部" ? t('nav.equipment.category_all') : cat}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -111,25 +118,23 @@ export default function EquipmentBrowsePage() {
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     ) : (
-                      <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
-                        {item.category === "炊事系統" && "🍳"}
-                        {item.category === "營帳系統" && "⛺"}
-                        {item.category === "睡眠系統" && "🛌"}
-                        {item.category === "行進裝備" && "🎒"}
-                        {item.category === "技術裝備" && "⛏️"}
-                      </div>
+                    <div className="text-muted/20 text-4xl md:text-6xl group-hover:scale-110 transition-transform duration-700">
+                        <span className="block scale-150">
+                          {categories.find(c => c.name === item.category)?.emoji || "📦"}
+                        </span>
+                    </div>
                     )}
 
                     {item.isMemberOnly && (
                       <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[8px] md:text-[10px] font-mono px-2 md:px-3 py-0.5 md:py-1 rounded-full uppercase tracking-widest font-bold z-20">
-                        🔒 社員限定
+                        {t('nav.equipment.member_only')}
                       </div>
                     )}
                     
                     {isOutOfStock && (
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30">
-                        <div className="bg-white/90 px-4 md:px-6 py-1 md:py-2 rounded-full font-display italic text-red-600 text-[10px] md:text-sm shadow-xl">
-                          已借光 Out of Stock
+                        <div className="bg-white/90 px-4 md:px-6 py-1 md:py-2 rounded-full font-display italic text-red-600 text-[10px] md:text-sm shadow-xl text-center">
+                          {t('nav.equipment.out_of_stock')}
                         </div>
                       </div>
                     )}
@@ -139,7 +144,9 @@ export default function EquipmentBrowsePage() {
                   <div className="p-4 md:p-8 flex flex-1 flex-col">
                     {/* 2. System & Remaining Qty */}
                     <div className="flex justify-between items-center mb-1 md:mb-2">
-                      <div className="font-mono text-[8px] md:text-[10px] text-accent uppercase tracking-widest font-bold">{item.category}</div>
+                      <div className="font-mono text-[8px] md:text-[10px] text-accent uppercase tracking-widest font-bold">
+                        {item.category}
+                      </div>
                       <div className="font-mono text-muted uppercase tracking-widest flex items-baseline gap-0.5">
                         <span className={`font-bold text-xs md:text-sm ${isOutOfStock ? "text-red-500" : "text-foreground"}`}>{item.availableQty}</span>
                         <span className="opacity-40 text-[8px] md:text-[10px]">/{item.quantity}</span>
@@ -151,7 +158,7 @@ export default function EquipmentBrowsePage() {
 
                     {/* 4. Note (Details) */}
                     <p className="text-[11px] md:text-sm font-serif text-muted/60 mb-4 md:mb-6 line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] leading-relaxed break-words">
-                      {item.details || "專業登山裝備，提供完善防護與便利性。"}
+                      {item.details || t('nav.equipment.default_details')}
                     </p>
 
                     <div className="mt-auto">
@@ -191,7 +198,7 @@ export default function EquipmentBrowsePage() {
                           disabled={isOutOfStock}
                           className="w-full h-10 md:h-14 bg-accent text-white rounded-full font-mono text-[10px] md:text-sm uppercase tracking-wide hover:brightness-110 transition-all shadow-lg shadow-accent/20 disabled:bg-muted/20 disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
                         >
-                          {isOutOfStock ? "已借光" : "加入租借單"}
+                          {isOutOfStock ? t('nav.equipment.out_of_stock') : t('nav.equipment.add_to_cart')}
                         </button>
                       )}
                     </div>
@@ -216,8 +223,7 @@ export default function EquipmentBrowsePage() {
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[9px] md:text-[10px] font-mono text-muted uppercase tracking-widest font-bold whitespace-nowrap overflow-hidden text-ellipsis">My Rental Cart</div>
-                  <div className="text-xs md:text-sm font-serif italic text-muted whitespace-nowrap overflow-hidden text-ellipsis">已選擇 {state.items.length} 類裝備</div>
+                  <div className="text-sm md:text-lg font-serif italic text-muted whitespace-nowrap overflow-hidden text-ellipsis">{t('nav.equipment.selected_types', { count: state.items.length })}</div>
                 </div>
               </div>
               
@@ -225,7 +231,7 @@ export default function EquipmentBrowsePage() {
                 href="/equipment/cart"
                 className="flex-shrink-0 px-6 md:px-10 py-3 md:py-4 bg-accent text-white rounded-full font-mono text-[10px] md:text-xs uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg whitespace-nowrap"
               >
-                前往預約 <span className="hidden sm:inline">→</span>
+                {t('nav.equipment.checkout_button')} <span className="hidden sm:inline">→</span>
               </Link>
             </div>
           </div>

@@ -13,8 +13,10 @@ interface RegistrationCTAProps {
 }
 
 import { useSession, signIn } from "next-auth/react";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function RegistrationCTA({ event }: RegistrationCTAProps) {
+  const { t } = useTranslation();
   const { data: session, status } = useSession();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,10 +56,10 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
           className="w-full py-6 bg-emerald-500 text-white rounded-full font-mono text-center text-xs uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
         >
           <span className="text-xl">💬</span>
-          登入 LINE 報名活動
+          {t('nav.events.login_to_register')}
         </button>
         <p className="text-[9px] font-mono text-muted/60 uppercase tracking-widest text-center">
-          需登入後方可參與社團活動
+          {t('nav.events.login_required_desc')}
         </p>
       </div>
     );
@@ -69,14 +71,21 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
       <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] text-center space-y-4">
         <div className="flex items-center justify-center gap-2 text-emerald-600">
           <CheckCircle2 className="w-5 h-5" />
-          <span className="font-display italic text-lg">您已報名此活動</span>
+          <span className="font-display italic text-lg">{t('nav.events.already_registered')}</span>
         </div>
         <div className="space-y-2">
           <div className="text-[10px] font-mono text-muted uppercase tracking-widest">
-            報名狀態：{registration.status === 'pending' ? '待審核' : registration.status === 'confirmed' ? '已確認' : '候補中'}
+            {t('nav.events.reg_status_label')}：{
+              registration.status === 'pending' ? t('nav.events.pending') : 
+              registration.status === 'confirmed' ? t('nav.events.confirmed') : 
+              t('nav.events.waitlist')
+            }
           </div>
           <div className="text-[10px] font-mono text-muted uppercase tracking-widest">
-            繳費狀態：{registration.payment_status === 'unpaid' ? '尚未繳費' : '已繳費'}
+            {t('nav.events.payment_status_label')}：{
+              registration.payment_status === 'unpaid' ? t('nav.events.unpaid') : 
+              t('nav.events.paid')
+            }
           </div>
         </div>
       </div>
@@ -97,7 +106,7 @@ export default function RegistrationCTA({ event }: RegistrationCTAProps) {
               : "bg-accent text-white hover:brightness-110 shadow-accent/20"
           }`}
         >
-          {isClosed ? "報名已截止" : "一鍵報名"}
+          {isClosed ? t('nav.events.reg_status_closed') : t('nav.events.register_now')}
         </button>
         
 

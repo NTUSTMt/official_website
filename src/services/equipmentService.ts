@@ -32,6 +32,7 @@ export const equipmentService = {
       is_rentable: item.isRentable,
       is_member_only: item.isMemberOnly || false,
       image_url: item.image,
+      emoji: item.emoji,
       updated_at: new Date().toISOString(),
     };
 
@@ -108,6 +109,57 @@ export const equipmentService = {
       }
     }
   },
+  async getCategories() {
+    if (!isSupabaseConfigured) return [
+      { name: "炊事系統", emoji: "🍳" },
+      { name: "營帳系統", emoji: "⛺" },
+      { name: "睡眠系統", emoji: "🛌" },
+      { name: "行進裝備", emoji: "🎒" },
+      { name: "技術裝備", emoji: "⛏️" }
+    ];
+
+    const { data, error } = await supabase
+      .from("equipment_categories")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+
+    return data;
+  },
+
+  async upsertCategory(category: { name: string; emoji?: string }) {
+    if (!isSupabaseConfigured) throw new Error("Supabase not configured");
+
+    const { error } = await supabase
+      .from("equipment_categories")
+      .upsert(category, { onConflict: 'name' });
+
+    if (error) throw error;
+  },
+
+  async updateCategoryName(oldName: string, newName: string) {
+    if (!isSupabaseConfigured) throw new Error("Supabase not configured");
+
+    // 1. Update the category record
+    const { error: catError } = await supabase
+      .from("equipment_categories")
+      .update({ name: newName })
+      .eq("name", oldName);
+    
+    if (catError) throw catError;
+
+    // 2. Update all equipment that used this category
+    const { error: equipError } = await supabase
+      .from("equipment")
+      .update({ category: newName })
+      .eq("category", oldName);
+
+    if (equipError) throw equipError;
+  },
 
   mapDbToEquipment(db: any): EquipmentItem {
     return {
@@ -121,6 +173,7 @@ export const equipmentService = {
       isMemberOnly: db.is_member_only,
       pricing: db.pricing,
       image: db.image_url,
+      emoji: db.emoji,
     };
   }
 };

@@ -1,9 +1,13 @@
+"use client";
+
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { navigationConfig } from "@/config/navigation";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function EquipmentHubPage() {
+  const { t } = useTranslation();
   const equipItem = navigationConfig.find(item => item.href === "/equipment");
   const subItems = equipItem?.subItems || [];
 
@@ -23,7 +27,7 @@ export default function EquipmentHubPage() {
               <div className="relative z-10">
                 <span className="text-[10px] font-mono text-accent uppercase tracking-widest block mb-4">Module</span>
                 <h3 className="text-3xl font-display italic group-hover:text-accent transition-colors mb-4">
-                  {item.label}
+                  {t(item.labelKey || `nav.equipment.${item.label.toLowerCase()}`)}
                 </h3>
                 <div className="h-px w-12 bg-border group-hover:w-full group-hover:bg-accent transition-all duration-500"></div>
               </div>
@@ -37,17 +41,16 @@ export default function EquipmentHubPage() {
 
               {/* Decorative Icon Placeholder */}
               <div className="absolute -right-4 -bottom-4 text-8xl font-display italic text-muted/5 group-hover:text-accent/5 transition-colors pointer-events-none">
-                {item.label.slice(0, 1)}
+                {t(item.labelKey || `nav.equipment.${item.label.toLowerCase()}`).slice(0, 1)}
               </div>
             </Link>
           ))}
         </div>
 
         <div className="mt-32 p-12 bg-accent/5 border border-accent/20 rounded-[3rem] text-center max-w-3xl mx-auto">
-          <h3 className="text-xl font-display italic mb-4 text-accent">貼心提醒 Reminder</h3>
+          <h3 className="text-xl font-display italic mb-4 text-accent">{t('nav.equipment.reminder_title')}</h3>
           <p className="text-muted font-serif leading-relaxed italic text-sm">
-            請注意：租借裝備須遵守社團規章，技術裝備僅限社員租借。
-            若有特殊需求或長期租借，請直接連繫社團器材長。
+            {t('nav.equipment.reminder_desc')}
           </p>
         </div>
       </div>

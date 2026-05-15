@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { eventsData, difficultyLevels, EventItem } from "@/data/events";
 import { eventService } from "@/services/eventService";
 import Link from "next/link";
+import { useTranslation } from "@/context/LanguageContext";
 
 // Helper to get semester from date (Taiwan Academic Year)
 const getSemester = (dateStr: string) => {
@@ -19,6 +20,7 @@ const getSemester = (dateStr: string) => {
 };
 
 export default function EventListPage() {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +67,9 @@ export default function EventListPage() {
             {sortedSemesters.map(semester => (
               <div key={semester} className="space-y-8">
                 <div className="flex items-center gap-4 max-w-7xl mx-auto px-6">
-                  <h2 className="text-3xl font-display italic text-accent">{semester} 學年度</h2>
+                  <h2 className="text-3xl font-display italic text-accent">
+                    {semester} {t('nav.about.academic_year')}
+                  </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
                 
@@ -106,7 +110,7 @@ export default function EventListPage() {
                             <div className="p-8 flex-1 flex flex-col">
                               <div className="flex justify-between items-center mb-4">
                                 <div className="font-mono text-[10px] text-accent font-bold tracking-widest">{event.date}</div>
-                                <div className="font-mono text-[10px] text-muted/60">{event.cost}</div>
+                                <div className="font-mono text-sm text-foreground font-bold">{event.cost}</div>
                               </div>
                               
                               <h3 className="text-2xl font-display italic mb-4 group-hover:text-accent transition-colors line-clamp-2 break-words">
@@ -119,7 +123,7 @@ export default function EventListPage() {
 
                               <div className="mt-auto pt-6 border-t border-border/50 flex justify-between items-center">
                                 <span className="text-[10px] font-mono uppercase tracking-widest text-accent font-bold group-hover:translate-x-1 transition-transform">
-                                  View Details →
+                                  {t('nav.events.view_details')} →
                                 </span>
                                 <span className="text-[9px] font-mono text-muted/40 uppercase">{event.id}</span>
                               </div>
@@ -137,7 +141,7 @@ export default function EventListPage() {
           </div>
         ) : (
           <div className="py-32 text-center border border-dashed border-border rounded-[3rem] max-w-7xl mx-auto px-6">
-            <p className="font-serif text-muted italic">目前尚無已發布的計畫行程。</p>
+            <p className="font-serif text-muted italic">{t('nav.events.no_events_desc')}</p>
           </div>
         )}
       </div>

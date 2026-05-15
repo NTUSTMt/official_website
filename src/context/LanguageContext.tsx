@@ -9,7 +9,7 @@ type Translations = typeof zh;
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, variables?: Record<string, any>) => string;
 }
 
 const translations: Record<Language, any> = { zh, en };
@@ -38,7 +38,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('preferred_language', lang);
   };
 
-  const t = (key: string) => {
+  const t = (key: string, variables?: Record<string, any>) => {
     const keys = key.split('.');
     let result = translations[language];
     
@@ -46,11 +46,20 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (result && result[k]) {
         result = result[k];
       } else {
-        return key; // Fallback to key name if not found
+        return key;
       }
     }
     
-    return typeof result === 'string' ? result : key;
+    if (typeof result !== 'string') return key;
+
+    // Handle variables like {{count}}
+    if (variables) {
+      Object.entries(variables).forEach(([name, value]) => {
+        result = (result as string).replace(new RegExp(`{{${name}}}`, 'g'), String(value));
+      });
+    }
+    
+    return result;
   };
 
   return (

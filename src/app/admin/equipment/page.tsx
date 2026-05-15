@@ -8,12 +8,13 @@ import { Trash2, Pencil, Plus, Search, Package, CheckCircle, XCircle, Save, Uplo
 import { uploadFileAction } from "../uploadAction";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
-type Tab = "INVENTORY" | "RENTALS";
+type Tab = "INVENTORY" | "RENTALS" | "CATEGORIES";
 
 export default function AdminEquipmentPage() {
   const [activeTab, setActiveTab] = useState<Tab>("INVENTORY");
   const [inventory, setInventory] = useState<EquipmentItem[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{id?: string, name: string, emoji: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
@@ -36,6 +37,9 @@ export default function AdminEquipmentPage() {
         
         const dbRentals = await rentalService.getAllApplications();
         setRentals(dbRentals);
+
+        const dbCategories = await equipmentService.getCategories();
+        setCategories(dbCategories);
       } finally {
         setIsLoading(false);
       }
@@ -159,7 +163,6 @@ export default function AdminEquipmentPage() {
   };
 
 
-  const categories: EquipmentCategory[] = ["炊事系統", "營帳系統", "睡眠系統", "行進裝備", "技術裝備"];
 
   if (isLoading) {
     return <AdminLayout><div className="p-20 text-center font-mono animate-pulse">裝備資料讀取中...</div></AdminLayout>;
@@ -214,6 +217,14 @@ export default function AdminEquipmentPage() {
           >
             租借申請 ({rentals.filter(r => r.status === "PENDING").length})
           </button>
+          <button 
+            onClick={() => setActiveTab("CATEGORIES")}
+            className={`px-8 py-4 text-xs font-mono tracking-widest uppercase border-b-2 transition-all ${
+              activeTab === "CATEGORIES" ? "border-accent text-accent font-bold" : "border-transparent text-muted hover:text-foreground"
+            }`}
+          >
+            分類管理
+          </button>
         </div>
 
         {activeTab === "INVENTORY" && (
@@ -227,17 +238,15 @@ export default function AdminEquipmentPage() {
                 <div className="aspect-square bg-muted/10 relative overflow-hidden flex items-center justify-center">
                   <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
                   
-                  {item.image ? (
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  ) : (
                     <div className="text-muted/20 text-6xl group-hover:scale-110 transition-transform duration-700">
-                      {item.category === "炊事系統" && "🍳"}
-                      {item.category === "營帳系統" && "⛺"}
-                      {item.category === "睡眠系統" && "🛌"}
-                      {item.category === "行進裝備" && "🎒"}
-                      {item.category === "技術裝備" && "⛏️"}
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      ) : (
+                        <span className="block scale-150">
+                          {categories.find(c => c.name === item.category)?.emoji || "📦"}
+                        </span>
+                      )}
                     </div>
-                  )}
                   
                   {item.isMemberOnly && (
                     <div className="absolute top-6 left-6 bg-red-500/10 border border-red-500/20 text-red-600 text-[10px] font-mono px-3 py-1 rounded-full uppercase tracking-widest font-bold z-20">
@@ -338,6 +347,105 @@ export default function AdminEquipmentPage() {
             )}
           </div>
         )}
+
+        {activeTab === "CATEGORIES" && (
+          <div className="max-w-4xl space-y-8">
+            <div className="bg-surface border border-border rounded-[2.5rem] p-10">
+              <h2 className="text-2xl font-display italic mb-8">現有分類管理</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {categories.map((cat, idx) => (
+                  <div key={cat.id || `cat-${idx}`} className="flex items-center gap-4 bg-background p-4 rounded-2xl border border-border group">
+                    <input 
+                      type="text" 
+                      defaultValue={cat.emoji}
+                      placeholder="📦"
+                      onBlur={async (e) => {
+                        const newEmoji = e.target.value;
+                        if (newEmoji !== cat.emoji) {
+                          try {
+                            await equipmentService.upsertCategory({ name: cat.name, emoji: newEmoji });
+                            const updated = await equipmentService.getCategories();
+                            setCategories(updated);
+                          } catch (err) {
+                            alert("圖示更新失敗");
+                          }
+                        }
+                      }}
+                      className="w-16 h-16 bg-surface border border-border rounded-xl text-center text-2xl outline-none focus:border-accent"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <input 
+                        type="text" 
+                        defaultValue={cat.name}
+                        onBlur={async (e) => {
+                          const newName = e.target.value;
+                          if (newName && newName !== cat.name) {
+                            if (confirm(`確定要把分類「${cat.name}」改名為「${newName}」嗎？這會影響所有屬於此分類的裝備。`)) {
+                              try {
+                                await equipmentService.updateCategoryName(cat.name, newName);
+                                alert("更新成功");
+                                const updated = await equipmentService.getCategories();
+                                setCategories(updated);
+                              } catch (err) {
+                                alert("更新失敗");
+                              }
+                            } else {
+                              e.target.value = cat.name;
+                            }
+                          }
+                        }}
+                        className="w-full bg-transparent border-none outline-none font-serif text-xl focus:text-accent"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-accent/5 border border-accent/20 rounded-[2.5rem] p-10">
+              <h2 className="text-xl font-display italic mb-4 text-accent">新增分類</h2>
+              <p className="text-sm font-serif text-muted mb-6 italic">直接在下方輸入新分類名稱，按下確定後即可在編輯裝備時選用。</p>
+              <div className="flex gap-4">
+                <input 
+                  id="new-category-emoji"
+                  type="text" 
+                  placeholder="📦"
+                  className="w-20 bg-surface border border-border px-4 py-4 rounded-2xl font-serif text-center text-lg outline-none focus:border-accent"
+                />
+                <input 
+                  id="new-category-name"
+                  type="text" 
+                  placeholder="輸入新分類名稱..."
+                  className="flex-1 bg-surface border border-border px-6 py-4 rounded-2xl font-serif text-sm outline-none focus:border-accent"
+                />
+                <button 
+                  onClick={async () => {
+                    const nameInput = document.getElementById("new-category-name") as HTMLInputElement;
+                    const emojiInput = document.getElementById("new-category-emoji") as HTMLInputElement;
+                    const name = nameInput?.value.trim();
+                    const emoji = emojiInput?.value.trim() || "📦";
+                    
+                    if (name && !categories.find(c => c.name === name)) {
+                      try {
+                        await equipmentService.upsertCategory({ name, emoji });
+                        const updated = await equipmentService.getCategories();
+                        setCategories(updated);
+                        nameInput.value = "";
+                        emojiInput.value = "";
+                        alert(`已新增分類「${name}」`);
+                      } catch (err) {
+                        alert("新增失敗");
+                      }
+                    }
+                  }}
+                  className="px-8 py-4 bg-accent text-white rounded-2xl font-mono text-[10px] uppercase tracking-widest font-bold shadow-lg shadow-accent/20"
+                >
+                  確定新增
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal for Add/Edit Equipment */}
@@ -406,9 +514,10 @@ export default function AdminEquipmentPage() {
                     </div>
                     <div>
                       <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2 ml-1">類別 Category</label>
-                      <select name="category" defaultValue={editingItem?.category || "炊事系統"} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-serif text-sm outline-none focus:border-accent">
-                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                      <select name="category" defaultValue={editingItem?.category || categories[0]?.name} className="w-full bg-background border border-border px-6 py-4 rounded-2xl font-serif text-sm outline-none focus:border-accent">
+                        {categories.map((c, idx) => <option key={c.id || `opt-${idx}`} value={c.name}>{c.name}</option>)}
                       </select>
+                      <p className="mt-2 text-[10px] font-serif text-muted italic ml-1">* 若需新增分類，請至「分類管理」分頁。</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
