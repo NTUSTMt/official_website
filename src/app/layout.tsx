@@ -45,13 +45,13 @@ export default function RootLayout({
     <html lang="zh-Hant" className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${crimsonPro.variable}`} suppressHydrationWarning>
       <body className="antialiased flex flex-col min-h-screen" suppressHydrationWarning>
         <TopographyBackground />
-        <DynamicHero />
         <Providers>
+          <DynamicHero />
           <div className="flex-1 relative">
             {children}
           </div>
+          <Footer />
         </Providers>
-        <Footer />
       </body>
     </html>
   );

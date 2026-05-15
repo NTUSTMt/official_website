@@ -19,12 +19,12 @@ export default function RulesLayout({ children }: RulesLayoutProps) {
     <main className="min-h-screen">
       <Navbar />
       
-      <div className="pt-32 pb-24 px-6 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-12">
+      <div className="pt-20 md:pt-32 pb-16 md:pb-24 px-6 max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-12 max-w-4xl lg:max-w-none mx-auto">
           {/* Sidebar Navigation */}
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="sticky top-32">
-              <div className="mb-8">
+            <div className="lg:sticky lg:top-32">
+              <div className="mb-6 md:mb-8">
                 <h2 className="text-xs font-mono text-accent uppercase tracking-[0.3em] font-bold mb-4">
                   Regulations
                 </h2>
@@ -50,18 +50,20 @@ export default function RulesLayout({ children }: RulesLayoutProps) {
                 })}
               </nav>
 
-              <div className="mt-12 p-6 bg-surface border border-border rounded-3xl">
-                <p className="text-[10px] font-mono text-muted/60 leading-relaxed uppercase tracking-widest">
-                  如有任何疑問，請聯繫社團幹部或透過 LINE 官方帳號詢問。
-                </p>
-              </div>
             </div>
           </aside>
 
           {/* Main Content Area */}
           <div className="flex-1 max-w-4xl">
-            <div className="bg-surface border border-border rounded-[3rem] p-8 md:p-16 shadow-sm min-h-[600px]">
+            <div className="bg-surface border border-border rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-16 shadow-sm min-h-[600px]">
               {children}
+            </div>
+
+            {/* Moved Help Text to Bottom with Original Box Style */}
+            <div className="mt-8 md:mt-12 p-8 bg-surface border border-border rounded-[2.5rem] md:rounded-3xl text-center">
+              <p className="text-[11px] font-mono text-muted leading-relaxed uppercase tracking-widest">
+                如有任何疑問，請聯繫社團幹部或透過 LINE 官方帳號詢問。
+              </p>
             </div>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function RentalHistoryPage() {
         const profile = await userService.getCurrentUser();
         if (profile) {
           setUser(profile);
-          const data = await rentalService.getUserRentals(profile.id);
+          const data = await rentalService.getUserRentals(profile.id, profile.internal_line_id);
           setRentals(data);
         }
       } finally {

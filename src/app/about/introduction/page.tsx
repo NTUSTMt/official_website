@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { introductionContent as defaultContent } from "@/data/history";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function IntroductionPage() {
-  const [content, setContent] = useState(defaultContent);
+  const { language, t } = useTranslation();
+  const [content, setContent] = useState<any>(defaultContent);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,16 +40,16 @@ export default function IntroductionPage() {
               <p className="text-2xl text-foreground font-medium mb-6 whitespace-pre-wrap">
                 {content.quote}
               </p>
-              {content.paragraphs.map((p, i) => (
+              {content.paragraphs.map((p: string, i: number) => (
                 <p key={i}>{p}</p>
               ))}
             </div>
             
             <div className="bg-surface p-10 border border-border space-y-8 rounded-3xl shadow-sm">
               <div>
-                <h3 className="text-xl font-display italic text-accent mb-4">核心理念 Core Values</h3>
+                <h3 className="text-xl font-display italic text-accent mb-4">{t('nav.about.core_values')}</h3>
                 <ul className="space-y-3 font-mono text-sm uppercase tracking-wider">
-                  {content.coreValues.map((v, i) => (
+                  {content.coreValues.map((v: string, i: number) => (
                     <li key={i} className="flex items-center gap-3">
                       <span className="w-1.5 h-1.5 bg-accent rounded-full"></span>
                       {v}
@@ -60,7 +62,7 @@ export default function IntroductionPage() {
         </section>
 
         <p className="mt-16 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
-          2026 © 國立臺灣科技大學登山社 · 傳承與現代化
+          {t('nav.about.footer_tag')}
         </p>
       </div>
     </main>

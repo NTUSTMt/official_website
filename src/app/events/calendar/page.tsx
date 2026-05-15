@@ -36,9 +36,8 @@ export default function CalendarPage() {
             return (
               <div key={idx} className="group space-y-8">
                 <div className="flex items-center gap-4">
-                  <h2 className="text-3xl font-display italic text-foreground whitespace-nowrap">{cal.semester} 學期行事曆</h2>
+                  <h2 className="text-3xl font-display italic text-foreground whitespace-nowrap">{cal.semester} 學期行事曆 Semester Poster</h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
-                  <span className="font-mono text-[10px] text-muted uppercase tracking-widest hidden sm:block">Semester Poster</span>
                 </div>
                 
                 {/* Horizontal Scrollable Container with Bleed Effect */}

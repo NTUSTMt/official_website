@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { EquipmentItem, EquipmentCategory } from "@/data/equipment";
+import { EquipmentItem, EquipmentCategory, equipmentData } from "@/data/equipment";
 
 export const equipmentService = {
   async getAllEquipment() {
@@ -72,13 +72,19 @@ export const equipmentService = {
   },
 
   async getEquipmentById(id: string) {
-    if (!isSupabaseConfigured) return null;
+    if (!isSupabaseConfigured) return equipmentData.find(item => item.id === id) || null;
+
     const { data, error } = await supabase
       .from("equipment")
       .select("*")
       .eq("id", id)
       .single();
-    if (error) return null;
+
+    if (error || !data) {
+      // Fallback to static data if not found in database
+      return equipmentData.find(item => item.id === id) || null;
+    }
+
     return this.mapDbToEquipment(data);
   },
 
@@ -135,13 +141,21 @@ export const rentalService = {
     return data;
   },
 
-  async getUserRentals(userId: string) {
+  async getUserRentals(userId: string, lineId?: string) {
     if (!isSupabaseConfigured) return [];
-    const { data, error } = await supabase
+    
+    let query = supabase
       .from("rental_applications")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .select("*");
+
+    if (lineId) {
+      query = query.or(`user_id.eq."${userId}",user_id.eq."${lineId}"`);
+    } else {
+      query = query.eq("user_id", userId);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
+      
     if (error) {
       console.error("Error fetching user rentals:", error);
       return [];
@@ -180,6 +194,39 @@ export const rentalService = {
       .single();
 
     if (error) throw error;
+
+    // 3. Update user balance and record payment
+    if (application.totalFee > 0 && application.userId !== "anonymous") {
+      try {
+        // Find user by either ID or internal LINE ID
+        const { data: userData } = await supabase
+          .from("users")
+          .select("id, balance")
+          .eq("id", application.userId) // We assume userId passed is the Database UUID if logged in
+          .single();
+
+        if (userData) {
+          const newBalance = (userData.balance || 0) - application.totalFee;
+          
+          // Update balance
+          await supabase.from("users").update({ balance: newBalance }).eq("id", userData.id);
+          
+          // Record payment history
+          await supabase.from("payment_history").insert({
+            user_id: userData.id,
+            amount: -application.totalFee,
+            type: 'rental',
+            description: `裝備租借 (單號: ${data.id.substring(0,8)})`,
+            created_at: new Date().toISOString()
+          });
+        }
+      } catch (err) {
+        console.error("Failed to update balance or record payment history:", err);
+        // We don't throw here to avoid failing the whole rental submission 
+        // since the application record itself was successful.
+      }
+    }
+
     return data;
   },
 

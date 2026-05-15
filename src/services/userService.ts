@@ -23,6 +23,7 @@ export interface UserProfile {
   emergency_contact_relationship?: string;
   emergency_contact_address?: string;
   skills?: string[];
+  internal_line_id?: string;
   balance: number;
   created_at: string;
 }
@@ -120,7 +121,8 @@ export const userService = {
         return null;
       }
       
-      return mapDatabaseToProfile(userData);
+      const profile = mapDatabaseToProfile(userData);
+      return { ...profile, internal_line_id: lineUserId };
     } catch (err) {
       console.error("Failed to fetch current user session", err);
       return null;
@@ -146,5 +148,25 @@ export const userService = {
 
     if (error) throw error;
     return mapDatabaseToProfile(data);
+  },
+
+  async getPaymentHistory(userId: string, internalLineId?: string) {
+    let query = supabase
+      .from("payment_history")
+      .select("*");
+
+    if (internalLineId) {
+      query = query.or(`user_id.eq.${userId},user_id.eq.${internalLineId}`);
+    } else {
+      query = query.eq("user_id", userId);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching payment history:", error);
+      return [];
+    }
+    return data;
   }
 };

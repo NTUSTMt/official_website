@@ -40,15 +40,15 @@ export default function ConstitutionPage() {
   return (
     <RulesLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 h-full flex flex-col">
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-display italic mb-6">{data.title}</h1>
-          <p className="text-lg font-serif text-muted leading-relaxed">
+        <header className="mb-8 md:mb-12">
+          <h1 className="text-3xl md:text-5xl font-display italic mb-4 md:mb-6">{data.title}</h1>
+          <p className="text-base md:text-lg font-serif text-muted leading-relaxed">
             {data.description}
           </p>
-          <div className="h-px w-full bg-border mt-12"></div>
+          <div className="h-px w-full bg-border mt-8 md:mt-12"></div>
         </header>
 
-        <div className="flex-1 min-h-[800px] bg-white rounded-2xl overflow-hidden border border-border shadow-inner">
+        <div className="flex-1 min-h-[500px] md:min-h-[800px] bg-white rounded-2xl overflow-hidden border border-border shadow-inner">
           {googleDocsUrl ? (
             <iframe 
               src={googleDocsUrl.includes('?') ? `${googleDocsUrl}&embedded=true` : `${googleDocsUrl}?embedded=true`}
@@ -64,10 +64,15 @@ export default function ConstitutionPage() {
           )}
         </div>
 
-        <footer className="mt-12 pt-8 border-t border-border flex justify-between items-center">
-          <p className="text-xs font-mono text-muted/40 uppercase tracking-[0.2em]">
-            Real-time Update via Google Docs
-          </p>
+        <footer className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border flex justify-between items-center">
+          <div className="space-y-1">
+            <p className="text-[10px] font-mono text-muted/40 uppercase tracking-[0.2em]">
+              Last Updated: {data.updated_at ? new Date(data.updated_at).toLocaleDateString('zh-TW') : "2024.05.12"}
+            </p>
+            <p className="text-[9px] font-mono text-accent/40 uppercase tracking-[0.2em]">
+              Real-time Sync via Google Docs
+            </p>
+          </div>
           {googleDocsUrl && (
             <a 
               href={googleDocsUrl} 

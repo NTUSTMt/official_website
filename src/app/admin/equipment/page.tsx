@@ -19,13 +19,20 @@ export default function AdminEquipmentPage() {
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isUsingFallback, setIsUsingFallback] = useState(false);
 
   // Load data from DB
   useEffect(() => {
     async function loadData() {
       try {
         const dbEquipment = await equipmentService.getAllEquipment();
-        setInventory(dbEquipment.length > 0 ? dbEquipment : equipmentData);
+        if (dbEquipment.length > 0) {
+          setInventory(dbEquipment);
+          setIsUsingFallback(false);
+        } else {
+          setInventory(equipmentData);
+          setIsUsingFallback(true);
+        }
         
         const dbRentals = await rentalService.getAllApplications();
         setRentals(dbRentals);
@@ -178,6 +185,17 @@ export default function AdminEquipmentPage() {
             )}
           </div>
         </div>
+
+        {isUsingFallback && activeTab === "INVENTORY" && (
+          <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-3xl text-amber-700 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-4">
+              <span className="text-2xl">💡</span>
+              <div className="font-serif text-sm">
+                目前正在顯示 <span className="font-bold underline">預設靜態資料</span>。資料庫中尚未建立裝備紀錄，請點擊「編輯裝備資訊」並儲存以將資料寫入雲端。
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex border-b border-border mb-10">
           <button 

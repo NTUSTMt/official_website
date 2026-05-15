@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react";
 import ProfileLayout from "@/components/ProfileLayout";
 import { userService, UserProfile } from "@/services/userService";
+import { useTranslation } from "@/context/LanguageContext";
 import { peakService } from "@/services/peakService";
 import Link from "next/link";
 import { Shield, Award, Calendar, Package, ChevronRight, User, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [recentPeaks, setRecentPeaks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,11 +70,11 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
             <div className="relative group">
               <div className="absolute inset-0 bg-accent rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
+              <div className="w-40 h-40 md:w-56 md:h-56 rounded-full bg-accent/5 border-4 border-white shadow-xl relative z-10 flex items-center justify-center overflow-hidden">
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt={user.real_name} className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-16 h-16 text-accent" />
+                  <User className="w-20 h-20 md:w-28 md:h-28 text-accent" />
                 )}
               </div>
               <div className="absolute -bottom-2 right-4 z-20 px-3 py-1 bg-white border border-border rounded-full text-[9px] font-mono font-bold uppercase tracking-widest shadow-sm">
@@ -99,7 +101,7 @@ export default function ProfilePage() {
             className="group flex items-center gap-3 px-6 py-3 border border-red-200 text-red-500 hover:bg-red-50 rounded-2xl font-mono text-[10px] uppercase tracking-widest font-bold transition-all"
           >
             <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Logout_Sign_Out
+            登出 Sign Out
           </button>
         </header>
 
@@ -137,42 +139,32 @@ export default function ProfilePage() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <Shield className="w-5 h-5 text-accent" />
-                <h3 className="text-xl font-display italic">帳戶狀態</h3>
+                <h3 className="text-xl font-display italic">{t('profile.status')}</h3>
               </div>
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-serif text-muted">目前餘額</span>
-                  <span className={`font-mono text-sm font-bold ${user.balance < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-                    ${user.balance}
-                  </span>
+                <div className="flex justify-between items-center group cursor-pointer hover:bg-accent/5 p-2 -m-2 rounded-xl transition-colors" onClick={() => window.location.href='/profile/payments'}>
+                  <span className="text-sm font-serif text-muted">{t('profile.balance')}</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`font-mono text-sm font-bold ${user.balance < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                      ${user.balance}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted/20 group-hover:text-accent transition-colors" />
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-serif text-muted">社員身分</span>
+                  <span className="text-sm font-serif text-muted">{t('profile.membership')}</span>
                   <span className="text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 bg-accent/5 rounded border border-accent/10">
                     {user.membership_status}
                   </span>
                 </div>
               </div>
             </div>
-            <Link href="/profile/details" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline flex items-center gap-2">
-              修改個人資料 <ChevronRight className="w-3 h-3" />
+            <Link href="/profile/payments" className="mt-10 font-mono text-[10px] uppercase tracking-widest text-accent hover:underline flex items-center gap-2">
+              查看繳費紀錄 <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
         </div>
 
-        <section className="mt-16 p-10 bg-accent/5 border border-accent/20 rounded-[2.5rem]">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex-1">
-              <h3 className="text-xl font-display italic mb-4">完善緊急聯絡資訊</h3>
-              <p className="text-sm font-serif text-muted leading-relaxed">
-                填寫緊急聯絡人資訊是出隊的必要條件。完善後，系統在報名社團活動時會自動為您帶入資料，節省您的寶貴時間。
-              </p>
-            </div>
-            <Link href="/profile/details" className="px-8 py-3 bg-accent text-white rounded-full font-mono text-[10px] uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-accent/20 whitespace-nowrap">
-              前往填寫
-            </Link>
-          </div>
-        </section>
       </div>
     </ProfileLayout>
   );

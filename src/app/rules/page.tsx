@@ -11,24 +11,24 @@ export default function RulesHubPage() {
     <main className="min-h-screen">
       <Navbar />
       
-      <div className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
+      <div className="pt-16 md:pt-24 pb-16 md:pb-24 px-6 max-w-5xl mx-auto">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {subItems.map((item) => (
             <Link 
               key={item.href}
               href={item.href}
-              className="group relative p-12 bg-surface border border-border hover:border-accent transition-all duration-300 flex flex-col justify-between rounded-[3rem] shadow-sm hover:shadow-xl overflow-hidden"
+              className="group relative p-8 md:p-12 bg-surface border border-border hover:border-accent transition-all duration-300 flex flex-col justify-between rounded-[2.5rem] md:rounded-[3rem] shadow-sm hover:shadow-xl overflow-hidden"
             >
               <div className="relative z-10">
                 <span className="text-[10px] font-mono text-accent uppercase tracking-widest block mb-4">Module</span>
-                <h3 className="text-3xl font-display italic group-hover:text-accent transition-colors mb-4">
+                <h3 className="text-2xl md:text-3xl font-display italic group-hover:text-accent transition-colors mb-4">
                   {item.label}
                 </h3>
                 <div className="h-px w-12 bg-border group-hover:w-24 group-hover:bg-accent transition-all duration-500"></div>
               </div>
               
-              <div className="relative z-10 flex items-center gap-2 text-xs font-mono text-muted group-hover:text-accent transition-colors mt-12">
+              <div className="relative z-10 flex items-center gap-2 text-xs font-mono text-muted group-hover:text-accent transition-colors mt-8 md:mt-12">
                 <span>VIEW RULES</span>
                 <svg className="w-4 h-4 transform group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -43,7 +43,7 @@ export default function RulesHubPage() {
           ))}
         </div>
 
-        <p className="mt-24 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
+        <p className="mt-16 md:mt-24 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
           Organization & Responsibility
         </p>
       </div>

@@ -7,7 +7,7 @@ export const ruleService = {
 
     const { data, error } = await supabase
       .from("cms_config")
-      .select("content")
+      .select("content, updated_at")
       .eq("id", `rule_${id}`)
       .single();
 
@@ -16,7 +16,11 @@ export const ruleService = {
       return rulesData[id] || { id, title: "Unknown", description: "", sections: [] };
     }
 
-    return data.content as RuleCategory;
+    const content = data.content as RuleCategory;
+    return {
+      ...content,
+      updated_at: data.updated_at
+    };
   },
 
   async saveRuleCategory(category: RuleCategory) {

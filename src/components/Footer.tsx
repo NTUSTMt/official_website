@@ -11,6 +11,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { cmsService } from "@/services/cmsService";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -24,6 +25,7 @@ export default function Footer() {
     fetchConfig();
   }, []);
 
+  const { t } = useTranslation();
   if (!config) return null;
 
   return (
@@ -56,35 +58,35 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="space-y-6">
             <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-stone-400">
-              快速導覽 Navigation
+              {t('nav.footer.nav')}
             </h3>
             <ul className="space-y-3 text-sm font-medium">
-              <FooterLink href="/about/introduction">關於山社</FooterLink>
-              <FooterLink href="/events">活動列表</FooterLink>
-              <FooterLink href="/equipment/browse">裝備瀏覽</FooterLink>
-              <FooterLink href="/events/gallery">歷史花絮</FooterLink>
-              <FooterLink href="/contact">聯絡我們</FooterLink>
+              <FooterLink href="/about/introduction">{t('nav.about.intro')}</FooterLink>
+              <FooterLink href="/events">{t('nav.events.list')}</FooterLink>
+              <FooterLink href="/equipment/browse">{t('nav.equipment.browse')}</FooterLink>
+              <FooterLink href="/events/gallery">{t('nav.events.gallery')}</FooterLink>
+              <FooterLink href="/contact">{t('common.contact')}</FooterLink>
             </ul>
           </div>
 
           {/* Member Area */}
           <div className="space-y-6">
             <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-stone-400">
-              社員專區 Members
+              {t('nav.footer.members')}
             </h3>
             <ul className="space-y-3 text-sm font-medium">
-              <FooterLink href="/rules/membership">我想成為社員!</FooterLink>
-              <FooterLink href="/profile">我的足跡</FooterLink>
-              <FooterLink href="/profile/peaks">山岳足跡</FooterLink>
-              <FooterLink href="/rules/equipment">租借規則與費用</FooterLink>
-              <FooterLink href="/admin">管理後台</FooterLink>
+              <FooterLink href="/rules/membership">{t('nav.rules.membership')}</FooterLink>
+              <FooterLink href="/profile">{t('common.profile')}</FooterLink>
+              <FooterLink href="/profile/peaks">{t('profile.peaks')}</FooterLink>
+              <FooterLink href="/rules/equipment">{t('nav.rules.equipment_rules')}</FooterLink>
+              <FooterLink href="/admin">{t('common.admin')}</FooterLink>
             </ul>
           </div>
 
           {/* Contact Details */}
           <div className="space-y-6">
             <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-stone-400">
-              社辦基地 Basecamp
+              {t('nav.footer.basecamp')}
             </h3>
             <div className="space-y-5 text-sm leading-relaxed">
               <div className="flex gap-3 group">
@@ -93,10 +95,6 @@ export default function Footer() {
                   {config.address}<br />
                   <span className="text-stone-400 text-xs font-mono">{config.basecampDetail}</span>
                 </address>
-              </div>
-              <div className="pt-2 border-l-2 border-stone-100 pl-4">
-                <p className="text-[10px] font-mono text-stone-400 uppercase tracking-widest mb-1">對外開放時間</p>
-                <p className="text-stone-600 font-medium">{config.officeHours}</p>
               </div>
             </div>
           </div>
@@ -110,8 +108,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-mono tracking-widest text-stone-400 uppercase">
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-2">
             <span className="text-stone-500 font-bold">© {currentYear} {config.copyright}</span>
-            <Link href="/rules/constitution" className="hover:text-accent transition-colors">組織章程</Link>
-            <Link href="#" className="hover:text-accent transition-colors">隱私權條款</Link>
+            <Link href="/rules/constitution" className="hover:text-accent transition-colors">{t('nav.footer.constitution')}</Link>
+            <Link href="#" className="hover:text-accent transition-colors">{t('nav.footer.privacy')}</Link>
           </div>
           <div className="flex items-center gap-2 group cursor-default">
             <span>Made with</span>

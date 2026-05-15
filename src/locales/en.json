@@ -1,0 +1,98 @@
+{
+  "common": {
+    "home": "Home",
+    "about": "About",
+    "events": "Events",
+    "equipment": "Equipment",
+    "rules": "Rules",
+    "profile": "Profile",
+    "contact": "Contact",
+    "login": "Login / Sign Up",
+    "logout": "Sign Out",
+    "admin": "Admin"
+  },
+  "nav": {
+    "about": {
+      "history": "History & Heritage",
+      "intro": "Introduction",
+      "presidents": "Past Presidents",
+      "committee": "Committee & Roles",
+      "desc": "Discover the heritage, characteristics, and core values of NTUST Mountaineering Club.",
+      "history_desc": "Half a century of mountain stories and spiritual heritage since our founding.",
+      "intro_desc": "Learn about our core philosophy, course planning, and unique club atmosphere.",
+      "presidents_desc": "Saluting every committee member who has dedicated themselves to the club.",
+      "committee_desc": "Committee organization and club operations.",
+      "title": "About Us",
+      "subtitle": "Discover the history, traditions, and core values of the NTUST Mountaineering Club, and learn more about our organization.",
+      "section_label": "Section",
+      "view_page": "VIEW PAGE",
+      "academic_year": "ACADEMIC YEAR",
+      "core_values": "Core Values",
+      "roles_title": "Committee Roles",
+      "shared_duties_title": "Shared Responsibilities",
+      "mountain_duties_title": "On-Mountain Duties",
+      "footer_tag": "NTUST Mountaineering Club · Heritage & Modernity"
+    },
+    "events": {
+      "list": "Event List",
+      "calendar": "Calendar",
+      "gallery": "Gallery",
+      "levels": "Event Levels",
+      "desc": "Join every one of our adventures and record mountain memories.",
+      "list_desc": "Upcoming activity schedules.",
+      "calendar_desc": "Overview of semester activity planning and important schedules.",
+      "gallery_desc": "Precious team photos and mountain memories.",
+      "levels_desc": "Understand activity difficulty levels and find the best trip for you."
+    },
+    "equipment": {
+      "browse": "Browse Equipment",
+      "cart": "My Rental Cart",
+      "desc": "Club mountaineering equipment rental service.",
+      "browse_desc": "View current available equipment and inventory.",
+      "cart_desc": "Manage your rental list, confirm items and fees."
+    },
+    "rules": {
+      "membership": "Become a Member",
+      "joining": "Join an Event",
+      "equipment_rules": "Rental Rules",
+      "room": "Basecamp Rules",
+      "constitution": "Constitution",
+      "desc": "Understand club regulations and maintain a good environment together.",
+      "membership_desc": "Membership application process, rights, and exclusive benefits.",
+      "joining_desc": "Registration instructions, precautions, and rules for joining activities.",
+      "equipment_rules_desc": "Equipment maintenance, loss/damage compensation, and rental fee standards.",
+      "room_desc": "Basecamp space usage regulations and public property guidelines.",
+      "constitution_desc": "The supreme operating principles and constitutional details of NTUST Mountaineering Club."
+    },
+    "profile": {
+      "desc": "Record your mountain journey, view personal details and rental status.",
+      "dashboard_desc": "Your digital profile and membership information.",
+      "details_desc": "Manage personal details.",
+      "peaks_desc": "Light up your records of peaks climbed.",
+      "records_desc": "Review your history of participating in club activities.",
+      "rentals_desc": "View equipment rental records and return status.",
+      "payments_desc": "Track payment status for membership, activities, and rentals."
+    },
+    "contact": {
+      "desc": "Whether it's membership inquiries, activity registration, or equipment rental, feel free to contact us."
+    },
+    "footer": {
+      "nav": "Navigation",
+      "members": "Members",
+      "basecamp": "Basecamp",
+      "constitution": "Constitution",
+      "privacy": "Privacy Policy"
+    }
+  },
+  "profile": {
+    "dashboard": "Dashboard",
+    "details": "Details",
+    "peaks": "Peaks",
+    "records": "Records",
+    "rentals": "Rentals",
+    "payments": "Payments",
+    "status": "Account Status",
+    "balance": "Payment Status",
+    "membership": "Membership"
+  }
+}

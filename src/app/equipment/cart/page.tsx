@@ -16,6 +16,7 @@ export default function RentalCartPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -35,10 +36,12 @@ export default function RentalCartPage() {
       if (status === "authenticated") {
         const user = await userService.getCurrentUser();
         if (user) {
+          setUserProfile(user);
           setFormData(prev => ({
             ...prev,
             name: user.real_name || prev.name,
             phone: user.phone || prev.phone,
+            lineId: user.line_id || prev.lineId,
             identity: (user.membership_status === "active" || user.membership_status === "alumni") ? "MEMBER" : "NON_MEMBER"
           }));
         }
@@ -82,9 +85,16 @@ export default function RentalCartPage() {
     setIsSubmitting(true);
     setError(null);
 
+    if (new Date(formData.returnDate) <= new Date(formData.borrowDate)) {
+      setError("歸還日期必須晚於領取日期");
+      setIsSubmitting(false);
+      window.scrollTo(0, 0);
+      return;
+    }
+
     try {
       const applicationData = {
-        userId: (session?.user as any)?.lineUserId || "anonymous",
+        userId: userProfile?.id || (session?.user as any)?.lineUserId || "anonymous",
         userName: formData.name,
         userType: formData.identity,
         isClubEvent: formData.purpose === "CLUB",

@@ -9,6 +9,7 @@ export interface RuleCategory {
   title: string;
   description: string;
   sections: RuleSection[];
+  updated_at?: string;
 }
 
 export const rulesData: Record<string, RuleCategory> = {

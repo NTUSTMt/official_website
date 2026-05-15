@@ -1,0 +1,98 @@
+{
+  "common": {
+    "home": "首頁",
+    "about": "關於山社",
+    "events": "活動中心",
+    "equipment": "裝備租借",
+    "rules": "規章制度",
+    "profile": "我的足跡",
+    "contact": "聯絡我們",
+    "login": "登入 / 註冊",
+    "logout": "登出",
+    "admin": "管理後台"
+  },
+  "nav": {
+    "about": {
+      "history": "社團簡史與傳承",
+      "intro": "社團特色與簡介",
+      "presidents": "社團歷任幹部",
+      "committee": "關於幹部與職責",
+      "desc": "探索台科大登山社的歷史傳承、社團特色與核心價值。",
+      "history_desc": "從草創至今，半世紀的山林故事與精神傳承。",
+      "intro_desc": "了解我們的核心理念、社課規劃與獨特的社團氛圍。",
+      "presidents_desc": "向每一位曾為社團付出的幹部們致敬。",
+      "committee_desc": "幹部分工與社團運作",
+      "title": "關於山社",
+      "subtitle": "探索台科大登山社的歷史、傳統與核心價值，深入了解我們的組織架構。",
+      "section_label": "章節",
+      "view_page": "查看頁面",
+      "academic_year": "學年度",
+      "core_values": "核心理念",
+      "roles_title": "幹部分工",
+      "shared_duties_title": "幹部共同職責",
+      "mountain_duties_title": "上山後的工作",
+      "footer_tag": "國立臺灣科技大學登山社 · 傳承與現代化"
+    },
+    "events": {
+      "list": "活動列表",
+      "calendar": "行事曆",
+      "gallery": "歷史花絮",
+      "levels": "活動分級說明",
+      "desc": "參與我們的每一次冒險，記錄山野間的點滴回憶。",
+      "list_desc": "近期即將展開的活動行程。",
+      "calendar_desc": "學期的活動規劃與重要時程概覽。",
+      "gallery_desc": "珍貴的出隊照片與的山林回憶。",
+      "levels_desc": "了解活動難度分級，找到最適合你的行程。"
+    },
+    "equipment": {
+      "browse": "裝備瀏覽",
+      "cart": "我的租借單",
+      "desc": "社團登山裝備租借服務。",
+      "browse_desc": "查看社團現有可外借裝備與庫存。",
+      "cart_desc": "管理您的租借清單，確認租借品項與費用。"
+    },
+    "rules": {
+      "membership": "我想成為社員！",
+      "joining": "我想參與社團活動！",
+      "equipment_rules": "租借規則與費用",
+      "room": "社辦使用規範",
+      "constitution": "組織章程",
+      "desc": "了解社團運作規範，共同維護良好的社團環境。",
+      "membership_desc": "入社申請流程、權利義務與社員專屬優惠。",
+      "joining_desc": "參與活動的報名須知、注意事項與規範。",
+      "equipment_rules_desc": "裝備維護責任、遺失損壞賠償與租借費用標準。",
+      "room_desc": "社辦空間使用規範與公物使用準則。",
+      "constitution_desc": "臺科大登山社最高運作準則與章程細節。"
+    },
+    "profile": {
+      "desc": "記錄您的山野歷程，查看個人資料與租借狀態。",
+      "dashboard_desc": "您的數位簡介與社員身份資訊。",
+      "details_desc": "管理個人詳細資料。",
+      "peaks_desc": "點亮您走過的山岳紀錄。",
+      "records_desc": "回顧您參與過的社團出隊活動歷史。",
+      "rentals_desc": "查看裝備租借紀錄與歸還狀況。",
+      "payments_desc": "追蹤入社費、活動費與租借費用繳納狀況。"
+    },
+    "contact": {
+      "desc": "無論是入社諮詢、活動報名或是器材租借問題，歡迎與我們聯繫。"
+    },
+    "footer": {
+      "nav": "快速導覽",
+      "members": "社員專區",
+      "basecamp": "社辦基地",
+      "constitution": "組織章程",
+      "privacy": "隱私權條款"
+    }
+  },
+  "profile": {
+    "dashboard": "個人簡介",
+    "details": "詳細資料",
+    "peaks": "山岳足跡",
+    "records": "出團紀錄",
+    "rentals": "租借紀錄",
+    "payments": "繳費紀錄",
+    "status": "帳戶狀態",
+    "balance": "繳費狀態",
+    "membership": "社員身分"
+  }
+}

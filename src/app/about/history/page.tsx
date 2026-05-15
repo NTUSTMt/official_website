@@ -1,8 +1,12 @@
+"use client";
 import React from "react";
 import Navbar from "@/components/Navbar";
 import { historyData } from "@/data/history";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function HistoryPage() {
+  const { language, t } = useTranslation();
+
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
@@ -25,7 +29,7 @@ export default function HistoryPage() {
         </section>
 
         <p className="mt-16 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
-          2026 © 國立臺灣科技大學登山社 · 傳承與現代化
+          {t('nav.about.footer_tag')}
         </p>
       </div>
     </main>

@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { committeeData as defaultData } from "@/data/committee";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useTranslation } from "@/context/LanguageContext";
 
 export default function PresidentsPage() {
+  const { t } = useTranslation();
   const [committees, setCommittees] = useState(defaultData);
   const [visibleCount, setVisibleCount] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,9 +45,11 @@ export default function PresidentsPage() {
             <div key={yearGroup.year} className="relative">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 {/* Modern Year Display - Scaled Down */}
-                <div className="md:sticky md:top-32 flex-shrink-0 flex items-baseline gap-2 group">
+                <div className="md:sticky md:top-32 flex-shrink-0 flex items-start gap-2 group">
                   <span className="text-3xl md:text-5xl font-display italic text-foreground leading-none">{yearGroup.year}</span>
-                  <span className="text-[9px] font-mono text-muted uppercase tracking-[0.2em] [writing-mode:vertical-rl] h-fit border-l border-border pl-1.5 py-1">學年度</span>
+                  <span className="text-[9px] font-mono text-muted uppercase tracking-[0.2em] [writing-mode:vertical-rl] h-fit border-l border-border pl-1.5 py-1">
+                    {t('nav.about.academic_year')}
+                  </span>
                 </div>
 
                 {/* Members List - Horizontal Scroll */}
@@ -108,7 +112,7 @@ export default function PresidentsPage() {
         )}
 
         <p className="mt-24 text-center font-mono text-[10px] text-muted/40 uppercase tracking-[0.2em]">
-          2026 © 國立臺灣科技大學登山社 · 歷屆幹部
+          {t('nav.about.footer_tag')}
         </p>
       </div>
     </main>

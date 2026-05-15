@@ -2,13 +2,16 @@
 
 import { SessionProvider } from "next-auth/react";
 import { CartProvider } from "./CartProvider";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <CartProvider>
-        {children}
-      </CartProvider>
+      <LanguageProvider>
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </LanguageProvider>
     </SessionProvider>
   );
 }

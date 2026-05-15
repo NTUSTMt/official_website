@@ -107,14 +107,6 @@ export default function ContactPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-center md:justify-start gap-4">
-                  <p className="text-[10px] text-muted font-mono uppercase tracking-[0.2em] whitespace-nowrap">
-                    Office Hours:
-                  </p>
-                  <p className="text-sm font-serif text-foreground/80 italic">
-                    {contactInfo?.basecamp?.hours || "每週一至五 12:20 - 13:20 (學期期間)"}
-                  </p>
-                </div>
               </div>
             </div>
 

@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { navigationConfig } from "@/config/navigation";
+import { useTranslation } from "@/context/LanguageContext";
 
 const HERO_IMAGES: Record<string, string> = {
   "": "/images/hero-bg-0.jpg",
@@ -26,6 +27,7 @@ const HERO_POSITIONS: Record<string, string> = {
 };
  
 export default function DynamicHero() {
+  const { language, t } = useTranslation();
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
   const rootPath = segments[0] || "";
@@ -53,9 +55,9 @@ export default function DynamicHero() {
     return acc;
   }, null);
 
-  const pageTitle = currentNavItem?.label || "";
+  const pageTitle = currentNavItem?.tKey ? t(currentNavItem.tKey) : (currentNavItem?.label || "");
   const subtitle = currentNavItem?.subtitle || "";
-  const description = currentNavItem?.description || "";
+  const description = currentNavItem?.descKey ? t(currentNavItem.descKey) : (currentNavItem?.description || "");
 
   return (
     <div 
@@ -80,7 +82,7 @@ export default function DynamicHero() {
               <span className="text-4xl md:text-7xl font-display italic text-white uppercase tracking-tighter leading-tight">
                 {pageTitle}
               </span>
-              {subtitle && (
+              {subtitle && language !== 'en' && (
                 <span className="text-2xl md:text-5xl font-display italic text-white/60 uppercase tracking-tighter leading-tight">
                   {subtitle}
                 </span>
@@ -89,7 +91,7 @@ export default function DynamicHero() {
             
             {description && (
               <div className="pt-2">
-                <p className="text-white/90 font-serif italic text-sm md:text-lg max-w-2xl mx-auto leading-relaxed hero-text-shadow">
+                <p className="text-white/95 font-serif italic text-base md:text-2xl max-w-3xl mx-auto leading-relaxed hero-text-shadow tracking-wide">
                   {description}
                 </p>
               </div>

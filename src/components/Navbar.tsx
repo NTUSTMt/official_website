@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationConfig, NavItem } from "@/config/navigation";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useTranslation } from "@/context/LanguageContext";
 
 interface NavbarProps {
   announcements?: {
@@ -69,6 +70,8 @@ export default function Navbar({ announcements: initialAnnouncements, className 
     return () => window.removeEventListener('resize', updateHeights);
   }, [announcements, expandedItems]);
 
+  const { language, setLanguage, t } = useTranslation();
+
   return (
     <>
       <nav 
@@ -84,21 +87,42 @@ export default function Navbar({ announcements: initialAnnouncements, className 
             ))}
           </div>
 
+          {/* Language Switcher (Desktop) */}
+          <div className="hidden md:flex items-center ml-4 pl-4 border-l border-border/50">
+            <button 
+              onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+              className="text-[10px] font-mono font-bold hover:text-accent transition-colors uppercase tracking-widest px-3 py-1 bg-accent/5 rounded-full border border-accent/10 whitespace-nowrap"
+            >
+              {language === 'zh' ? 'English' : '中文'}
+            </button>
+          </div>
+
           {/* Mobile Navigation Placeholder / Toggle */}
           <div className="md:hidden flex flex-col w-full">
-            <div className="flex items-center w-screen -mx-4 overflow-x-auto no-scrollbar border-b border-border/50 py-2">
-              <div className="flex items-center px-4 font-mono">
-                {navigationConfig.map((item) => (
-                  <NavItemMobile 
-                    key={item.href} 
-                    item={item} 
-                    active={pathname.startsWith(item.href) && (item.href !== "/" || pathname === "/")}
-                    expanded={expandedItems.includes(item.href)}
-                    onToggle={(e) => {
-                      setExpandedItems(prev => prev.includes(item.href) ? [] : [item.href]);
-                    }}
-                  />
-                ))}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center w-full overflow-x-auto no-scrollbar border-b border-border/50 py-2">
+                <div className="flex items-center px-4 font-mono">
+                  {navigationConfig.map((item) => (
+                    <NavItemMobile 
+                      key={item.href} 
+                      item={item} 
+                      active={pathname.startsWith(item.href) && (item.href !== "/" || pathname === "/")}
+                      expanded={expandedItems.includes(item.href)}
+                      onToggle={(e) => {
+                        setExpandedItems(prev => prev.includes(item.href) ? [] : [item.href]);
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              {/* Language Switcher (Mobile) */}
+              <div className="px-4 py-2 border-b border-border/50">
+                <button 
+                  onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+                  className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest px-2 py-1 bg-accent/5 rounded border border-accent/10"
+                >
+                  {language === 'zh' ? 'EN' : '中'}
+                </button>
               </div>
             </div>
 
@@ -115,7 +139,7 @@ export default function Navbar({ announcements: initialAnnouncements, className 
                           pathname === sub.href ? "text-accent font-bold" : "text-foreground hover:text-accent"
                         }`}
                       >
-                        {sub.label}
+                        {sub.tKey ? t(sub.tKey) : sub.label}
                       </Link>
                     ))}
                   </div>
@@ -141,6 +165,9 @@ export default function Navbar({ announcements: initialAnnouncements, className 
 }
 
 function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
+  const { t } = useTranslation();
+  const label = item.tKey ? t(item.tKey) : item.label;
+
   return (
     <div className="relative group flex-1">
       <Link 
@@ -151,7 +178,7 @@ function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
             : "border-transparent text-foreground hover:text-accent"
         }`}
       >
-        <span className="text-[12px] lg:text-[13px] font-bold tracking-[0.05em]">{item.label}</span>
+        <span className="text-[12px] lg:text-[13px] font-bold tracking-[0.05em]">{label}</span>
         {item.subItems && (
           <svg className="w-3 h-3 opacity-50 group-hover:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -169,7 +196,7 @@ function NavItemDesktop({ item, active }: { item: NavItem, active: boolean }) {
                 href={sub.href}
                 className="px-5 py-2.5 text-[12px] text-foreground hover:text-accent hover:bg-background transition-colors border-l-4 border-transparent hover:border-accent"
               >
-                {sub.label}
+                {sub.tKey ? t(sub.tKey) : sub.label}
               </Link>
             ))}
           </div>
@@ -190,6 +217,8 @@ function NavItemMobile({
   expanded: boolean,
   onToggle: (e: React.MouseEvent) => void
 }) {
+  const { t } = useTranslation();
+  const label = item.tKey ? t(item.tKey) : item.label;
   const hasSubItems = item.subItems && item.subItems.length > 0;
 
   const content = (
@@ -198,7 +227,7 @@ function NavItemMobile({
         ? "border-accent text-accent font-bold" 
         : "border-transparent text-foreground hover:text-accent"
     }`}>
-      <span className="text-[12px] font-bold tracking-[0.05em]">{item.label}</span>
+      <span className="text-[12px] font-bold tracking-[0.05em]">{label}</span>
       {hasSubItems && (
         <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

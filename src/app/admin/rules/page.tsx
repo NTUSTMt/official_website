@@ -137,14 +137,26 @@ export default function AdminRulesPage() {
                   <p className="text-xs text-muted font-serif italic">設定該頁面的標題與引導文字。</p>
                 </div>
                 <div className="md:col-span-2 space-y-6">
-                  <div>
-                    <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2">Display Title</label>
-                    <input 
-                      type="text" 
-                      value={data.title} 
-                      onChange={(e) => setData({ ...data, title: e.target.value })}
-                      className="w-full bg-background border border-border px-4 py-3 rounded-xl font-display italic text-lg outline-none focus:border-accent"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest h-4">Display Title</label>
+                      <input 
+                        type="text" 
+                        value={data.title} 
+                        onChange={(e) => setData({ ...data, title: e.target.value })}
+                        className="w-full h-14 bg-background border border-border px-4 rounded-xl font-display italic text-lg outline-none focus:border-accent"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-mono text-muted uppercase tracking-widest h-4 flex items-center gap-2">
+                        Last Updated
+                        <span className="text-[9px] lowercase italic text-accent opacity-60">(Auto-recorded)</span>
+                      </label>
+                      <div className="w-full h-14 bg-background/50 border border-border px-4 rounded-xl font-mono text-xs text-muted flex items-center gap-3">
+                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                        {data.updated_at ? new Date(data.updated_at).toLocaleString('zh-TW') : "尚未儲存至資料庫"}
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-[10px] font-mono text-muted uppercase tracking-widest mb-2">Description / Intro</label>

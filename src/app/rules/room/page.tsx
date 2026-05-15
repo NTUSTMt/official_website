@@ -36,12 +36,13 @@ export default function RoomRulesPage() {
   return (
     <RulesLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-display italic mb-6">{data.title}</h1>
-          <p className="text-lg font-serif text-muted leading-relaxed">
+        <header className="mb-8 md:mb-12">
+
+          <h1 className="text-3xl md:text-5xl font-display italic mb-4 md:mb-6">{data.title}</h1>
+          <p className="text-base md:text-lg font-serif text-muted leading-relaxed">
             {data.description}
           </p>
-          <div className="h-px w-full bg-border mt-12"></div>
+          <div className="h-px w-full bg-border mt-8 md:mt-12"></div>
         </header>
 
         <div className="space-y-16">
@@ -70,7 +71,7 @@ export default function RoomRulesPage() {
 
         <footer className="mt-20 pt-12 border-t border-border">
           <p className="text-xs font-mono text-muted/40 uppercase tracking-[0.2em]">
-            Last Updated: {new Date().toLocaleDateString('zh-TW')}
+            Last Updated: {data.updated_at ? new Date(data.updated_at).toLocaleDateString('zh-TW') : "2024.05.12"}
           </p>
         </footer>
       </div>
